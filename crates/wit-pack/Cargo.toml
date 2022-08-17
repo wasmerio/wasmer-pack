@@ -9,3 +9,7 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+wit-parser = { git = "https://github.com/wasmerio/wit-bindgen", rev = "1750cd0", version = "0.1.0" }
+
+[dev-dependencies]
+cargo_metadata = "0.15.0"
