@@ -1,11 +1,2 @@
-[package]
-name = "wit-pack"
-version = "0.1.0"
-edition = "2021"
-authors = ["Wasmer Engineering Team <engineering@wasmer.io>"]
-repository = "https://github.com/wasmerio/wit-pack"
-description = "wit pack"
-
-license = "MIT"
-
-[dependencies]
+[workspace]
+members = ["crates/*"]
