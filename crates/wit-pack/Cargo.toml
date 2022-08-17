@@ -5,6 +5,7 @@ authors = ["Wasmer Engineering Team <engineering@wasmer.io>"]
 repository = "https://github.com/wasmerio/wit-pack"
 edition = "2021"
 license = "MIT"
+rust_version = "1.56.0" # The first version that supports rust_version
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

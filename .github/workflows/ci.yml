@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches:
-    - master
+      - master
 
 env:
   DEFAULT_CRATE_NAME: wit_pack
@@ -37,7 +37,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: stable
+          toolchain: "1.56.0"
           override: true
       - name: Type Checking
         uses: actions-rs/cargo@v1
@@ -125,4 +125,3 @@ jobs:
           branch: gh-pages
           folder: target/doc
           single-commit: true
-
