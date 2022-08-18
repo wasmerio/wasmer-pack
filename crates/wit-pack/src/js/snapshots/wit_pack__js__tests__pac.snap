@@ -1,0 +1,14 @@
+---
+source: crates/wit-pack/src/js/mod.rs
+expression: got.utf8_contents().unwrap()
+---
+
+import { Exports } from "./generated/exports";
+
+declare module "wit-bindgen" {
+    /**
+     * Load the WebAssembly module.
+     */
+    function load(): Promise<Exports>;
+}
+

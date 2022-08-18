@@ -1,0 +1,5 @@
+{
+    "name": "integration-tests",
+    "private": true,
+    "type": "module"
+}

@@ -16,6 +16,8 @@ wit-bindgen-gen-js = { git = "https://github.com/wasmerio/wit-bindgen", rev = "1
 wit-bindgen-gen-core = { git = "https://github.com/wasmerio/wit-bindgen", rev = "1750cd0", version = "0.1.0" }
 serde_json = "1.0.83"
 serde = "1.0.143"
+heck = "0.4.0"
 
 [dev-dependencies]
 cargo_metadata = "0.15.0"
+insta = "1.18.2"

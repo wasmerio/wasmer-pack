@@ -7,7 +7,7 @@ use std::{
 use anyhow::{Context, Error};
 
 /// A set of files loaded into memory.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Files {
     members: BTreeMap<PathBuf, SourceFile>,
 }
@@ -47,8 +47,14 @@ impl Files {
     }
 }
 
+impl Default for Files {
+    fn default() -> Self {
+        Files::new()
+    }
+}
+
 /// A file in memory.
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct SourceFile {
     contents: Vec<u8>,
 }

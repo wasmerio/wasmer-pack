@@ -1,0 +1,11 @@
+---
+source: crates/wit-pack/src/js/mod.rs
+expression: got.utf8_contents().unwrap()
+---
+{
+  "lib": "src/index.js",
+  "name": "wit-pack",
+  "type": "module",
+  "types": "src/index.d.ts",
+  "version": "0.0.0"
+}
