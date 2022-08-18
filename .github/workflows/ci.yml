@@ -39,6 +39,7 @@ jobs:
           profile: minimal
           toolchain: "1.59.0" # Required by wit-bindgen-gen-rust
           override: true
+          target: wasm32-wasi, wasm32-unknown-unknown
       - name: Type Checking
         uses: actions-rs/cargo@v1
         with:
