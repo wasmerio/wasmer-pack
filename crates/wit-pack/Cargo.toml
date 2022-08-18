@@ -5,12 +5,14 @@ authors = ["Wasmer Engineering Team <engineering@wasmer.io>"]
 repository = "https://github.com/wasmerio/wit-pack"
 edition = "2021"
 license = "MIT"
-rust_version = "1.56.0" # The first version that supports rust_version
+rust-version = "1.56.0" # The first version that supports rust_version
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.62"
 wit-parser = { git = "https://github.com/wasmerio/wit-bindgen", rev = "1750cd0", version = "0.1.0" }
+wit-bindgen-gen-js = { git = "https://github.com/wasmerio/wit-bindgen", rev = "1750cd0", version = "0.1.0" }
 
 [dev-dependencies]
 cargo_metadata = "0.15.0"

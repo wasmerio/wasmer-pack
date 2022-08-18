@@ -1,3 +1,12 @@
+mod bindings;
+mod files;
+mod js;
+
+pub use crate::{
+    bindings::Bindings,
+    files::{Directory, SourceFile},
+};
+
 /// The versions of [`wit_parser`] this crate is compatible with.
 pub const WIT_PARSER_VERSION: &str = "^0.1.0";
 
