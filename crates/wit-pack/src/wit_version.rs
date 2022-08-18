@@ -46,17 +46,16 @@ mod tests {
             panic!("{} should export a {variable} constant", file!());
         }
 
-        let expected = wit_version_rs
-            .lines()
-            .map(|line| {
-                if line.contains(&const_decl_keyword) {
-                    version_line.as_str()
-                } else {
-                    line
-                }
-            })
-            .collect::<Vec<_>>()
-            .join(if cfg!(windows) { "\r\n" } else { "\n" });
+        let mut expected = String::new();
+        for line in wit_version_rs.lines() {
+            if line.contains(&const_decl_keyword) {
+                expected.push_str(&version_line);
+            } else {
+                expected.push_str(line);
+            }
+
+            expected.push_str(if cfg!(windows) { "\r\n" } else { "\n" });
+        }
 
         if wit_version_rs != expected {
             std::fs::write(&path, expected.as_bytes()).unwrap();
