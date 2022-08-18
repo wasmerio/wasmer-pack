@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "The WebAssembly interface to wit-pack."
 publish = false
-rust-version = "1.58.0"
+rust-version = "1.59.0" # Required by wit-bindgen-gen-rust
 
 [lib]
 crate-type = ["cdylib", "rlib"]
