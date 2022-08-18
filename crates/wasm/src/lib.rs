@@ -1,12 +1,15 @@
+use std::path::Path;
+
 use anyhow::Error;
 use wit_bindgen_rust::Handle;
+use wit_pack::SourceFile;
 
 wit_bindgen_rust::export!("exports.wit");
 
 pub struct Exports;
 
 impl exports::Exports for Exports {
-    fn parse(
+    fn load_bindings(
         name: String,
         contents: String,
         wasm: Vec<u8>,
@@ -14,26 +17,26 @@ impl exports::Exports for Exports {
         let bindings = wit_pack::Bindings::from_src(&name, &contents, &wasm)?;
         Ok(Handle::new(Bindings(bindings)))
     }
-
-    fn parse_from_disk(
-        wit_file_path: String,
-        wasm_path: String,
-    ) -> Result<Handle<Bindings>, exports::Error> {
-        let bindings = wit_pack::Bindings::from_disk(&wit_file_path, &wasm_path)?;
-        Ok(Handle::new(Bindings(bindings)))
-    }
 }
 
 pub struct Bindings(wit_pack::Bindings);
 
 impl exports::Bindings for Bindings {
-    fn generate_python(&self, _ouput_dir: String) -> Result<(), exports::Error> {
+    fn generate_python(&self) -> Result<Vec<exports::File>, exports::Error> {
         todo!();
     }
 
-    fn generate_javascript(&self, output_dir: String) -> Result<(), exports::Error> {
-        self.0.javascript()?.save_to_disk(&output_dir)?;
-        Ok(())
+    fn generate_javascript(&self) -> Result<Vec<exports::File>, exports::Error> {
+        let js = self.0.javascript()?;
+        let files = js.iter().map(|(p, f)| file(p, f)).collect();
+        Ok(files)
+    }
+}
+
+fn file(p: &Path, f: &SourceFile) -> exports::File {
+    exports::File {
+        filename: p.display().to_string(),
+        contents: f.contents().into(),
     }
 }
 

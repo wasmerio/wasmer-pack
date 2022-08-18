@@ -5,7 +5,7 @@ description = "A code generator that lets you treat WebAssembly modules like nat
 
 [[module]]
 name = "wit-pack"
-source = "target/wasm32-wasi/debug/wit_pack_wasm.wasm"
+source = "target/wasm32-unknown-unknown/debug/wit_pack_wasm.wasm"
 abi = "wasi"
 bindings = { wit = "crates/wasm/exports.wit", wit_bindgen = "0.1.0" }
 

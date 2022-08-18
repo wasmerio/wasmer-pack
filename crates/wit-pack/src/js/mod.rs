@@ -38,7 +38,7 @@ fn generate_package_json(package_name: &str) -> SourceFile {
     let package_json = serde_json::json!({
         "name": package_name,
         "version": "0.0.0",
-        "lib": "src/index.js",
+        "main": "src/index.js",
         "types": "src/index.d.ts",
         "type": "module",
     });

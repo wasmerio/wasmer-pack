@@ -1,0 +1,8 @@
+{
+    "name": "integration-tests",
+    "private": true,
+    "type": "module",
+    "dependencies": {
+        "wit-pack": "file:../../../../target/tmp/javascript"
+    }
+}

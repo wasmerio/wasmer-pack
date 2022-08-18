@@ -6,7 +6,6 @@ use std::{
 use wit_pack::Bindings;
 
 #[test]
-#[ignore = "Requires injecting WASI imports"]
 fn use_javascript_bindings() {
     let Fixtures { exports, wasm } = Fixtures::load();
     let bindings = Bindings::from_disk(&exports, &wasm).unwrap();
@@ -17,11 +16,18 @@ fn use_javascript_bindings() {
     let js = bindings.javascript().unwrap();
     js.save_to_disk(&out_dir).unwrap();
 
-    let js_file = Path::new(env!("CARGO_MANIFEST_DIR"))
+    let js_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
-        .join("index.js");
+        .join("js");
 
-    execute(Command::new("node").arg(&js_file));
+    let _ = std::fs::remove_dir_all(js_dir.join("node_modules"));
+    execute(Command::new("yarn").current_dir(&js_dir));
+
+    execute(
+        Command::new("node")
+            .current_dir(&js_dir)
+            .arg(js_dir.join("index.js")),
+    );
 }
 
 #[derive(Debug)]
@@ -40,7 +46,7 @@ impl Fixtures {
         execute(
             Command::new(env!("CARGO"))
                 .arg("build")
-                .arg("--target=wasm32-wasi")
+                .arg("--target=wasm32-unknown-unknown")
                 .arg("--package=wit-pack-wasm")
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped()),
@@ -48,7 +54,7 @@ impl Fixtures {
 
         let wasm = project_root
             .join("target")
-            .join("wasm32-wasi")
+            .join("wasm32-unknown-unknown")
             .join("debug")
             .join("wit_pack_wasm.wasm");
 
