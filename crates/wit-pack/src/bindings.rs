@@ -1,15 +1,15 @@
-use std::{path::Path, sync::Arc};
+use std::path::Path;
 
 use anyhow::{Context, Error};
 use wit_parser::Interface;
 
-use crate::Directory;
+use crate::Files;
 
 /// An interface definition that has been parsed into memory.
 #[derive(Debug)]
 pub struct Bindings {
     pub(crate) interface: Interface,
-    pub(crate) wasm: Arc<[u8]>,
+    pub(crate) wasm: Vec<u8>,
 }
 
 impl Bindings {
@@ -22,7 +22,7 @@ impl Bindings {
 
         Ok(Bindings {
             interface,
-            wasm: Arc::from(wasm),
+            wasm: wasm.into(),
         })
     }
 
@@ -38,14 +38,15 @@ impl Bindings {
         let wasm = std::fs::read(&wasm_file)
             .with_context(|| format!("Unable to read \"{}\"", wasm_file.display()))?;
 
-        Ok(Bindings {
-            interface,
-            wasm: Arc::from(wasm),
-        })
+        Ok(Bindings { interface, wasm })
     }
 
     /// Get the generated JavaScript bindings.
-    pub fn javascript(&self) -> Result<Directory, Error> {
+    pub fn javascript(&self) -> Result<Files, Error> {
         crate::js::generate(self)
+    }
+
+    pub(crate) fn package_name(&self) -> &str {
+        &self.interface.name
     }
 }

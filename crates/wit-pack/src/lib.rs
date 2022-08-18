@@ -4,7 +4,7 @@ mod js;
 
 pub use crate::{
     bindings::Bindings,
-    files::{Directory, SourceFile},
+    files::{Files, SourceFile},
 };
 
 /// The versions of [`wit_parser`] this crate is compatible with.

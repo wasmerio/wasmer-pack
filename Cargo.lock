@@ -299,6 +299,9 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
+ "serde",
+ "serde_json",
+ "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen?rev=1750cd0)",
  "wit-bindgen-gen-js",
  "wit-parser 0.1.0 (git+https://github.com/wasmerio/wit-bindgen?rev=1750cd0)",
 ]
