@@ -19,7 +19,7 @@ impl exports::Exports for Exports {
         wit_file_path: String,
         wasm_path: String,
     ) -> Result<Handle<Bindings>, exports::Error> {
-        let bindings = wit_pack::Bindings::from_path(&wit_file_path, &wasm_path)?;
+        let bindings = wit_pack::Bindings::from_disk(&wit_file_path, &wasm_path)?;
         Ok(Handle::new(Bindings(bindings)))
     }
 }

@@ -28,7 +28,7 @@ impl Bindings {
 
     /// Parse a set of [`Bindings`] from its interface definition and `*.wasm`
     /// files on disk, potentially recursively parsing any files they depend on.
-    pub fn from_path(
+    pub fn from_disk(
         wit_file: impl AsRef<Path>,
         wasm_file: impl AsRef<Path>,
     ) -> Result<Self, Error> {
@@ -46,7 +46,7 @@ impl Bindings {
         crate::js::generate(self)
     }
 
-    pub(crate) fn package_name(&self) -> &str {
+    pub fn package_name(&self) -> &str {
         &self.interface.name
     }
 }

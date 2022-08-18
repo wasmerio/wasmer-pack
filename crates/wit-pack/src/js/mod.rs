@@ -40,8 +40,8 @@ fn generate_package_json(package_name: &str) -> SourceFile {
 }
 
 fn generate_bindings(interface: &Interface, files: &mut Files) {
-    let imports = &[];
-    let exports = std::slice::from_ref(interface);
+    let imports = std::slice::from_ref(interface);
+    let exports = &[];
     let mut generated = wit_bindgen_gen_core::Files::default();
 
     Js::new().generate_all(imports, exports, &mut generated);
@@ -55,5 +55,6 @@ fn generate_bindings(interface: &Interface, files: &mut Files) {
 }
 
 fn generate_glue_code(_interface_name: &str) -> SourceFile {
+    // TODO: Actually generate something here
     SourceFile::new(Vec::new())
 }

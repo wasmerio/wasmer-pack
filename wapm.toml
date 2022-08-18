@@ -1,0 +1,20 @@
+[package]
+name = "Michael-F-Bryan/wit-pack"
+version = "0.0.0"
+description = "A code generator that lets you treat WebAssembly modules like native dependencies."
+
+[[module]]
+name = "wit-pack"
+source = "target/wasm32-wasi/debug/wit_pack_wasm.wasm"
+abi = "wasi"
+bindings = { wit = "crates/wasm/exports.wit", wit_bindgen = "0.1.0" }
+
+[[module]]
+name = "wit-pack-cli"
+source = "target/wasm32-wasi/debug/wit-pack-cli.wasm"
+abi = "wasi"
+
+[[command]]
+name = "wit-pack"
+module = "wit-pack-cli"
+package = "Michael-F-Bryan/wit-pack"

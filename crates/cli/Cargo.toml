@@ -1,0 +1,13 @@
+[package]
+name = "wit-pack-cli"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.62"
+clap = { version = "3.2.17", features = ["derive"] }
+semver = "1.0.13"
+wapm-toml = { git = "https://github.com/Michael-F-Bryan/wapm-cli", branch = "feature/bindings-field", version = "0.1.0" }
+wit-pack = { version = "0.1.0", path = "../wit-pack" }
