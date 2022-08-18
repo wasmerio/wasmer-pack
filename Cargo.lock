@@ -9,6 +9,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1485d4d2cc45e7b201ee3767015c96faa5904387c9d87c6efdd0fb511f12d305"
 
 [[package]]
+name = "async-trait"
+version = "0.1.57"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "76464446b8bc32758d7e88ee1a804d9914cd9b1cb264c029899680b0be29826f"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -43,6 +54,15 @@ dependencies = [
  "semver",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "heck"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6d621efb26863f0e9924c6ac577e8275e5e6b77455db64ffa6c65c904e9e132c"
+dependencies = [
+ "unicode-segmentation",
 ]
 
 [[package]]
@@ -189,6 +209,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "unicode-segmentation"
+version = "1.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e8820f5d777f6224dc4be3632222971ac30164d4a258d595640799554ebfd99"
+
+[[package]]
 name = "unicode-xid"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -201,17 +227,107 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
+name = "wit-bindgen-gen-core"
+version = "0.1.0"
+source = "git+https://github.com/wasmerio/wit-bindgen?rev=1750cd0#1750cd082c19ccc78b610fff7cf26184aad7a85b"
+dependencies = [
+ "anyhow",
+ "wit-parser 0.1.0 (git+https://github.com/wasmerio/wit-bindgen?rev=1750cd0)",
+]
+
+[[package]]
+name = "wit-bindgen-gen-core"
+version = "0.1.0"
+source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7cf26184aad7a85b"
+dependencies = [
+ "anyhow",
+ "wit-parser 0.1.0 (git+https://github.com/wasmerio/wit-bindgen)",
+]
+
+[[package]]
+name = "wit-bindgen-gen-js"
+version = "0.1.0"
+source = "git+https://github.com/wasmerio/wit-bindgen?rev=1750cd0#1750cd082c19ccc78b610fff7cf26184aad7a85b"
+dependencies = [
+ "heck",
+ "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen?rev=1750cd0)",
+]
+
+[[package]]
+name = "wit-bindgen-gen-rust"
+version = "0.1.0"
+source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7cf26184aad7a85b"
+dependencies = [
+ "heck",
+ "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen)",
+]
+
+[[package]]
+name = "wit-bindgen-gen-rust-wasm"
+version = "0.1.0"
+source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7cf26184aad7a85b"
+dependencies = [
+ "heck",
+ "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen)",
+ "wit-bindgen-gen-rust",
+]
+
+[[package]]
+name = "wit-bindgen-rust"
+version = "0.1.0"
+source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7cf26184aad7a85b"
+dependencies = [
+ "async-trait",
+ "bitflags",
+ "wit-bindgen-rust-impl",
+]
+
+[[package]]
+name = "wit-bindgen-rust-impl"
+version = "0.1.0"
+source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7cf26184aad7a85b"
+dependencies = [
+ "proc-macro2",
+ "syn",
+ "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen)",
+ "wit-bindgen-gen-rust-wasm",
+]
+
+[[package]]
 name = "wit-pack"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "cargo_metadata",
- "wit-parser",
+ "wit-bindgen-gen-js",
+ "wit-parser 0.1.0 (git+https://github.com/wasmerio/wit-bindgen?rev=1750cd0)",
+]
+
+[[package]]
+name = "wit-pack-wasm"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "wit-bindgen-rust",
+ "wit-pack",
 ]
 
 [[package]]
 name = "wit-parser"
 version = "0.1.0"
 source = "git+https://github.com/wasmerio/wit-bindgen?rev=1750cd0#1750cd082c19ccc78b610fff7cf26184aad7a85b"
+dependencies = [
+ "anyhow",
+ "id-arena",
+ "pulldown-cmark",
+ "unicode-normalization",
+ "unicode-xid",
+]
+
+[[package]]
+name = "wit-parser"
+version = "0.1.0"
+source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7cf26184aad7a85b"
 dependencies = [
  "anyhow",
  "id-arena",

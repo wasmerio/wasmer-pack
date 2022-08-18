@@ -1,0 +1,16 @@
+[package]
+name = "wit-pack-wasm"
+version = "0.1.0"
+edition = "2021"
+description = "The WebAssembly interface to wit-pack."
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.62"
+wit-bindgen-rust = { git = "https://github.com/wasmerio/wit-bindgen", version = "0.1.0" }
+wit-pack = { version = "0.1.0", path = "../wit-pack" }
