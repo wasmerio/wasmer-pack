@@ -24,9 +24,9 @@ fn use_javascript_bindings() {
         .join("js");
 
     let _ = std::fs::remove_dir_all(js_dir.join("node_modules"));
-    execute(Command::new("yarn").current_dir(&js_dir));
 
-    execute(Command::new("yarn").arg("start").current_dir(&js_dir));
+    execute("yarn", &js_dir);
+    execute("yarn start", &js_dir);
 }
 
 #[derive(Debug)]
@@ -46,12 +46,8 @@ impl Fixtures {
         assert!(exports.exists());
 
         execute(
-            Command::new(env!("CARGO"))
-                .arg("build")
-                .arg("--target=wasm32-unknown-unknown")
-                .arg("--package=wit-pack-wasm")
-                .stdout(Stdio::piped())
-                .stderr(Stdio::piped()),
+            "cargo build --target=wasm32-unknown-unknown --package=wit-pack-wasm",
+            &project_root,
         );
 
         let wasm = project_root
@@ -65,12 +61,29 @@ impl Fixtures {
 }
 
 #[track_caller]
-fn execute(cmd: &mut Command) {
+fn execute(command: impl AsRef<str>, current_dir: impl AsRef<Path>) {
+    let mut cmd = if cfg!(windows) {
+        let mut cmd = Command::new("cmd.exe");
+        cmd.arg("/c");
+        cmd
+    } else {
+        let mut cmd = Command::new("sh");
+        cmd.arg("-c");
+        cmd
+    };
+
+    cmd.arg(command.as_ref()).current_dir(current_dir);
+
     let Output {
         status,
         stdout,
         stderr,
-    } = cmd.output().expect("Unable to start the process");
+    } = cmd
+        .stdin(Stdio::null())
+        .stderr(Stdio::piped())
+        .stdout(Stdio::piped())
+        .output()
+        .expect("Unable to start the process");
 
     if !status.success() {
         let stdout = String::from_utf8_lossy(&stdout);
