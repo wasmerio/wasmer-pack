@@ -47,7 +47,7 @@ jobs:
           node-version: 16
           cache: yarn
           cache-dependency-path: crates/wit-pack/tests/js/yarn.lock
-        run: yarn --version
+      - run: yarn --version
       - name: Type Checking
         uses: actions-rs/cargo@v1
         with:
