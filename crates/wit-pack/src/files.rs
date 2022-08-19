@@ -19,8 +19,8 @@ impl Files {
         }
     }
 
-    pub fn push(&mut self, path: PathBuf, file: SourceFile) {
-        self.members.insert(path, file);
+    pub fn push(&mut self, path: impl Into<PathBuf>, file: SourceFile) {
+        self.members.insert(path.into(), file);
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (&Path, &SourceFile)> + '_ {

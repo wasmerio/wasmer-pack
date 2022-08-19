@@ -14,24 +14,22 @@ impl crate::wit_pack::WitPack for WitPack {
     fn generate_javascript(
         bindings: wit_pack::Bindings,
     ) -> Result<Vec<wit_pack::File>, wit_pack::Error> {
-        let bindings = upstream::Bindings {
-            metadata: bindings.metadata.0.borrow().clone(),
-            interface: bindings.exports.0.clone(),
-            module: bindings.module.0.clone(),
-        };
-        let js = bindings.javascript()?;
+        let js = upstream::generate_javascript(
+            &bindings.metadata.0.borrow(),
+            &bindings.module.0,
+            &bindings.exports.0,
+        )?;
         Ok(unwrap_files(js))
     }
 
     fn generate_python(
         bindings: wit_pack::Bindings,
     ) -> Result<Vec<wit_pack::File>, wit_pack::Error> {
-        let bindings = upstream::Bindings {
-            metadata: bindings.metadata.0.borrow().clone(),
-            interface: bindings.exports.0.clone(),
-            module: bindings.module.0.clone(),
-        };
-        let py = bindings.python()?;
+        let py = upstream::generate_python(
+            &bindings.metadata.0.borrow(),
+            &bindings.module.0,
+            &bindings.exports.0,
+        )?;
         Ok(unwrap_files(py))
     }
 }

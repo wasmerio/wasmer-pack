@@ -4,7 +4,6 @@ use anyhow::{Context, Error};
 use clap::Parser;
 use semver::{Version, VersionReq};
 use wapm_toml::{Manifest, Module};
-use wit_pack::Bindings;
 
 fn main() -> Result<(), Error> {
     let cmd = Cmd::parse();
@@ -50,20 +49,18 @@ impl Codegen {
             .as_ref()
             .context("The module doesn't declare any bindings")?;
 
-        let bindings = Bindings {
-            metadata: derive_metadata(&manifest),
-            interface: load_interface(bindings_field)?,
-            module: load_module(module, &manifest.base_directory_path)?,
-        };
+        let metadata = derive_metadata(&manifest);
+        let interface = load_interface(bindings_field)?;
+        let module = load_module(module, &manifest.base_directory_path)?;
 
         let files = match language {
-            Language::JavaScript => bindings.javascript()?,
-            Language::Python => bindings.python()?,
+            Language::JavaScript => wit_pack::generate_javascript(&metadata, &module, &interface)?,
+            Language::Python => wit_pack::generate_python(&metadata, &module, &interface)?,
         };
 
         let out_dir = out_dir
             .as_deref()
-            .unwrap_or_else(|| Path::new(&bindings.metadata.package_name));
+            .unwrap_or_else(|| Path::new(&metadata.package_name));
         files.save_to_disk(out_dir)?;
 
         Ok(())

@@ -7,14 +7,14 @@ use wit_bindgen_gen_core::Generator;
 use wit_bindgen_gen_js::Js;
 use wit_parser::Interface;
 
-use crate::{Bindings, Files, Module, SourceFile};
+use crate::{Files, Metadata, Module, SourceFile};
 
-pub(crate) fn generate(bindings: &Bindings) -> Result<Files, Error> {
-    let Bindings {
-        interface,
-        module,
-        metadata,
-    } = bindings;
+/// Generate JavaScript bindings for a package.
+pub fn generate_javascript(
+    metadata: &Metadata,
+    module: &Module,
+    interface: &crate::Interface,
+) -> Result<Files, Error> {
     let interface_name = &interface.0.name;
 
     let mut files = Files::new();

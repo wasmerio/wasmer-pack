@@ -3,7 +3,7 @@ use std::{
     process::{Command, Output, Stdio},
 };
 
-use wit_pack::{Abi, Bindings, Interface, Metadata, Module};
+use wit_pack::{Abi, Interface, Metadata, Module};
 
 #[test]
 fn use_javascript_bindings() {
@@ -12,16 +12,11 @@ fn use_javascript_bindings() {
     let metadata = Metadata::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
     let module = Module::from_path(&wasm, Abi::None).unwrap();
     let interface = Interface::from_path(&exports).unwrap();
-    let bindings = Bindings {
-        metadata,
-        module,
-        interface,
-    };
 
     let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("javascript");
     let _ = std::fs::remove_dir_all(&out_dir);
 
-    let js = bindings.javascript().unwrap();
+    let js = wit_pack::generate_javascript(&metadata, &module, &interface).unwrap();
     js.save_to_disk(&out_dir).unwrap();
 
     let js_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
