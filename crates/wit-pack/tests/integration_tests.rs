@@ -3,12 +3,20 @@ use std::{
     process::{Command, Output, Stdio},
 };
 
-use wit_pack::Bindings;
+use wit_pack::{Abi, Bindings, Interface, Metadata, Module};
 
 #[test]
 fn use_javascript_bindings() {
     let Fixtures { exports, wasm } = Fixtures::load();
-    let bindings = Bindings::from_disk(&exports, &wasm).unwrap();
+
+    let metadata = Metadata::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+    let module = Module::from_path(&wasm, Abi::None).unwrap();
+    let interface = Interface::from_path(&exports).unwrap();
+    let bindings = Bindings {
+        metadata,
+        module,
+        interface,
+    };
 
     let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("javascript");
     let _ = std::fs::remove_dir_all(&out_dir);
@@ -23,11 +31,7 @@ fn use_javascript_bindings() {
     let _ = std::fs::remove_dir_all(js_dir.join("node_modules"));
     execute(Command::new("yarn").current_dir(&js_dir));
 
-    execute(
-        Command::new("node")
-            .current_dir(&js_dir)
-            .arg(js_dir.join("index.js")),
-    );
+    execute(Command::new("yarn").arg("start").current_dir(&js_dir));
 }
 
 #[derive(Debug)]
@@ -40,7 +44,10 @@ impl Fixtures {
     fn load() -> Self {
         let project_root = project_root();
 
-        let exports = project_root.join("crates").join("wasm").join("exports.wit");
+        let exports = project_root
+            .join("crates")
+            .join("wasm")
+            .join("wit-pack.exports.wit");
         assert!(exports.exists());
 
         execute(

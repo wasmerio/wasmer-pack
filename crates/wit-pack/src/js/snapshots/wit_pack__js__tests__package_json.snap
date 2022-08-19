@@ -3,9 +3,9 @@ source: crates/wit-pack/src/js/mod.rs
 expression: got.utf8_contents().unwrap()
 ---
 {
-  "main": "src/index.js",
-  "name": "wit-pack",
+  "main": "src/wit-pack.js",
+  "name": "wasmerio/wit-pack",
   "type": "module",
-  "types": "src/index.d.ts",
+  "types": "src/wit-pack.d.ts",
   "version": "0.0.0"
 }

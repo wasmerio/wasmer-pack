@@ -1,0 +1,44 @@
+resource metadata {
+    static new: func(package-name: string, version: string) -> metadata
+    set-description: func(description: string)
+}
+
+resource exports {
+    static from-wit: func(name: string, contents: string) -> expected<exports, error>
+    static from-path: func(path: string) -> expected<exports, error>
+}
+
+resource module {
+    static new: func(name: string, abi: abi, wasm: list<u8>) -> module
+}
+
+enum abi {
+    none,
+    wasi,
+}
+
+/// Information used to generate bindings.
+record bindings {
+    metadata: metadata,
+    exports: exports,
+    module: module,
+}
+
+/// An error that may occur.
+record error {
+    /// The error message.
+    message: string,
+    /// An extended error message, possibly including a backtrace and the list
+    /// of errors which led to this one.
+    verbose: string,
+    /// The chain of source errors.
+    causes: list<string>,
+}
+
+record file {
+    filename: string,
+    contents: list<u8>,
+}
+
+generate-javascript: func(bindings: bindings) -> expected<list<file>, error>
+generate-python: func(bindings: bindings) -> expected<list<file>, error>

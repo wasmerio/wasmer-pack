@@ -45,6 +45,10 @@ impl Files {
 
         Ok(())
     }
+
+    pub fn get_mut(&mut self, path: impl AsRef<Path>) -> Option<&mut SourceFile> {
+        self.members.get_mut(path.as_ref())
+    }
 }
 
 impl Default for Files {
@@ -53,33 +57,40 @@ impl Default for Files {
     }
 }
 
-/// A file in memory.
-#[derive(Clone, PartialEq, Eq)]
-pub struct SourceFile {
-    contents: Vec<u8>,
+impl IntoIterator for Files {
+    type Item = (PathBuf, SourceFile);
+
+    type IntoIter = <BTreeMap<PathBuf, SourceFile> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.members.into_iter()
+    }
 }
+
+/// A file in memory.
+#[derive(Clone, Default, PartialEq, Eq)]
+pub struct SourceFile(pub Vec<u8>);
 
 impl SourceFile {
     pub fn new(contents: Vec<u8>) -> Self {
-        SourceFile { contents }
+        SourceFile(contents)
     }
 
     pub fn contents(&self) -> &[u8] {
-        &self.contents
+        &self.0
     }
 
     pub fn utf8_contents(&self) -> Option<&str> {
-        std::str::from_utf8(&self.contents).ok()
+        std::str::from_utf8(&self.0).ok()
     }
 }
 
 impl Debug for SourceFile {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let SourceFile { contents } = self;
+        let SourceFile(contents) = self;
 
-        f.debug_struct("SourceFile")
+        f.debug_tuple("SourceFile")
             .field(
-                "contents",
                 self.utf8_contents()
                     .as_ref()
                     .map(|c| c as &dyn Debug)

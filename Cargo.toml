@@ -1,2 +1,9 @@
 [workspace]
 members = ["crates/*"]
+
+[patch."https://github.com/wasmerio/wit-bindgen"]
+# Note: Switch back to the wasmer version when bytecodealliance/wit-bindgen#304
+# is merged and wasmer's fork has done a rebase.
+#
+# See https://github.com/bytecodealliance/wit-bindgen/pull/304
+wit-parser = { git = "https://github.com/Michael-F-Bryan/wit-bindgen", branch = "wasmer-temp" }

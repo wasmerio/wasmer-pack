@@ -7,10 +7,13 @@
 //! language, you can always use this crate directly.
 //!
 //! ```rust,no_run
-//! use wit_pack::Bindings;
+//! use wit_pack::{Bindings, Module, Interface, Metadata, Abi};
 //!
-//! // First, load the bindings from disk
-//! let bindings = Bindings::from_disk("exports.wit", "module.wasm")?;
+//! // First, load the relevant information from disk
+//! let metadata = Metadata::new("my-package", "1.2.3");
+//! let module = Module::from_path("./module.wasm", Abi::None)?;
+//! let interface = Interface::from_path("./exports.wit")?;
+//! let bindings = Bindings { metadata, module, interface };
 //!
 //! // Next, generate the bindings for your language
 //! let js = bindings.javascript()?;
@@ -26,7 +29,7 @@ mod js;
 mod wit_version;
 
 pub use crate::{
-    bindings::Bindings,
+    bindings::{Abi, Bindings, Interface, Metadata, Module},
     files::{Files, SourceFile},
     wit_version::WIT_PARSER_VERSION,
 };

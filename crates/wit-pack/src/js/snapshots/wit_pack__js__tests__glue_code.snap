@@ -1,22 +1,21 @@
 ---
 source: crates/wit-pack/src/js/mod.rs
-expression: got.utf8_contents().unwrap()
+expression: contents
 ---
 
 import fs from "fs/promises";
 import path from "path";
-import * as url from 'url';
+import * as url from "url";
 
-import { Exports } from "./generated/exports.js";
-
-export async function load() {
-    const wrapper = new Exports();
+export default async function() {
+    const wrapper = new WitPack();
 
     const scriptDir = url.fileURLToPath(new URL('.', import.meta.url));
-    const wasm = await fs.readFile(path.join(scriptDir, "exports.wasm"));
+    const wasm = await fs.readFile(path.join(scriptDir, "wit-pack-wasm.wasm"));
 
     const imports = {};
     await wrapper.instantiate(wasm, imports);
     return wrapper;
 }
+
 

@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Error};
 use clap::Parser;
-use semver::VersionReq;
+use semver::{Version, VersionReq};
 use wapm_toml::{Manifest, Module};
 use wit_pack::Bindings;
 
@@ -45,34 +45,76 @@ impl Codegen {
         let manifest = Manifest::find_in_directory(&path)?;
         let module = get_desired_module(&manifest, module.as_deref())?;
 
-        let wapm_toml::Bindings { wit, wit_bindgen } = module
+        let bindings_field = module
             .bindings
             .as_ref()
             .context("The module doesn't declare any bindings")?;
 
-        let compatible_version: VersionReq = wit_pack::WIT_PARSER_VERSION
-            .parse()
-            .expect("Should always be valid");
-
-        anyhow::ensure!(
-            compatible_version.matches(wit_bindgen),
-            "wit-pack is not compatible with WIT format {wit_bindgen} (expected {compatible_version})"
-        );
-
-        let bindings = Bindings::from_disk(&wit, &module.source)?;
+        let bindings = Bindings {
+            metadata: derive_metadata(&manifest),
+            interface: load_interface(bindings_field)?,
+            module: load_module(module, &manifest.base_directory_path)?,
+        };
 
         let files = match language {
             Language::JavaScript => bindings.javascript()?,
-            Language::Python => todo!(),
+            Language::Python => bindings.python()?,
         };
 
         let out_dir = out_dir
             .as_deref()
-            .unwrap_or_else(|| Path::new(bindings.package_name()));
+            .unwrap_or_else(|| Path::new(&bindings.metadata.package_name));
         files.save_to_disk(out_dir)?;
 
         Ok(())
     }
+}
+
+fn load_interface(bindings: &wapm_toml::Bindings) -> Result<wit_pack::Interface, Error> {
+    let wapm_toml::Bindings { wit, wit_bindgen } = bindings;
+
+    ensure_compatible(wit_bindgen)?;
+
+    wit_pack::Interface::from_path(wit)
+}
+
+fn load_module(module: &Module, base_dir: &Path) -> Result<wit_pack::Module, Error> {
+    let Module {
+        name, source, abi, ..
+    } = module;
+    let path = base_dir.join(source);
+    let wasm =
+        std::fs::read(&path).with_context(|| format!("Unable to read \"{}\"", path.display()))?;
+
+    let abi = match abi {
+        wapm_toml::Abi::None => wit_pack::Abi::None,
+        wapm_toml::Abi::Wasi => wit_pack::Abi::Wasi,
+        other => anyhow::bail!("ABI not supported by wit-pack: {other:?}"),
+    };
+
+    Ok(wit_pack::Module {
+        name: name.clone(),
+        abi,
+        wasm,
+    })
+}
+
+fn derive_metadata(manifest: &Manifest) -> wit_pack::Metadata {
+    let pkg = &manifest.package;
+    wit_pack::Metadata::new(&pkg.name, pkg.version.to_string()).with_description(&pkg.description)
+}
+
+fn ensure_compatible(wit_bindgen: &Version) -> Result<(), Error> {
+    let compatible_version: VersionReq = wit_pack::WIT_PARSER_VERSION
+        .parse()
+        .expect("Should always be valid");
+
+    anyhow::ensure!(
+        compatible_version.matches(wit_bindgen),
+        "wit-pack is not compatible with WIT format {wit_bindgen} (expected {compatible_version})",
+    );
+
+    Ok(())
 }
 
 fn get_desired_module<'m>(
