@@ -8,6 +8,7 @@ on:
 
 env:
   DEFAULT_CRATE_NAME: wit_pack
+  RUST_BACKTRACE: 1
 
 jobs:
   check:
@@ -70,6 +71,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
+            crates/wit-pack/tests/js/yarn.lock
           key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
@@ -79,6 +81,12 @@ jobs:
           toolchain: nightly
           override: true
           components: rustfmt, clippy
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: yarn
+          cache-dependency-path: crates/wit-pack/tests/js/yarn.lock
       - name: Check Formatting
         uses: actions-rs/cargo@v1
         with:
