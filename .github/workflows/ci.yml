@@ -41,6 +41,13 @@ jobs:
           toolchain: "1.59.0" # Required by wit-bindgen-gen-rust
           override: true
           target: wasm32-unknown-unknown
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: yarn
+          cache-dependency-path: crates/wit-pack/tests/js/yarn.lock
+        run: yarn --version
       - name: Type Checking
         uses: actions-rs/cargo@v1
         with:
@@ -71,7 +78,6 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-            crates/wit-pack/tests/js/yarn.lock
           key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
@@ -81,12 +87,6 @@ jobs:
           toolchain: nightly
           override: true
           components: rustfmt, clippy
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: yarn
-          cache-dependency-path: crates/wit-pack/tests/js/yarn.lock
       - name: Check Formatting
         uses: actions-rs/cargo@v1
         with:

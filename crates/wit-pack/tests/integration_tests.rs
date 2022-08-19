@@ -64,12 +64,13 @@ impl Fixtures {
     }
 }
 
+#[track_caller]
 fn execute(cmd: &mut Command) {
     let Output {
         status,
         stdout,
         stderr,
-    } = cmd.output().unwrap();
+    } = cmd.output().expect("Unable to start the process");
 
     if !status.success() {
         let stdout = String::from_utf8_lossy(&stdout);
