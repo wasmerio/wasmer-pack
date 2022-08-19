@@ -51,7 +51,7 @@ fn sanitized_module_name(path: &Path) -> Result<&str, Error> {
         .to_str()
         .context("wit filename must be valid unicode")?;
 
-    let first_segment = name.split(".").next().expect("Guaranteed to not be empty");
+    let first_segment = name.split('.').next().expect("Guaranteed to not be empty");
 
     Ok(first_segment)
 }

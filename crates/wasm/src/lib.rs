@@ -81,7 +81,7 @@ impl crate::wit_pack::Metadata for Metadata {
     }
 
     fn set_description(&self, description: String) {
-        (*self.0.borrow_mut()).description = Some(description);
+        self.0.borrow_mut().description = Some(description);
     }
 }
 

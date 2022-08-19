@@ -27,7 +27,7 @@ pub fn generate_javascript(
     generate_bindings(&interface.0, &mut files);
 
     let glue_code = Path::new("src").join(interface_name).with_extension("js");
-    inject_load_function(&module, interface_name, files.get_mut(&glue_code).unwrap())?;
+    inject_load_function(module, interface_name, files.get_mut(&glue_code).unwrap())?;
 
     let typings_file = Path::new("src").join(interface_name).with_extension("d.ts");
     patch_typings_file(interface_name, files.get_mut(&typings_file).unwrap());

@@ -22,20 +22,20 @@
 //! # Ok::<(), anyhow::Error>(())
 //! ```
 
-mod module;
 mod files;
 mod interface;
 mod js;
 mod metadata;
+mod module;
 mod py;
 mod wit_version;
 
 pub use crate::{
-    module::{Abi, Module},
     files::{Files, SourceFile},
     interface::Interface,
     js::generate_javascript,
     metadata::Metadata,
+    module::{Abi, Module},
     py::generate_python,
     wit_version::WIT_PARSER_VERSION,
 };
