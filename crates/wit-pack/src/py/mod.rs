@@ -109,11 +109,10 @@ mod tests {
     #[test]
     fn generated_files() {
         let expected: HashSet<&Path> = [
-            "package.json",
-            "src/wit-pack.js",
-            "src/wit-pack.d.ts",
-            "src/wit_pack_wasm.wasm",
-            "src/intrinsics.js",
+            "setup.py",
+            "wit_pack/bindings.py",
+            "wit_pack/__init__.py",
+            "wit_pack/wit_pack_wasm.wasm",
         ]
         .iter()
         .map(Path::new)

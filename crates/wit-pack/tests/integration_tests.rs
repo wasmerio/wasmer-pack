@@ -1,4 +1,5 @@
 use std::{
+    ffi::OsStr,
     path::{Path, PathBuf},
     process::{Command, Output, Stdio},
 };
@@ -27,6 +28,29 @@ fn use_javascript_bindings() {
 
     execute("yarn", &js_dir);
     execute("yarn start", &js_dir);
+}
+
+#[test]
+fn use_python_bindings() {
+    let Fixtures { exports, wasm } = Fixtures::load();
+
+    let metadata = Metadata::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+    let module = Module::from_path(&wasm, Abi::None).unwrap();
+    let interface = Interface::from_path(&exports).unwrap();
+
+    let out_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("python");
+    let _ = std::fs::remove_dir_all(&out_dir);
+
+    let py = wit_pack::generate_python(&metadata, &module, &interface).unwrap();
+    py.save_to_disk(&out_dir).unwrap();
+
+    let main_py = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("main.py");
+
+    execute(&main_py, &out_dir);
 }
 
 #[derive(Debug)]
@@ -61,7 +85,7 @@ impl Fixtures {
 }
 
 #[track_caller]
-fn execute(command: impl AsRef<str>, current_dir: impl AsRef<Path>) {
+fn execute(command: impl AsRef<OsStr>, current_dir: impl AsRef<Path>) {
     let mut cmd = if cfg!(windows) {
         let mut cmd = Command::new("cmd.exe");
         cmd.arg("/c");
@@ -74,6 +98,11 @@ fn execute(command: impl AsRef<str>, current_dir: impl AsRef<Path>) {
 
     cmd.arg(command.as_ref()).current_dir(current_dir);
 
+    assert_runs_successfully(&mut cmd);
+}
+
+#[track_caller]
+fn assert_runs_successfully(cmd: &mut Command) {
     let Output {
         status,
         stdout,
@@ -84,7 +113,6 @@ fn execute(command: impl AsRef<str>, current_dir: impl AsRef<Path>) {
         .stdout(Stdio::piped())
         .output()
         .expect("Unable to start the process");
-
     if !status.success() {
         let stdout = String::from_utf8_lossy(&stdout);
         if !stdout.is_empty() {
