@@ -185,14 +185,13 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.18.2"
+version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57a9aec10c9a062ef0454fd49ebaefa59239f836d1b30891d9cc2289978dd970"
+checksum = "f37dc501f12ec0c339b385787fa89ffda3d5d2caa62e558da731134c24d6e0c4"
 dependencies = [
  "console",
  "linked-hash-map",
  "once_cell",
- "serde",
  "similar",
  "yaml-rust",
 ]
@@ -303,9 +302,9 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.143"
+version = "1.0.144"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53e8e5d5b70924f74ff5c6d64d9a5acd91422117c60f48c4e07855238a254553"
+checksum = "0f747710de3dcd43b88c9168773254e809d8ddbdf9653b84e2554ab219f17860"
 dependencies = [
  "serde_derive",
 ]
@@ -322,9 +321,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.143"
+version = "1.0.144"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3d8e8de557aee63c26b85b947f5e59b690d0454c753f3adeb5cd7835ab88391"
+checksum = "94ed3a816fb1d101812f83e789f888322c34e291f894f19590dc310963e87a00"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -333,9 +332,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.83"
+version = "1.0.85"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38dd04e3c8279e75b31ef29dbdceebfe5ad89f4d0937213c53f7d49d01b3d5a7"
+checksum = "e55a28e3aaef9d5ce0506d0a14dbba8054ddc7e499ef522dd8b26859ec9d4a44"
 dependencies = [
  "itoa",
  "ryu",
@@ -538,16 +537,7 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 [[package]]
 name = "wit-bindgen-gen-core"
 version = "0.1.0"
-source = "git+https://github.com/wasmerio/wit-bindgen?branch=wasmer#1750cd082c19ccc78b610fff7cf26184aad7a85b"
-dependencies = [
- "anyhow",
- "wit-parser",
-]
-
-[[package]]
-name = "wit-bindgen-gen-core"
-version = "0.1.0"
-source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7cf26184aad7a85b"
+source = "git+https://github.com/Michael-F-Bryan/wit-bindgen?branch=wasmer-temp#398c270b3ce735ded3f52cf87b3457f54cdd0ce8"
 dependencies = [
  "anyhow",
  "wit-parser",
@@ -559,7 +549,7 @@ version = "0.1.0"
 source = "git+https://github.com/wasmerio/wit-bindgen?branch=wasmer#1750cd082c19ccc78b610fff7cf26184aad7a85b"
 dependencies = [
  "heck 0.3.3",
- "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen?branch=wasmer)",
+ "wit-bindgen-gen-core",
 ]
 
 [[package]]
@@ -568,7 +558,7 @@ version = "0.1.0"
 source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7cf26184aad7a85b"
 dependencies = [
  "heck 0.3.3",
- "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen)",
+ "wit-bindgen-gen-core",
 ]
 
 [[package]]
@@ -577,8 +567,17 @@ version = "0.1.0"
 source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7cf26184aad7a85b"
 dependencies = [
  "heck 0.3.3",
- "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen)",
+ "wit-bindgen-gen-core",
  "wit-bindgen-gen-rust",
+]
+
+[[package]]
+name = "wit-bindgen-gen-wasmer-py"
+version = "0.1.0"
+source = "git+https://github.com/Michael-F-Bryan/wit-bindgen?branch=wasmer-temp#398c270b3ce735ded3f52cf87b3457f54cdd0ce8"
+dependencies = [
+ "heck 0.3.3",
+ "wit-bindgen-gen-core",
 ]
 
 [[package]]
@@ -598,7 +597,7 @@ source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7c
 dependencies = [
  "proc-macro2",
  "syn",
- "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen)",
+ "wit-bindgen-gen-core",
  "wit-bindgen-gen-rust-wasm",
 ]
 
@@ -612,8 +611,9 @@ dependencies = [
  "insta",
  "serde",
  "serde_json",
- "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen?branch=wasmer)",
+ "wit-bindgen-gen-core",
  "wit-bindgen-gen-js",
+ "wit-bindgen-gen-wasmer-py",
  "wit-parser",
 ]
 
@@ -640,7 +640,7 @@ dependencies = [
 [[package]]
 name = "wit-parser"
 version = "0.1.0"
-source = "git+https://github.com/Michael-F-Bryan/wit-bindgen?branch=wasmer-temp#a4ba752c46106cdbf4b9a0a446f17d86bb16b7bf"
+source = "git+https://github.com/Michael-F-Bryan/wit-bindgen?branch=wasmer-temp#398c270b3ce735ded3f52cf87b3457f54cdd0ce8"
 dependencies = [
  "anyhow",
  "id-arena",

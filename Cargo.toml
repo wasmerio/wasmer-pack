@@ -2,8 +2,11 @@
 members = ["crates/*"]
 
 [patch."https://github.com/wasmerio/wit-bindgen"]
-# Note: Switch back to the wasmer version when bytecodealliance/wit-bindgen#304
-# is merged and wasmer's fork has done a rebase.
+# Note We are using a temporary fork until the following PRs are merged
+# and end up in the wasmerio/wit-bindgen repo's "wasmer" branch.
 #
-# See https://github.com/bytecodealliance/wit-bindgen/pull/304
+# https://github.com/bytecodealliance/wit-bindgen/pull/304
+# https://github.com/wasmerio/wit-bindgen/pull/7
+wit-bindgen-gen-core = { git = "https://github.com/Michael-F-Bryan/wit-bindgen", branch = "wasmer-temp" }
+wit-bindgen-gen-wasmer-py = { git = "https://github.com/Michael-F-Bryan/wit-bindgen", branch = "wasmer-temp" }
 wit-parser = { git = "https://github.com/Michael-F-Bryan/wit-bindgen", branch = "wasmer-temp" }

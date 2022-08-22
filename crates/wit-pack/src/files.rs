@@ -85,6 +85,36 @@ impl SourceFile {
     }
 }
 
+impl From<&str> for SourceFile {
+    fn from(s: &str) -> Self {
+        SourceFile::from(s.to_string())
+    }
+}
+
+impl From<String> for SourceFile {
+    fn from(s: String) -> Self {
+        SourceFile::new(s.into_bytes())
+    }
+}
+
+impl From<&[u8]> for SourceFile {
+    fn from(v: &[u8]) -> Self {
+        SourceFile::from(v.to_vec())
+    }
+}
+
+impl From<&Vec<u8>> for SourceFile {
+    fn from(v: &Vec<u8>) -> Self {
+        SourceFile::from(v.clone())
+    }
+}
+
+impl From<Vec<u8>> for SourceFile {
+    fn from(v: Vec<u8>) -> Self {
+        SourceFile::new(v)
+    }
+}
+
 impl Debug for SourceFile {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let SourceFile(contents) = self;

@@ -21,7 +21,7 @@ pub fn generate_javascript(
 
     files.push(
         Path::new("src").join(&module.name).with_extension("wasm"),
-        SourceFile::new(module.wasm.clone()),
+        SourceFile::from(&module.wasm),
     );
 
     generate_bindings(&interface.0, &mut files);
@@ -59,7 +59,7 @@ fn generate_package_json(package_name: &str, interface_name: &str) -> SourceFile
         "type": "module",
     });
 
-    SourceFile::new((format!("{package_json:#}")).into())
+    format!("{package_json:#}").into()
 }
 
 fn generate_bindings(interface: &Interface, files: &mut Files) {
@@ -72,7 +72,7 @@ fn generate_bindings(interface: &Interface, files: &mut Files) {
     let dir = Path::new("src");
 
     for (path, contents) in generated.iter() {
-        files.push(dir.join(path), SourceFile::new(contents.into()));
+        files.push(dir.join(path), contents.into());
     }
 }
 
@@ -114,6 +114,8 @@ export default async function() {{
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
     use super::*;
 
     #[test]
@@ -153,5 +155,38 @@ mod tests {
         let got = generate_package_json(package_name, "wit-pack");
 
         insta::assert_display_snapshot!(got.utf8_contents().unwrap());
+    }
+
+    #[test]
+    fn generated_files() {
+        let expected: HashSet<&Path> = [
+            "package.json",
+            "src/wit-pack.js",
+            "src/wit-pack.d.ts",
+            "src/wit_pack_wasm.wasm",
+            "src/intrinsics.js",
+        ]
+        .iter()
+        .map(Path::new)
+        .collect();
+        let metadata = Metadata::new("wit-pack", "1.2.3");
+        let module = Module {
+            name: "wit_pack_wasm.wasm".to_string(),
+            abi: crate::Abi::None,
+            wasm: Vec::new(),
+        };
+        let interface = crate::Interface::from_wit(
+            "wit-pack.exports.wit",
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../wasm/wit-pack.exports.wit"
+            )),
+        )
+        .unwrap();
+
+        let files = generate_javascript(&metadata, &module, &interface).unwrap();
+
+        let file_names: HashSet<&Path> = files.iter().map(|(path, _)| path).collect();
+        assert_eq!(file_names, expected);
     }
 }
