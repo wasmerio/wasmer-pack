@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7e93d3ed34adae2fe7680533b88d83d99d100f7d108f5795b4b4f0229142a7a8"
+            "sha256": "0603677fd761c0a52573d9c2ca029d4267bb23fda01a29e0f2ba29844a7f439e"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -55,7 +55,7 @@
             "version": "==1.1.0"
         },
         "wit-pack": {
-            "path": "/home/consulting/Documents/wasmer/wit-pack/target/tmp/python",
+            "path": "./../../../../target/tmp/python",
             "version": "==0.1.0"
         }
     },

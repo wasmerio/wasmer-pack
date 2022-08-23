@@ -4,7 +4,7 @@ expression: got.utf8_contents().unwrap()
 ---
 {
   "main": "src/wit-pack.js",
-  "name": "wasmerio/wit-pack",
+  "name": "@wasmerio/wit-pack",
   "type": "module",
   "types": "src/wit-pack.d.ts",
   "version": "0.0.0"

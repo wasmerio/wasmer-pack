@@ -10,10 +10,7 @@ use wit_pack::{Abi, Interface, Metadata, Module};
 fn use_javascript_bindings() {
     let Fixtures { exports, wasm } = Fixtures::load();
 
-    let metadata = Metadata::new(
-        "wasmer/wit-pack".parse().unwrap(),
-        env!("CARGO_PKG_VERSION"),
-    );
+    let metadata = Metadata::new("@wasmer/wit-pack", env!("CARGO_PKG_VERSION"));
     let module = Module::from_path(&wasm, Abi::None).unwrap();
     let interface = Interface::from_path(&exports).unwrap();
 
@@ -37,10 +34,7 @@ fn use_javascript_bindings() {
 fn use_python_bindings() {
     let Fixtures { exports, wasm } = Fixtures::load();
 
-    let metadata = Metadata::new(
-        "wasmer/wit-pack".parse().unwrap(),
-        env!("CARGO_PKG_VERSION"),
-    );
+    let metadata = Metadata::new("wit_pack", env!("CARGO_PKG_VERSION"));
     let module = Module::from_path(&wasm, Abi::None).unwrap();
     let interface = Interface::from_path(&exports).unwrap();
 

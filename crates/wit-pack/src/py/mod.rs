@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use anyhow::Error;
+use anyhow::{Context, Error};
 use heck::ToPascalCase;
 use wit_bindgen_gen_core::Generator;
 use wit_bindgen_gen_wasmer_py::WasmerPy;
@@ -13,7 +13,8 @@ pub fn generate_python(
     module: &Module,
     interface: &Interface,
 ) -> Result<Files, Error> {
-    let package_name = metadata.package_name.python_package();
+    let package_name =
+        sanitize_python_package_name(&metadata.package_name).context("Invalid package name")?;
     let interface_name = interface.0.name.as_str();
 
     let mut files = Files::new();
@@ -36,6 +37,19 @@ pub fn generate_python(
     files.push(Path::new("MANIFEST.in"), "include **/*.wasm".into());
 
     Ok(files)
+}
+
+fn sanitize_python_package_name(name: &str) -> Result<&str, Error> {
+    anyhow::ensure!(!name.is_empty(), "Package names can't be empty");
+
+    for (i, c) in name.char_indices() {
+        anyhow::ensure!(
+            matches!(c, '_' | 'a'..='z' | 'A'..='Z' | '0'..='9'),
+            "Invalid character, '{c}', at index {i}",
+        );
+    }
+
+    Ok(name)
 }
 
 fn generate_pyproject_toml(metadata: &Metadata, package_name: &str) -> SourceFile {
@@ -146,7 +160,7 @@ mod tests {
         .iter()
         .map(Path::new)
         .collect();
-        let metadata = Metadata::new("wasmer/wit-pack".parse().unwrap(), "1.2.3");
+        let metadata = Metadata::new("wit_pack", "1.2.3");
         let module = Module {
             name: "wit_pack_wasm.wasm".to_string(),
             abi: crate::Abi::None,
@@ -165,5 +179,26 @@ mod tests {
 
         let file_names: HashSet<&Path> = files.iter().map(|(path, _)| path).collect();
         assert_eq!(file_names, expected);
+    }
+
+    #[test]
+    fn sanitize_python_package_names() {
+        let inputs = vec![
+            ("package", true),
+            ("package_name", true),
+            ("package-name", false),
+            ("wasmer/package", false),
+            ("@wasmer/package-name", false),
+            (
+                "abcdefghijklmopqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ0123456789",
+                true,
+            ),
+            ("", false),
+        ];
+
+        for (original, is_okay) in inputs {
+            let got = sanitize_python_package_name(original);
+            assert_eq!(got.is_ok(), is_okay, "{original}");
+        }
     }
 }

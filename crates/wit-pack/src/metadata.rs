@@ -1,16 +1,38 @@
-use std::{
-    fmt::{self, Display, Formatter},
-    str::FromStr,
-};
-
-use anyhow::{Context, Error};
-
 /// Information about the package being generated.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct Metadata {
     /// What is the package's name?
-    pub package_name: PackageName,
+    ///
+    /// # Language Requirements
+    ///
+    /// Depending on the target language, the package name may have different
+    /// constraints.
+    ///
+    /// For example, all packages being published to NPM should follow their
+    /// [naming rules](https://github.com/npm/validate-npm-package-name#naming-rules):
+    ///
+    /// - package name length should be greater than zero
+    /// - all the characters in the package name must be lowercase i.e., no uppercase or mixed case names are allowed
+    /// - package name can consist of hyphens
+    /// - package name must not contain any non-url-safe characters (since name ends up being part of a URL)
+    /// - package name should not start with . or _
+    /// - package name should not contain any spaces
+    /// - package name should not contain any of the following characters: ~)('!*
+    /// - package name cannot be the same as a node.js/io.js core module nor a reserved/blacklisted name. For example, the following names are invalid:
+    ///   - http
+    ///   - stream
+    ///   - node_modules
+    ///   - favicon.ico
+    /// - package name length cannot exceed 214
+    ///
+    /// Python package names should follow [PEP 8](https://peps.python.org/pep-0008/#package-and-module-names):
+    ///
+    /// > Modules should have short, all-lowercase names. Underscores can be
+    /// > used in the module name if it improves readability. Python packages
+    /// > should also have short, all-lowercase names, although the use of
+    /// > underscores is discouraged.
+    pub package_name: String,
     /// A semver-compliant version number.
     pub version: String,
     /// Extended information about the package.
@@ -19,9 +41,9 @@ pub struct Metadata {
 
 impl Metadata {
     /// Create a new [`Metadata`] object with all required fields.
-    pub fn new(package_name: PackageName, version: impl Into<String>) -> Self {
+    pub fn new(package_name: impl Into<String>, version: impl Into<String>) -> Self {
         Metadata {
-            package_name,
+            package_name: package_name.into(),
             version: version.into(),
             description: None,
         }
@@ -33,64 +55,5 @@ impl Metadata {
             description: Some(description.into()),
             ..self
         }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PackageName {
-    namespace: String,
-    name: String,
-}
-
-impl PackageName {
-    pub fn namespace(&self) -> &str {
-        &self.name
-    }
-
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
-    pub fn python_package(&self) -> String {
-        self.name.replace("-", "_")
-    }
-
-    pub fn javascript_package(&self) -> String {
-        let PackageName { namespace, name } = self;
-        format!("@{namespace}/{name}")
-    }
-}
-
-impl FromStr for PackageName {
-    type Err = Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut words = s.split("/");
-        let namespace = words.next().context("Missing the namespace")?;
-        let name = words.next().context("Missing the package name")?;
-
-        anyhow::ensure!(
-            namespace
-                .chars()
-                .all(|c| c.is_alphanumeric() || c == '-' || c == '_'),
-            "The namespace may only contain letters, numbers, and '-' or '_'"
-        );
-        anyhow::ensure!(
-            name.chars()
-                .all(|c| c.is_alphanumeric() || c == '-' || c == '_'),
-            "The name may only contain letters, numbers, and '-' or '_'"
-        );
-
-        Ok(PackageName {
-            namespace: namespace.to_string(),
-            name: name.to_string(),
-        })
-    }
-}
-
-impl Display for PackageName {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let PackageName { namespace, name } = self;
-        write!(f, "{namespace}/{name}")
     }
 }

@@ -10,8 +10,7 @@
 //! use wit_pack::{Module, Interface, Metadata, Abi};
 //!
 //! // First, load the relevant information from disk...
-//! let package_name = "username/my-package".parse()?;
-//! let metadata = Metadata::new(package_name, "1.2.3");
+//! let metadata = Metadata::new("@username/my-package", "1.2.3");
 //! let module = Module::from_path("./module.wasm", Abi::None)?;
 //! let interface = Interface::from_path("./exports.wit")?;
 //!

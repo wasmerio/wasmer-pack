@@ -15,6 +15,7 @@ fn main() -> Result<(), Error> {
 }
 
 #[derive(Debug, Parser)]
+#[clap(version)]
 enum Cmd {
     Js(Codegen),
     Python(Codegen),
@@ -49,7 +50,7 @@ impl Codegen {
             .as_ref()
             .context("The module doesn't declare any bindings")?;
 
-        let metadata = derive_metadata(&manifest)?;
+        let metadata = derive_metadata(&manifest);
         let interface = load_interface(bindings_field, &manifest.base_directory_path)?;
         let module = load_module(module, &manifest.base_directory_path)?;
 
@@ -60,7 +61,7 @@ impl Codegen {
 
         let out_dir = out_dir
             .as_deref()
-            .unwrap_or_else(|| Path::new(metadata.package_name.name()));
+            .unwrap_or_else(|| Path::new(&metadata.package_name));
         files.save_to_disk(out_dir)?;
 
         Ok(())
@@ -98,14 +99,15 @@ fn load_module(module: &Module, base_dir: &Path) -> Result<wit_pack::Module, Err
     })
 }
 
-fn derive_metadata(manifest: &Manifest) -> Result<wit_pack::Metadata, Error> {
-    let pkg = &manifest.package;
-    let name = pkg
-        .name
-        .parse()
-        .context("Unable to parse the package name")?;
+fn derive_metadata(manifest: &Manifest) -> wit_pack::Metadata {
+    let wapm_toml::Package {
+        name,
+        version,
+        description,
+        ..
+    } = &manifest.package;
 
-    Ok(wit_pack::Metadata::new(name, pkg.version.to_string()).with_description(&pkg.description))
+    wit_pack::Metadata::new(name, version.to_string()).with_description(description)
 }
 
 fn ensure_compatible(wit_bindgen: &Version) -> Result<(), Error> {

@@ -1,7 +1,7 @@
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use anyhow::Error;
+use anyhow::{Context, Error};
 use heck::ToPascalCase;
 use wit_bindgen_gen_core::Generator;
 use wit_bindgen_gen_js::Js;
@@ -16,6 +16,8 @@ pub fn generate_javascript(
     interface: &crate::Interface,
 ) -> Result<Files, Error> {
     let interface_name = &interface.0.name;
+    let package_name =
+        sanitize_javascript_package_name(&metadata.package_name).context("Invalid package name")?;
 
     let mut files = Files::new();
 
@@ -32,8 +34,7 @@ pub fn generate_javascript(
     let typings_file = Path::new("src").join(interface_name).with_extension("d.ts");
     patch_typings_file(interface_name, files.get_mut(&typings_file).unwrap());
 
-    let package_json =
-        generate_package_json(&metadata.package_name.javascript_package(), interface_name);
+    let package_json = generate_package_json(&package_name, interface_name);
     files.push(PathBuf::from("package.json"), package_json);
 
     Ok(files)
@@ -61,6 +62,37 @@ fn generate_package_json(package_name: &str, interface_name: &str) -> SourceFile
     });
 
     format!("{package_json:#}").into()
+}
+
+/// Try to make sure the provided string can be used as a JavaScript package
+/// name.
+///
+/// This won't catch everything, but it should provide a "good enough" first
+/// approximation.
+fn sanitize_javascript_package_name(name: &str) -> Result<&str, Error> {
+    anyhow::ensure!(!name.is_empty(), "Package names can't be empty");
+
+    for (i, c) in name.char_indices() {
+        anyhow::ensure!(
+            matches!(c, '.' | '-' | '_' | '/' | '@' | 'a'..='z' | 'A'..='Z' | '0'..='9'),
+            "Invalid character, '{c}', at index {i}",
+        );
+    }
+
+    let words: Vec<_> = name.split('/').collect();
+
+    match *words.as_slice() {
+        [_top_level_name] => {}
+        [namespace, _name] => {
+            anyhow::ensure!(
+                namespace.starts_with('@'),
+                "The namespace should start with a '@'"
+            );
+        }
+        _ => anyhow::bail!("Namespaced JavaScript packages look like @namespace/package"),
+    }
+
+    Ok(name)
 }
 
 fn generate_bindings(interface: &Interface, files: &mut Files) {
@@ -151,7 +183,7 @@ mod tests {
 
     #[test]
     fn package_json() {
-        let package_name = "wasmerio/wit-pack";
+        let package_name = "@wasmerio/wit-pack";
 
         let got = generate_package_json(package_name, "wit-pack");
 
@@ -170,7 +202,7 @@ mod tests {
         .iter()
         .map(Path::new)
         .collect();
-        let metadata = Metadata::new("wasmer/wit-pack".parse().unwrap(), "1.2.3");
+        let metadata = Metadata::new("wit-pack", "1.2.3");
         let module = Module {
             name: "wit_pack_wasm.wasm".to_string(),
             abi: crate::Abi::None,
@@ -189,5 +221,25 @@ mod tests {
 
         let file_names: HashSet<&Path> = files.iter().map(|(path, _)| path).collect();
         assert_eq!(file_names, expected);
+    }
+
+    #[test]
+    fn sanitize_js_package_names() {
+        let inputs = vec![
+            ("package", true),
+            ("@wasmer/package", true),
+            ("@wasmer/package-name", true),
+            (
+                "abcdefghijklmopqrstuvwxyz-ABCDEFGHIJKLMOPQRSTUVWXYZ_0123456789",
+                true,
+            ),
+            ("wasmer/package", false),
+            ("", false),
+        ];
+
+        for (original, is_okay) in inputs {
+            let got = sanitize_javascript_package_name(original);
+            assert_eq!(got.is_ok(), is_okay, "{original}");
+        }
     }
 }

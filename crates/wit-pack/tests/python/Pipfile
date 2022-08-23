@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-wit-pack = {path = "/home/consulting/Documents/wasmer/wit-pack/target/tmp/python"}
+wit-pack = {path = "./../../../../target/tmp/python"}
 
 [dev-packages]
 
