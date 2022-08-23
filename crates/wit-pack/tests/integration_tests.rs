@@ -31,6 +31,7 @@ fn use_javascript_bindings() {
 }
 
 #[test]
+#[ignore = "We need to set up a proper python environment for this"]
 fn use_python_bindings() {
     let Fixtures { exports, wasm } = Fixtures::load();
 
