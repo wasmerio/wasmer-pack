@@ -46,8 +46,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-      - name: Install pipenv
-        run: pip install --user pipenv
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+          cache: "pipenv"
+          cache-dependency-path: crates/wit-pack/tests/python/Pipfile.lock
+      - name: Install Pipenv
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python3
       - run: yarn --version
       - name: Type Checking
         uses: actions-rs/cargo@v1
