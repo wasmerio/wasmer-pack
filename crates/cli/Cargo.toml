@@ -6,6 +6,10 @@ rust-version = "1.59.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[package.metadata.wapm]
+namespace = "Michael-F-Bryan"
+abi = "wasi"
+
 [[bin]]
 name = "wit-pack"
 path = "src/main.rs"

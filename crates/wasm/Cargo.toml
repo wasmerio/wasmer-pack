@@ -5,6 +5,14 @@ edition = "2021"
 description = "The WebAssembly interface to wit-pack."
 publish = false
 rust-version = "1.59.0" # Required by wit-bindgen-gen-rust
+repository = "https://github.com/wasmerio/wit-pack/"
+homepage = "https://wasmer.io/"
+
+[package.metadata.wapm]
+package = "wit-pack"
+namespace = "Michael-F-Bryan"
+abi = "none"
+bindings = { wit-exports = "wit-pack.exports.wit", wit-bindgen = "0.1.0" }
 
 [lib]
 crate-type = ["cdylib", "rlib"]
