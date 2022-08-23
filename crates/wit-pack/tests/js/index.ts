@@ -36,8 +36,8 @@ async function main() {
     const generatedPackageJson = JSON.parse(contents);
 
     // Make sure we generated something with the right name.
-    if (generatedPackageJson.name != "wit-pack") {
-        throw new Error('We should have generated a package called "wit-pack"');
+    if (generatedPackageJson.name != "@wasmer/wit-pack") {
+        throw new Error('We should have generated a package called "@wasmer/wit-pack"');
     }
 }
 
