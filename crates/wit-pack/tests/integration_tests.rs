@@ -49,7 +49,7 @@ fn use_python_bindings() {
         .join("python");
 
     execute("pipenv install", &python_dir);
-    execute("pipenv run ./main.py", &python_dir);
+    execute("pipenv run python3 main.py", &python_dir);
 }
 
 #[derive(Debug)]
