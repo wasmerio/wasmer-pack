@@ -13,7 +13,7 @@ pub fn generate_python(
     module: &Module,
     interface: &Interface,
 ) -> Result<Files, Error> {
-    let package_name = python_package_name(&metadata.package_name);
+    let package_name = metadata.package_name.python_package();
     let interface_name = interface.0.name.as_str();
 
     let mut files = Files::new();
@@ -74,14 +74,6 @@ struct Project<'a> {
     readme: Option<&'a Path>,
     keywords: Vec<&'a str>,
     dependencies: Vec<&'a str>,
-}
-
-fn python_package_name(raw_package_name: &str) -> String {
-    raw_package_name
-        .split('/')
-        .last()
-        .expect("Split always returns at least 1 item")
-        .replace("-", "_")
 }
 
 fn dunder_init_file(metadata: &Metadata, module_name: &str, interface_name: &str) -> SourceFile {
@@ -154,7 +146,7 @@ mod tests {
         .iter()
         .map(Path::new)
         .collect();
-        let metadata = Metadata::new("wit-pack", "1.2.3");
+        let metadata = Metadata::new("wasmer/wit-pack".parse().unwrap(), "1.2.3");
         let module = Module {
             name: "wit_pack_wasm.wasm".to_string(),
             abi: crate::Abi::None,

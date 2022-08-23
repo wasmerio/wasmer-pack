@@ -32,7 +32,8 @@ pub fn generate_javascript(
     let typings_file = Path::new("src").join(interface_name).with_extension("d.ts");
     patch_typings_file(interface_name, files.get_mut(&typings_file).unwrap());
 
-    let package_json = generate_package_json(&metadata.package_name, interface_name);
+    let package_json =
+        generate_package_json(&metadata.package_name.javascript_package(), interface_name);
     files.push(PathBuf::from("package.json"), package_json);
 
     Ok(files)
@@ -82,7 +83,7 @@ fn inject_load_function(
     file: &mut SourceFile,
 ) -> Result<(), Error> {
     if matches!(module.abi, crate::Abi::Wasi) {
-        anyhow::bail!("");
+        anyhow::bail!("Unable to generate JavaScript bindings to a WASI module (see https://github.com/wasmerio/wit-pack/issues/5)");
     }
 
     let module_name = &module.name;
@@ -169,7 +170,7 @@ mod tests {
         .iter()
         .map(Path::new)
         .collect();
-        let metadata = Metadata::new("wit-pack", "1.2.3");
+        let metadata = Metadata::new("wasmer/wit-pack".parse().unwrap(), "1.2.3");
         let module = Module {
             name: "wit_pack_wasm.wasm".to_string(),
             abi: crate::Abi::None,

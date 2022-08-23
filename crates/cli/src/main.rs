@@ -41,7 +41,7 @@ impl Codegen {
             module,
         } = self;
 
-        let manifest = Manifest::find_in_directory(&path)?;
+        let manifest = Manifest::find_in_directory(&path).context("Unable to find wapm.toml")?;
         let module = get_desired_module(&manifest, module.as_deref())?;
 
         let bindings_field = module
@@ -49,8 +49,8 @@ impl Codegen {
             .as_ref()
             .context("The module doesn't declare any bindings")?;
 
-        let metadata = derive_metadata(&manifest);
-        let interface = load_interface(bindings_field)?;
+        let metadata = derive_metadata(&manifest)?;
+        let interface = load_interface(bindings_field, &manifest.base_directory_path)?;
         let module = load_module(module, &manifest.base_directory_path)?;
 
         let files = match language {
@@ -60,19 +60,21 @@ impl Codegen {
 
         let out_dir = out_dir
             .as_deref()
-            .unwrap_or_else(|| Path::new(&metadata.package_name));
+            .unwrap_or_else(|| Path::new(metadata.package_name.name()));
         files.save_to_disk(out_dir)?;
 
         Ok(())
     }
 }
 
-fn load_interface(bindings: &wapm_toml::Bindings) -> Result<wit_pack::Interface, Error> {
+fn load_interface(
+    bindings: &wapm_toml::Bindings,
+    base_dir: &Path,
+) -> Result<wit_pack::Interface, Error> {
     let wapm_toml::Bindings { wit, wit_bindgen } = bindings;
-
     ensure_compatible(wit_bindgen)?;
 
-    wit_pack::Interface::from_path(wit)
+    wit_pack::Interface::from_path(base_dir.join(wit))
 }
 
 fn load_module(module: &Module, base_dir: &Path) -> Result<wit_pack::Module, Error> {
@@ -96,9 +98,14 @@ fn load_module(module: &Module, base_dir: &Path) -> Result<wit_pack::Module, Err
     })
 }
 
-fn derive_metadata(manifest: &Manifest) -> wit_pack::Metadata {
+fn derive_metadata(manifest: &Manifest) -> Result<wit_pack::Metadata, Error> {
     let pkg = &manifest.package;
-    wit_pack::Metadata::new(&pkg.name, pkg.version.to_string()).with_description(&pkg.description)
+    let name = pkg
+        .name
+        .parse()
+        .context("Unable to parse the package name")?;
+
+    Ok(wit_pack::Metadata::new(name, pkg.version.to_string()).with_description(&pkg.description))
 }
 
 fn ensure_compatible(wit_bindgen: &Version) -> Result<(), Error> {
