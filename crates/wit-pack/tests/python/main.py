@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from typing import Union
-from python.wit_pack import (
+from wit_pack import (
     load,
     Bindings,
     Exports,
@@ -16,7 +16,8 @@ from python.wit_pack import (
     WitPack,
 )
 
-project_root = Path(__file__).parents[3]
+
+project_root = Path(__file__).parents[4]
 
 
 def unwrap(value: Union[Ok[T], Err[Error]]) -> T:
@@ -51,15 +52,22 @@ def main():
     files = unwrap(wit_pack.generate_python(bindings))
 
     expected = {
-        "wit_pack/wit_pack_wasm.wasm",
+        "MANIFEST.in",
+        "pyproject.toml",
         "wit_pack/__init__.py",
-        "setup.py",
         "wit_pack/bindings.py",
+        "wit_pack/wit_pack_wasm.wasm",
     }
     filenames = {f.filename for f in files}
-    print(expected, filenames)
+    print("Expected", expected)
+    print("Actual", filenames)
 
     assert filenames == expected
+
+    # Note: wit-bindgen's glue code forces us to manually free things
+    bindings.exports.drop()
+    bindings.metadata.drop()
+    bindings.module.drop()
 
 
 if __name__ == "__main__":

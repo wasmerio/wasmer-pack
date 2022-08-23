@@ -46,6 +46,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+      - name: Install pipenv
+        run: pip install --user pipenv
       - run: yarn --version
       - name: Type Checking
         uses: actions-rs/cargo@v1

@@ -31,7 +31,6 @@ fn use_javascript_bindings() {
 }
 
 #[test]
-#[ignore = "We need to set up a proper python environment for this"]
 fn use_python_bindings() {
     let Fixtures { exports, wasm } = Fixtures::load();
 
@@ -39,19 +38,18 @@ fn use_python_bindings() {
     let module = Module::from_path(&wasm, Abi::None).unwrap();
     let interface = Interface::from_path(&exports).unwrap();
 
-    let out_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests")
-        .join("python");
+    let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("python");
     let _ = std::fs::remove_dir_all(&out_dir);
 
     let py = wit_pack::generate_python(&metadata, &module, &interface).unwrap();
     py.save_to_disk(&out_dir).unwrap();
 
-    let main_py = Path::new(env!("CARGO_MANIFEST_DIR"))
+    let python_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
-        .join("main.py");
+        .join("python");
 
-    execute(&main_py, &out_dir);
+    execute("pipenv install", &python_dir);
+    execute("pipenv run ./main.py", &python_dir);
 }
 
 #[derive(Debug)]

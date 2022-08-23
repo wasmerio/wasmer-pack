@@ -611,6 +611,7 @@ dependencies = [
  "insta",
  "serde",
  "serde_json",
+ "toml",
  "wit-bindgen-gen-core",
  "wit-bindgen-gen-js",
  "wit-bindgen-gen-wasmer-py",

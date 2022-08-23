@@ -30,14 +30,50 @@ pub fn generate_python(
     let dunder_init: SourceFile = dunder_init_file(metadata, &module.name, interface_name);
     files.push(Path::new(&package_name).join("__init__.py"), dunder_init);
 
-    let setup_py = generate_setup_py(metadata, &package_name);
-    files.push(Path::new("setup.py"), setup_py);
+    let pyproject = generate_pyproject_toml(metadata, &package_name);
+    files.push(Path::new("pyproject.toml"), pyproject);
+
+    files.push(Path::new("MANIFEST.in"), "include **/*.wasm".into());
 
     Ok(files)
 }
 
-fn generate_setup_py(metadata: &Metadata, package_name: &str) -> SourceFile {
-    "".into()
+fn generate_pyproject_toml(metadata: &Metadata, package_name: &str) -> SourceFile {
+    let Metadata {
+        version,
+        description,
+        ..
+    } = metadata;
+
+    let project = PyProject {
+        project: Project {
+            name: package_name,
+            version,
+            description: description.as_deref(),
+            readme: None,
+            keywords: Vec::new(),
+            dependencies: vec!["wasmer", "wasmer_compiler_cranelift"],
+        },
+    };
+
+    let serialized = toml::to_vec(&project).expect("Serialization should always succeed");
+
+    serialized.into()
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+struct PyProject<'a> {
+    project: Project<'a>,
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+struct Project<'a> {
+    name: &'a str,
+    version: &'a str,
+    description: Option<&'a str>,
+    readme: Option<&'a Path>,
+    keywords: Vec<&'a str>,
+    dependencies: Vec<&'a str>,
 }
 
 fn python_package_name(raw_package_name: &str) -> String {
@@ -109,9 +145,10 @@ mod tests {
     #[test]
     fn generated_files() {
         let expected: HashSet<&Path> = [
-            "setup.py",
-            "wit_pack/bindings.py",
+            "MANIFEST.in",
+            "pyproject.toml",
             "wit_pack/__init__.py",
+            "wit_pack/bindings.py",
             "wit_pack/wit_pack_wasm.wasm",
         ]
         .iter()
