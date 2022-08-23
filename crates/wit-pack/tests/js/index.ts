@@ -18,7 +18,7 @@ async function main() {
     const exports = unwrap(Exports.fromWit(witPack, path.basename(wit), witFile));
 
     // Now we can generate the JavaScript bindings
-    const result = witPack.generateJavascript({exports, module, metadata});
+    const result = witPack.generateJavascript(metadata, exports, module);
     const files: File[] = unwrap(result);
 
     // We should have been given a list of the generated files

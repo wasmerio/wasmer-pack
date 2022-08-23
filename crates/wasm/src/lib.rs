@@ -12,24 +12,20 @@ pub struct WitPack;
 
 impl crate::wit_pack::WitPack for WitPack {
     fn generate_javascript(
-        bindings: wit_pack::Bindings,
+        metadata: Handle<Metadata>,
+        exports: Handle<Exports>,
+        module: Handle<Module>,
     ) -> Result<Vec<wit_pack::File>, wit_pack::Error> {
-        let js = upstream::generate_javascript(
-            &bindings.metadata.0.borrow(),
-            &bindings.module.0,
-            &bindings.exports.0,
-        )?;
+        let js = upstream::generate_javascript(&metadata.0.borrow(), &module.0, &exports.0)?;
         Ok(unwrap_files(js))
     }
 
     fn generate_python(
-        bindings: wit_pack::Bindings,
+        metadata: Handle<Metadata>,
+        exports: Handle<Exports>,
+        module: Handle<Module>,
     ) -> Result<Vec<wit_pack::File>, wit_pack::Error> {
-        let py = upstream::generate_python(
-            &bindings.metadata.0.borrow(),
-            &bindings.module.0,
-            &bindings.exports.0,
-        )?;
+        let py = upstream::generate_python(&metadata.0.borrow(), &module.0, &exports.0)?;
         Ok(unwrap_files(py))
     }
 }

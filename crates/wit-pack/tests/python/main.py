@@ -1,10 +1,9 @@
 #!/bin/env python3
 
 from pathlib import Path
-from typing import Union
+from typing import Tuple, Union
 from wit_pack import (
     load,
-    Bindings,
     Exports,
     Module,
     Metadata,
@@ -27,7 +26,7 @@ def unwrap(value: Union[Ok[T], Err[Error]]) -> T:
         return value.value
 
 
-def load_bindings(wit_pack: WitPack) -> Bindings:
+def load_bindings(wit_pack: WitPack) -> Tuple[Metadata, Exports, Module]:
     metadata = Metadata.new(wit_pack, "wit_pack", "1.2.3")
 
     exports_wit = project_root.joinpath("crates", "wasm", "wit-pack.exports.wit")
@@ -42,14 +41,14 @@ def load_bindings(wit_pack: WitPack) -> Bindings:
         wit_pack, wit_pack_wasm.name, Abi.NONE, wit_pack_wasm.read_bytes()
     )
 
-    return Bindings(metadata, exports, module)
+    return (metadata, exports, module)
 
 
 def main():
     wit_pack = load()
-    bindings = load_bindings(wit_pack)
+    (metadata, exports, module) = load_bindings(wit_pack)
 
-    files = unwrap(wit_pack.generate_python(bindings))
+    files = unwrap(wit_pack.generate_python(metadata, exports, module))
 
     expected = {
         "MANIFEST.in",
@@ -65,9 +64,9 @@ def main():
     assert filenames == expected
 
     # Note: wit-bindgen's glue code forces us to manually free things
-    bindings.exports.drop()
-    bindings.metadata.drop()
-    bindings.module.drop()
+    exports.drop()
+    metadata.drop()
+    module.drop()
 
 
 if __name__ == "__main__":

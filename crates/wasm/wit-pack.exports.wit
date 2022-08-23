@@ -17,13 +17,6 @@ enum abi {
     wasi,
 }
 
-/// Information used to generate bindings.
-record bindings {
-    metadata: metadata,
-    exports: exports,
-    module: module,
-}
-
 /// An error that may occur.
 record error {
     /// The error message.
@@ -40,5 +33,13 @@ record file {
     contents: list<u8>,
 }
 
-generate-javascript: func(bindings: bindings) -> expected<list<file>, error>
-generate-python: func(bindings: bindings) -> expected<list<file>, error>
+generate-javascript: func(
+    metadata: metadata,
+    exports: exports,
+    module: module,
+) -> expected<list<file>, error>
+generate-python: func(
+    metadata: metadata,
+    exports: exports,
+    module: module,
+) -> expected<list<file>, error>
