@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{path::Path, str::FromStr};
 
 use anyhow::{Context, Error};
 
@@ -39,6 +39,18 @@ impl Module {
 pub enum Abi {
     None,
     Wasi,
+}
+
+impl FromStr for Abi {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Abi, Error> {
+        match s {
+            "none" => Ok(Abi::None),
+            "wasi" => Ok(Abi::Wasi),
+            _ => Err(Error::msg("Expected either \"none\" or \"wasi\"")),
+        }
+    }
 }
 
 fn sanitized_module_name(path: &Path) -> Result<&str, Error> {

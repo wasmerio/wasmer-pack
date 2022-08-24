@@ -26,12 +26,12 @@ pub fn generate_python(
         SourceFile::from(&module.wasm),
     );
 
-    generate_bindings(&interface.0, &package_name, &mut files);
+    generate_bindings(&interface.0, package_name, &mut files);
 
     let dunder_init: SourceFile = dunder_init_file(metadata, &module.name, interface_name);
     files.push(Path::new(&package_name).join("__init__.py"), dunder_init);
 
-    let pyproject = generate_pyproject_toml(metadata, &package_name);
+    let pyproject = generate_pyproject_toml(metadata, package_name);
     files.push(Path::new("pyproject.toml"), pyproject);
 
     files.push(Path::new("MANIFEST.in"), "include **/*.wasm".into());
@@ -137,7 +137,7 @@ fn generate_bindings(interface: &wit_parser::Interface, package_name: &str, file
     WasmerPy::default().generate_all(imports, exports, &mut generated);
 
     for (path, file) in generated.iter() {
-        let path = Path::new(package_name).join(path.replace("-", "_"));
+        let path = Path::new(package_name).join(path.replace('-', "_"));
         files.push(path, SourceFile::from(file));
     }
 }

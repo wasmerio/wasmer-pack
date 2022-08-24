@@ -34,7 +34,7 @@ pub fn generate_javascript(
     let typings_file = Path::new("src").join(interface_name).with_extension("d.ts");
     patch_typings_file(interface_name, files.get_mut(&typings_file).unwrap());
 
-    let package_json = generate_package_json(&package_name, interface_name);
+    let package_json = generate_package_json(package_name, interface_name);
     files.push(PathBuf::from("package.json"), package_json);
 
     Ok(files)
