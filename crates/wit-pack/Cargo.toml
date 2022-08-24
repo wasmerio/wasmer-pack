@@ -6,6 +6,7 @@ repository = "https://github.com/wasmerio/wit-pack"
 edition = "2021"
 license = "MIT"
 rust-version = "1.59.0"
+description = "A code generator that lets you treat WebAssembly modules like native dependencies."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
