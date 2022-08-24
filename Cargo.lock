@@ -490,7 +490,7 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 [[package]]
 name = "wapm-toml"
 version = "0.1.0"
-source = "git+https://github.com/Michael-F-Bryan/wapm-cli?branch=feature/bindings-field#52a8029c072ba63a45af0f33c84cc18e947351cb"
+source = "git+https://github.com/wasmerio/wapm-cli#bf9c9ee8205093146f7b7d9b374ab614edc37291"
 dependencies = [
  "anyhow",
  "semver",
@@ -537,10 +537,19 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 [[package]]
 name = "wit-bindgen-gen-core"
 version = "0.1.0"
-source = "git+https://github.com/Michael-F-Bryan/wit-bindgen?branch=wasmer-temp#398c270b3ce735ded3f52cf87b3457f54cdd0ce8"
+source = "git+https://github.com/wasmerio/wit-bindgen?branch=wasmer#c04723063c7a5a7389660ca97f85ffd9bc9ef0b8"
 dependencies = [
  "anyhow",
- "wit-parser",
+ "wit-parser 0.1.0 (git+https://github.com/wasmerio/wit-bindgen?branch=wasmer)",
+]
+
+[[package]]
+name = "wit-bindgen-gen-core"
+version = "0.1.0"
+source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7cf26184aad7a85b"
+dependencies = [
+ "anyhow",
+ "wit-parser 0.1.0 (git+https://github.com/wasmerio/wit-bindgen)",
 ]
 
 [[package]]
@@ -549,7 +558,7 @@ version = "0.1.0"
 source = "git+https://github.com/wasmerio/wit-bindgen?branch=wasmer#1750cd082c19ccc78b610fff7cf26184aad7a85b"
 dependencies = [
  "heck 0.3.3",
- "wit-bindgen-gen-core",
+ "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen?branch=wasmer)",
 ]
 
 [[package]]
@@ -558,7 +567,7 @@ version = "0.1.0"
 source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7cf26184aad7a85b"
 dependencies = [
  "heck 0.3.3",
- "wit-bindgen-gen-core",
+ "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen)",
 ]
 
 [[package]]
@@ -567,17 +576,17 @@ version = "0.1.0"
 source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7cf26184aad7a85b"
 dependencies = [
  "heck 0.3.3",
- "wit-bindgen-gen-core",
+ "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen)",
  "wit-bindgen-gen-rust",
 ]
 
 [[package]]
 name = "wit-bindgen-gen-wasmer-py"
 version = "0.1.0"
-source = "git+https://github.com/Michael-F-Bryan/wit-bindgen?branch=wasmer-temp#398c270b3ce735ded3f52cf87b3457f54cdd0ce8"
+source = "git+https://github.com/wasmerio/wit-bindgen?branch=wasmer#c04723063c7a5a7389660ca97f85ffd9bc9ef0b8"
 dependencies = [
  "heck 0.3.3",
- "wit-bindgen-gen-core",
+ "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen?branch=wasmer)",
 ]
 
 [[package]]
@@ -597,7 +606,7 @@ source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7c
 dependencies = [
  "proc-macro2",
  "syn",
- "wit-bindgen-gen-core",
+ "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen)",
  "wit-bindgen-gen-rust-wasm",
 ]
 
@@ -612,10 +621,10 @@ dependencies = [
  "serde",
  "serde_json",
  "toml",
- "wit-bindgen-gen-core",
+ "wit-bindgen-gen-core 0.1.0 (git+https://github.com/wasmerio/wit-bindgen?branch=wasmer)",
  "wit-bindgen-gen-js",
  "wit-bindgen-gen-wasmer-py",
- "wit-parser",
+ "wit-parser 0.1.0 (git+https://github.com/wasmerio/wit-bindgen?branch=wasmer)",
 ]
 
 [[package]]
@@ -641,7 +650,19 @@ dependencies = [
 [[package]]
 name = "wit-parser"
 version = "0.1.0"
-source = "git+https://github.com/Michael-F-Bryan/wit-bindgen?branch=wasmer-temp#398c270b3ce735ded3f52cf87b3457f54cdd0ce8"
+source = "git+https://github.com/wasmerio/wit-bindgen?branch=wasmer#c04723063c7a5a7389660ca97f85ffd9bc9ef0b8"
+dependencies = [
+ "anyhow",
+ "id-arena",
+ "pulldown-cmark",
+ "unicode-normalization",
+ "unicode-xid",
+]
+
+[[package]]
+name = "wit-parser"
+version = "0.1.0"
+source = "git+https://github.com/wasmerio/wit-bindgen#1750cd082c19ccc78b610fff7cf26184aad7a85b"
 dependencies = [
  "anyhow",
  "id-arena",

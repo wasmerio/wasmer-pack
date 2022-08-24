@@ -72,10 +72,13 @@ fn load_interface(
     bindings: &wapm_toml::Bindings,
     base_dir: &Path,
 ) -> Result<wit_pack::Interface, Error> {
-    let wapm_toml::Bindings { wit, wit_bindgen } = bindings;
+    let wapm_toml::Bindings {
+        wit_exports,
+        wit_bindgen,
+    } = bindings;
     ensure_compatible(wit_bindgen)?;
 
-    wit_pack::Interface::from_path(base_dir.join(wit))
+    wit_pack::Interface::from_path(base_dir.join(wit_exports))
 }
 
 fn load_module(module: &Module, base_dir: &Path) -> Result<wit_pack::Module, Error> {
