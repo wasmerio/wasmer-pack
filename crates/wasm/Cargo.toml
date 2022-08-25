@@ -1,6 +1,6 @@
 [package]
 name = "wit-pack-wasm"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "The WebAssembly interface to wit-pack."
 publish = false
