@@ -28,7 +28,8 @@ pub fn generate_python(
 
     generate_bindings(&interface.0, package_name, &mut files);
 
-    let dunder_init: SourceFile = dunder_init_file(metadata, &module.name, interface_name);
+    let dunder_init: SourceFile =
+        dunder_init_file(metadata, module.abi, &module.name, interface_name);
     files.push(Path::new(&package_name).join("__init__.py"), dunder_init);
 
     let pyproject = generate_pyproject_toml(metadata, package_name);
@@ -90,7 +91,12 @@ struct Project<'a> {
     dependencies: Vec<&'a str>,
 }
 
-fn dunder_init_file(metadata: &Metadata, module_name: &str, interface_name: &str) -> SourceFile {
+fn dunder_init_file(
+    metadata: &Metadata,
+    abi: crate::Abi,
+    module_name: &str,
+    interface_name: &str,
+) -> SourceFile {
     let Metadata {
         version,
         description,
@@ -102,6 +108,20 @@ fn dunder_init_file(metadata: &Metadata, module_name: &str, interface_name: &str
         .clone()
         .unwrap_or_else(|| format!("Bindings to {package_name}."));
 
+    let imports = if abi == crate::Abi::Wasi {
+        format!(
+            r#"
+    from wasmer import wasi
+    env = wasi.StateBuilder("").finalize()
+    imports = env.generate_imports(store, wasi.Version.LATEST)
+"#
+        )
+    } else {
+        r#"
+    imports = {}
+"#
+        .to_owned()
+    };
     let src = format!(
         r#"
 '''
@@ -121,7 +141,7 @@ module = _wasmer.Module(store, wasm)
 
 
 def load() -> {class_name}:
-    imports = {{}}
+{imports}
     return {class_name}(store, imports, module)
 "#
     );

@@ -31,6 +31,30 @@ fn use_javascript_bindings() {
 }
 
 #[test]
+fn use_wasi_javascript_bindings() {
+    let Fixtures { exports, wasm } = Fixtures::load_wasi();
+
+    let metadata = Metadata::new("wabt", env!("CARGO_PKG_VERSION"));
+    let module = Module::from_path(&wasm, Abi::Wasi).unwrap();
+    let interface = Interface::from_path(&exports).unwrap();
+
+    let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("javascript-wasi");
+    let _ = std::fs::remove_dir_all(&out_dir);
+
+    let js = wit_pack::generate_javascript(&metadata, &module, &interface).unwrap();
+    js.save_to_disk(&out_dir).unwrap();
+
+    let js_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("js-wasi");
+
+    let _ = std::fs::remove_dir_all(js_dir.join("node_modules"));
+
+    execute("yarn", &js_dir);
+    execute("yarn start", &js_dir);
+}
+
+#[test]
 fn use_python_bindings() {
     let Fixtures { exports, wasm } = Fixtures::load();
 
@@ -47,6 +71,28 @@ fn use_python_bindings() {
     let python_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("python");
+
+    execute("pipenv install", &python_dir);
+    execute("pipenv run python3 main.py", &python_dir);
+}
+
+#[test]
+fn use_wasi_python_bindings() {
+    let Fixtures { exports, wasm } = Fixtures::load_wasi();
+
+    let metadata = Metadata::new("wabt", env!("CARGO_PKG_VERSION"));
+    let module = Module::from_path(&wasm, Abi::Wasi).unwrap();
+    let interface = Interface::from_path(&exports).unwrap();
+
+    let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("python-wasi");
+    let _ = std::fs::remove_dir_all(&out_dir);
+
+    let py = wit_pack::generate_python(&metadata, &module, &interface).unwrap();
+    py.save_to_disk(&out_dir).unwrap();
+
+    let python_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("python-wasi");
 
     execute("pipenv install", &python_dir);
     execute("pipenv run python3 main.py", &python_dir);
@@ -78,6 +124,50 @@ impl Fixtures {
             .join("wasm32-unknown-unknown")
             .join("debug")
             .join("wit_pack_wasm.wasm");
+
+        Fixtures { exports, wasm }
+    }
+
+    // fn load_wasi() -> Self {
+    //     let project_root = project_root();
+
+    //     let exports = project_root
+    //         .join("crates")
+    //         .join("wasm")
+    //         .join("wit-pack.exports.wit");
+    //     assert!(exports.exists());
+
+    //     execute(
+    //         "RUSTFLAGS=\"-Z wasi-exec-model=reactor\" cargo +nightly build --target=wasm32-wasi --package=wit-pack-wasm",
+    //         &project_root,
+    //     );
+
+    //     let wasm = project_root
+    //         .join("target")
+    //         .join("wasm32-wasi")
+    //         .join("debug")
+    //         .join("wit_pack_wasm.wasm");
+
+    //     Fixtures { exports, wasm }
+    // }
+
+    fn load_wasi() -> Self {
+        let project_root = project_root();
+
+        let exports = project_root
+            .join("crates")
+            .join("wit-pack")
+            .join("tests")
+            .join("wabt")
+            .join("wabt.exports.wit");
+        assert!(exports.exists());
+
+        let wasm = project_root
+            .join("crates")
+            .join("wit-pack")
+            .join("tests")
+            .join("wabt")
+            .join("libwabt.wasm");
 
         Fixtures { exports, wasm }
     }

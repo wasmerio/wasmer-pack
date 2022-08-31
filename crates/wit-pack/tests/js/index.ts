@@ -1,4 +1,4 @@
-import load, { WitPack, Exports, Metadata, Module, Result, Error as WitPackError, File } from "wit-pack";
+import load, { WitPack, Exports, Metadata, Module, Result, Error as WitPackError, File } from "@wasmer/wit-pack";
 import fs from "fs/promises";
 import path from "path";
 

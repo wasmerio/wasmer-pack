@@ -1,12 +1,12 @@
 {
-    "name": "integration-tests",
+    "name": "integration-tests-wasi",
     "private": true,
     "type": "module",
     "scripts": {
         "start": "node --loader ts-node/esm --unhandled-rejections=strict index.ts"
     },
     "dependencies": {
-        "@wasmer/wit-pack": "file:../../../../target/tmp/javascript"
+        "wabt": "file:../../../../target/tmp/javascript-wasi"
     },
     "devDependencies": {
         "@types/node": "^18.7.6",
