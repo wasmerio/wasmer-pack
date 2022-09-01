@@ -72,8 +72,8 @@ fn use_python_bindings() {
         .join("tests")
         .join("python");
 
-    execute("pipenv install", &python_dir);
-    execute("pipenv run python3 main.py", &python_dir);
+    execute("pip install -r requirements.txt", &python_dir);
+    execute("python3 main.py", &python_dir);
 }
 
 #[test]
@@ -94,8 +94,8 @@ fn use_wasi_python_bindings() {
         .join("tests")
         .join("python-wasi");
 
-    execute("pipenv install", &python_dir);
-    execute("pipenv run python3 main.py", &python_dir);
+    execute("pip install -r requirements.txt", &python_dir);
+    execute("python3 main.py", &python_dir);
 }
 
 #[derive(Debug)]

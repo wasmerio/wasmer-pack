@@ -48,12 +48,19 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.9"
-          # cache: "pipenv"
+          cache: "pip"
           # cache-dependency-path: |
           #   crates/wit-pack/tests/python/Pipfile.lock
-          #   crates/wit-pack/tests/python-wasi/Pipfile.lock
-      - name: Install Pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python3
+      
+      # We disabled Pipenv because installation on CI was failing when
+      # testing multiple Pipenv files
+      # - name: Install Pipenv
+      #   run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python3
+
+      # We also tried with Poetry, unsuccessfully...
+      # - name: Install Poetry
+      #   run: curl -sSL https://install.python-poetry.org | python3 -
+
       - run: yarn --version
       - name: Type Checking
         uses: actions-rs/cargo@v1
