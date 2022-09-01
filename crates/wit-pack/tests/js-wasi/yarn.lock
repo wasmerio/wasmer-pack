@@ -52,10 +52,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.14.tgz#0fe081752a3333392d00586d815485a17c2cf3c9"
   integrity sha512-6bbDaETVi8oyIARulOE9qF1/Qdi/23z6emrUh0fNJRUmjznqrixD4MpGDdgOFk5Xb0m2H6Xu42JGdvAxaJR/wA==
 
-"@wasmer/wasi@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@wasmer/wasi/-/wasi-1.1.1.tgz#0c99dd9f27991a785f55f216048e679e0492b2ba"
-  integrity sha512-RASwlTETKAG4ZfwneMTPGF6ostGQoesNTaLikPlDSpZ7mYY00mKZDvHwKwUS1EtherpOw7BTr8HDZu52xazlwg==
+"@wasmer/wasi@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@wasmer/wasi/-/wasi-1.1.2.tgz#c99faf45bfc7ff464dfd4bec661320c4073c268b"
+  integrity sha512-c1h7L2qPviV6n+ny2fYboFPFL4RbvCqYckDPfpWMUOqX+QIt83EnMnYfeWNwWbUAIku087qj3cBJzcqY+HbHxw==
 
 acorn-walk@^8.1.1:
   version "8.2.0"
@@ -119,7 +119,7 @@ v8-compile-cache-lib@^3.0.1:
 "wabt@file:../../../../target/tmp/javascript-wasi":
   version "0.1.4"
   dependencies:
-    "@wasmer/wasi" "^1.1.1"
+    "@wasmer/wasi" "^1.1.2"
 
 yn@3.1.1:
   version "3.1.1"

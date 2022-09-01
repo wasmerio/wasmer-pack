@@ -68,7 +68,7 @@ fn generate_package_json(
             "types": format!("src/{interface_name}.d.ts"),
             "type": "module",
             "dependencies": {
-                "@wasmer/wasi": "^1.1.1",
+                "@wasmer/wasi": "^1.1.2",
             },
         })
     } else {
@@ -217,7 +217,7 @@ export default async function() {{
         writeln!(
             &mut file.0,
             r#"
-    wasi.setInstance(wrapper.instance);
+    wasi.instantiate(wrapper.instance);
     "#
         )
         .unwrap();
