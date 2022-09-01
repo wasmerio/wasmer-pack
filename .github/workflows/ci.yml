@@ -49,7 +49,9 @@ jobs:
         with:
           python-version: "3.9"
           cache: "pipenv"
-          cache-dependency-path: crates/wit-pack/tests/python/Pipfile.lock
+          cache-dependency-path: |
+            crates/wit-pack/tests/python/Pipfile.lock
+            crates/wit-pack/tests/python-wasi/Pipfile.lock
       - name: Install Pipenv
         run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python3
       - run: yarn --version
