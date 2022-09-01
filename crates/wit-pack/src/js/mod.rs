@@ -18,6 +18,7 @@ pub fn generate_javascript(
     let interface_name = &interface.0.name;
     let package_name =
         sanitize_javascript_package_name(&metadata.package_name).context("Invalid package name")?;
+    let package_version = &metadata.version;
 
     let mut files = Files::new();
 
@@ -34,7 +35,8 @@ pub fn generate_javascript(
     let typings_file = Path::new("src").join(interface_name).with_extension("d.ts");
     patch_typings_file(interface_name, files.get_mut(&typings_file).unwrap());
 
-    let package_json = generate_package_json(package_name, interface_name);
+    let package_json =
+        generate_package_json(module.abi, package_name, package_version, interface_name);
     files.push(PathBuf::from("package.json"), package_json);
 
     Ok(files)
@@ -52,14 +54,32 @@ fn patch_typings_file(interface_name: &str, typings_file: &mut SourceFile) {
     .unwrap();
 }
 
-fn generate_package_json(package_name: &str, interface_name: &str) -> SourceFile {
-    let package_json = serde_json::json!({
-        "name": package_name,
-        "version": "0.0.0",
-        "main": format!("src/{interface_name}.js"),
-        "types": format!("src/{interface_name}.d.ts"),
-        "type": "module",
-    });
+fn generate_package_json(
+    abi: crate::Abi,
+    package_name: &str,
+    package_version: &str,
+    interface_name: &str,
+) -> SourceFile {
+    let package_json = if abi == crate::Abi::Wasi {
+        serde_json::json!({
+            "name": package_name,
+            "version": package_version,
+            "main": format!("src/{interface_name}.js"),
+            "types": format!("src/{interface_name}.d.ts"),
+            "type": "module",
+            "dependencies": {
+                "@wasmer/wasi": "^1.1.2",
+            },
+        })
+    } else {
+        serde_json::json!({
+            "name": package_name,
+            "version": package_version,
+            "main": format!("src/{interface_name}.js"),
+            "types": format!("src/{interface_name}.d.ts"),
+            "type": "module",
+        })
+    };
 
     format!("{package_json:#}").into()
 }
@@ -114,10 +134,6 @@ fn inject_load_function(
     interface_name: &str,
     file: &mut SourceFile,
 ) -> Result<(), Error> {
-    if matches!(module.abi, crate::Abi::Wasi) {
-        anyhow::bail!("Unable to generate JavaScript bindings to a WASI module (see https://github.com/wasmerio/wit-pack/issues/5)");
-    }
-
     let module_name = &module.name;
     let class_name = interface_name.to_pascal_case();
 
@@ -127,15 +143,89 @@ fn inject_load_function(
 import fs from "fs/promises";
 import path from "path";
 import * as url from "url";
+"#
+    )
+    .unwrap();
 
+    if matches!(module.abi, crate::Abi::Wasi) {
+        writeln!(
+            &mut file.0,
+            r#"
+import {{init as initWasi, WASI }} from "@wasmer/wasi";
+"#
+        )
+        .unwrap();
+    }
+
+    writeln!(
+        &mut file.0,
+        r#"
 export default async function() {{
     const wrapper = new {class_name}();
 
     const scriptDir = url.fileURLToPath(new URL('.', import.meta.url));
     const wasm = await fs.readFile(path.join(scriptDir, "{module_name}.wasm"));
+"#
+    )
+    .unwrap();
 
+    writeln!(
+        &mut file.0,
+        r#"
+    let moduleToAwait;
+    if (WebAssembly.compileStreaming) {{
+      moduleToAwait = WebAssembly.compileStreaming(wasm);
+    }}
+    else {{
+      moduleToAwait = WebAssembly.compile(wasm);
+    }}
+"#
+    )
+    .unwrap();
+
+    if matches!(module.abi, crate::Abi::Wasi) {
+        writeln!(
+            &mut file.0,
+            r#"
+    const toAwait = await Promise.all([initWasi(), moduleToAwait]);
+    const module = toAwait[1];
+    let wasi = new WASI({{}});
+    const imports = wasi.getImports(module);
+"#
+        )
+        .unwrap();
+    } else {
+        writeln!(
+            &mut file.0,
+            r#"
+    const module = await moduleToAwait;
     const imports = {{}};
-    await wrapper.instantiate(wasm, imports);
+"#
+        )
+        .unwrap();
+    }
+
+    writeln!(
+        &mut file.0,
+        r#"
+    await wrapper.instantiate(module, imports);
+"#
+    )
+    .unwrap();
+
+    if matches!(module.abi, crate::Abi::Wasi) {
+        writeln!(
+            &mut file.0,
+            r#"
+    wasi.instantiate(wrapper.instance);
+    "#
+        )
+        .unwrap();
+    }
+
+    writeln!(
+        &mut file.0,
+        r#"
     return wrapper;
 }}
 "#
@@ -185,7 +275,16 @@ mod tests {
     fn package_json() {
         let package_name = "@wasmerio/wit-pack";
 
-        let got = generate_package_json(package_name, "wit-pack");
+        let got = generate_package_json(crate::Abi::None, package_name, "0.0.0", "wit-pack");
+
+        insta::assert_display_snapshot!(got.utf8_contents().unwrap());
+    }
+
+    #[test]
+    fn package_json_wasi() {
+        let package_name = "@wasmerio/wabt";
+
+        let got = generate_package_json(crate::Abi::Wasi, package_name, "0.0.0", "wabt");
 
         insta::assert_display_snapshot!(got.utf8_contents().unwrap());
     }

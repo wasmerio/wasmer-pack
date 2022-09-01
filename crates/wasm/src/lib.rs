@@ -99,3 +99,9 @@ impl From<Error> for crate::wit_pack::Error {
         }
     }
 }
+
+// #[cfg(target = "wasm32-wasi")]
+// fn main() {
+//     // We only add this function to test wasm32 wasi
+//     println!("Hello, world!");
+// }

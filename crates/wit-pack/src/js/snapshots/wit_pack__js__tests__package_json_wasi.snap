@@ -1,0 +1,15 @@
+---
+source: crates/wit-pack/src/js/mod.rs
+assertion_line: 265
+expression: got.utf8_contents().unwrap()
+---
+{
+  "dependencies": {
+    "@wasmer/wasi": "^1.1.2"
+  },
+  "main": "src/wabt.js",
+  "name": "@wasmerio/wabt",
+  "type": "module",
+  "types": "src/wabt.d.ts",
+  "version": "0.0.0"
+}
