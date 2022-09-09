@@ -63,9 +63,7 @@ fn load_pirita_file(path: &Path) -> Result<(Metadata, Module, Interface), Error>
 
     let webc = WebCMmap::parse(path.to_path_buf(), &options)
         .with_context(|| format!("Unable to load \"{}\" as a WEBC file", path.display()))?;
-    let Manifest {
-        package, bindings, ..
-    } = webc.get_metadata();
+    let Manifest { bindings, .. } = webc.get_metadata();
 
     let bindings = match bindings.as_slice() {
         [b] => b
@@ -78,15 +76,50 @@ fn load_pirita_file(path: &Path) -> Result<(Metadata, Module, Interface), Error>
 
     let package = webc.get_package_name();
 
-    dbg!(webc.get_volumes_for_package(&package));
-
+    let exports = bindings.exports.trim_start_matches("metadata://");
     let exports = webc
-        .get_file(&package, &bindings.exports)
+        .get_volume(&package, "metadata")
+        .context("The container doesn't have a \"metadata\" volume")?
+        .get_file(exports)
         .with_context(|| format!("Unable to find the \"{}\" volume", bindings.exports))?;
+    let exports = std::str::from_utf8(exports).context("The WIT file should be a UTF-8 string")?;
+    let interface =
+        Interface::from_wit(&bindings.exports, exports).context("Unable to parse the WIT file")?;
 
+    let exports = bindings.module.trim_start_matches("atoms://");
     let module = webc
-        .get_atom("Michael-F-Bryan/wit-pack@0.1.4", &bindings.module)
+        .get_atom(&package, exports)
         .with_context(|| format!("Unable to get the \"{}\" atom", bindings.module))?;
+    let module = Module {
+        name: Path::new(exports)
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .context("Unable to determine the module's name")?
+            .to_string(),
+        abi: wasm_abi(module),
+        wasm: module.to_vec(),
+    };
 
-    todo!();
+    let (unversioned_name, _) = package.split_once("@").unwrap();
+
+    Ok((
+        Metadata::new(format!("@{unversioned_name}"), "0.0.0"),
+        module,
+        interface,
+    ))
+}
+
+fn wasm_abi(module: &[u8]) -> wit_pack::Abi {
+    // TODO: use a proper method to guess the ABI
+    if bytes_contain(module, b"wasi_snapshot_preview") {
+        wit_pack::Abi::Wasi
+    } else {
+        wit_pack::Abi::None
+    }
+}
+
+fn bytes_contain(haystack: &[u8], needle: &[u8]) -> bool {
+    haystack
+        .windows(needle.len())
+        .any(|window| window == needle)
 }
