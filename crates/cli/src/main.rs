@@ -2,9 +2,8 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Error};
 use clap::Parser;
-use wit_pack::{Abi, Interface, Metadata, Module};
-
-const POSSIBLE_ABIS: &[&str] = &["wasi", "none"];
+use webc::{Manifest, ParseOptions, WebCMmap};
+use wit_pack::{Interface, Metadata, Module};
 
 fn main() -> Result<(), Error> {
     let cmd = Cmd::parse();
@@ -29,42 +28,15 @@ struct Codegen {
     /// Where to save the generated bindings.
     #[clap(short, long)]
     out_dir: Option<PathBuf>,
-    /// A `*.wit` file defining the exported interface.
-    #[clap(short, long)]
-    exports: PathBuf,
-    /// The name of the generated package.
-    #[clap(short = 'n', long = "name")]
-    package_name: String,
-    /// The generated package's version number.
-    #[clap(short = 'v', long = "version")]
-    package_version: String,
-    /// The `*.wasm` file bindings are being generated for.
-    #[clap(short, long)]
-    module: PathBuf,
-    #[clap(short, long, default_value = "none", parse(try_from_str), possible_values = POSSIBLE_ABIS)]
-    abi: Abi,
+    #[clap(parse(from_os_str))]
+    input: PathBuf,
 }
 
 impl Codegen {
     fn run(self, language: Language) -> Result<(), Error> {
-        let Codegen {
-            out_dir,
-            exports,
-            package_name,
-            package_version,
-            module,
-            abi,
-        } = self;
+        let Codegen { out_dir, input } = self;
 
-        let metadata = Metadata::new(package_name, package_version);
-        let module = Module::from_path(&module, abi)
-            .with_context(|| format!("Unable to load \"{}\"", module.display()))?;
-        let interface = Interface::from_path(&exports).with_context(|| {
-            format!(
-                "Unable to parse an interface definition from \"{}\"",
-                exports.display()
-            )
-        })?;
+        let (metadata, module, interface) = load_pirita_file(&input)?;
 
         let files = match language {
             Language::JavaScript => wit_pack::generate_javascript(&metadata, &module, &interface)?,
@@ -86,16 +58,35 @@ enum Language {
     Python,
 }
 
-#[cfg(test)]
-mod tests {
-    use std::str::FromStr;
+fn load_pirita_file(path: &Path) -> Result<(Metadata, Module, Interface), Error> {
+    let options = ParseOptions::default();
 
-    use super::*;
+    let webc = WebCMmap::parse(path.to_path_buf(), &options)
+        .with_context(|| format!("Unable to load \"{}\" as a WEBC file", path.display()))?;
+    let Manifest {
+        package, bindings, ..
+    } = webc.get_metadata();
 
-    #[test]
-    fn abi_options_are_all_usable() {
-        for abi in POSSIBLE_ABIS {
-            assert!(Abi::from_str(abi).is_ok(), "{abi}");
+    let bindings = match bindings.as_slice() {
+        [b] => b
+            .get_wit_bindings()
+            .with_context(|| format!("Expected WIT bindings, but found \"{}\"", b.kind))?,
+        [..] => {
+            anyhow::bail!("Generating bindings for multiple modules isn't supported at the moment")
         }
-    }
+    };
+
+    let package = webc.get_package_name();
+
+    dbg!(webc.get_volumes_for_package(&package));
+
+    let exports = webc
+        .get_file(&package, &bindings.exports)
+        .with_context(|| format!("Unable to find the \"{}\" volume", bindings.exports))?;
+
+    let module = webc
+        .get_atom("Michael-F-Bryan/wit-pack@0.1.4", &bindings.module)
+        .with_context(|| format!("Unable to get the \"{}\" atom", bindings.module))?;
+
+    todo!();
 }
