@@ -34,6 +34,12 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+      # Note: some of our dependencies are from private repos so we use a PAT
+      # for credentials
+      - name: Configure Private Access Token
+        run: |
+          echo https://wasmer:${{ secrets.GH_PAT }}@github.com > creds.txt
+          git config --global credential.helper "store --file creds.txt"
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -62,12 +68,6 @@ jobs:
       #   run: curl -sSL https://install.python-poetry.org | python3 -
 
       - run: yarn --version
-      # Note: some of our dependencies are from private repos so we use a deploy
-      # key and the "git" CLI to check them out.
-      - name: Setup SSH keys
-        run: |
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-add - <<< "${{ secrets.PIRITA_PRIVATE_KEY }}"
       - name: Type Checking
         uses: actions-rs/cargo@v1
         with:
@@ -101,6 +101,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+      - name: Configure Private Access Token
+        run: |
+          echo https://wasmer:${{ secrets.GH_PAT }}@github.com > creds.txt
+          git config --global credential.helper "store --file creds.txt"
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -139,6 +143,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+      - name: Configure Private Access Token
+        run: |
+          echo https://wasmer:${{ secrets.GH_PAT }}@github.com > creds.txt
+          git config --global credential.helper "store --file creds.txt"
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
