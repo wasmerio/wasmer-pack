@@ -10,7 +10,7 @@ homepage = "https://wasmer.io/"
 
 [package.metadata.wapm]
 package = "wit-pack"
-namespace = "Michael-F-Bryan"
+namespace = "wasmer"
 abi = "none"
 bindings = { wit-exports = "wit-pack.exports.wit", wit-bindgen = "0.1.0" }
 
