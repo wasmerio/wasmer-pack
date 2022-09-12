@@ -688,7 +688,7 @@ checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 [[package]]
 name = "webc"
 version = "0.1.0"
-source = "git+ssh://git@github.com/wasmerio/pirita#1a2510a6344b9c05a7b38a2f8ff1354ff3adb60f"
+source = "git+ssh://git@github.com/wasmerio/pirita.git#1a2510a6344b9c05a7b38a2f8ff1354ff3adb60f"
 dependencies = [
  "anyhow",
  "base64",

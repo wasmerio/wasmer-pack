@@ -9,6 +9,7 @@ on:
 env:
   DEFAULT_CRATE_NAME: wit_pack
   RUST_BACKTRACE: 1
+  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 
 jobs:
   check:
@@ -50,7 +51,7 @@ jobs:
           python-version: "3.9"
           # cache-dependency-path: |
           #   crates/wit-pack/tests/python/Pipfile.lock
-      
+
       # We disabled Pipenv because installation on CI was failing when
       # testing multiple Pipenv files
       # - name: Install Pipenv
@@ -61,6 +62,12 @@ jobs:
       #   run: curl -sSL https://install.python-poetry.org | python3 -
 
       - run: yarn --version
+      # Note: some of our dependencies are from private repos so we use a deploy
+      # key and the "git" CLI to check them out.
+      - name: Setup SSH keys
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.PIRITA_PRIVATE_KEY }}"
       - name: Type Checking
         uses: actions-rs/cargo@v1
         with:
@@ -100,6 +107,10 @@ jobs:
           toolchain: nightly
           override: true
           components: rustfmt, clippy
+      - name: Setup SSH keys
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.PIRITA_PRIVATE_KEY }}"
       - name: Check Formatting
         uses: actions-rs/cargo@v1
         with:
@@ -133,6 +144,10 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
+      - name: Setup SSH keys
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.PIRITA_PRIVATE_KEY }}"
       - uses: actions-rs/cargo@v1
         with:
           command: doc
