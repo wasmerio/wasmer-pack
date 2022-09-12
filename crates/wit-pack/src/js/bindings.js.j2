@@ -1,0 +1,44 @@
+import fs from "fs/promises";
+import * as url from "url";
+import { {{class_name}} } from "./{{module_name}}.js";
+
+{%- if wasi %}
+import { init as initWasi, WASI } from "@wasmer/wasi";
+{%- endif %}
+
+let module = undefined;
+
+/** Lazily fetch and compile the WebAssembly module */
+async function getModule() {
+    if (!module) {
+        const path = url.fileURLToPath(new URL("./{{module_name}}.wasm", import.meta.url));
+        const wasm = await fs.readFile(path);
+
+        module = WebAssembly.compileStreaming
+            ? WebAssembly.compileStreaming(wasm)
+            : WebAssembly.compile(wasm);
+    }
+
+    return await module;
+}
+
+export default async function(options) {
+    const wrapper = new {{class_name}}();
+
+    {%- if wasi %}
+    const [_, module] = await Promise.all([getModule(), initWasi()]);
+    const wasi = options.wasi || new Wasi({});
+    const imports = Object.assign({}, options.imports, wasi.getImports(module));
+    {%- else %}
+    const module = await getModule();
+    const imports = options.imports || {};
+    {%- endif %}
+
+    await wrapper.instantiate(module, imports);
+
+    {%- if wasi %}
+    wasi.instantiate(wrapper.instance);
+    {%- endif %}
+
+    return wrapper;
+}

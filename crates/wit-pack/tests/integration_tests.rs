@@ -7,6 +7,7 @@ use std::{
 use wit_pack::{Abi, Interface, Metadata, Module};
 
 #[test]
+#[ignore]
 fn use_javascript_bindings() {
     let Fixtures { exports, wasm } = Fixtures::load();
 
@@ -31,6 +32,7 @@ fn use_javascript_bindings() {
 }
 
 #[test]
+#[ignore]
 fn use_wasi_javascript_bindings() {
     let Fixtures { exports, wasm } = Fixtures::load_wasi();
 
@@ -55,6 +57,7 @@ fn use_wasi_javascript_bindings() {
 }
 
 #[test]
+#[ignore]
 fn use_python_bindings() {
     let Fixtures { exports, wasm } = Fixtures::load();
 

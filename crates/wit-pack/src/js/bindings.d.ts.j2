@@ -1,0 +1,21 @@
+{% if wasi %}
+import { Wasi } from "@wasmer/wasi";
+{% endif -%}
+
+import { {{class_name}} } from "./{{interface_name}}";
+
+/**
+ * Options used when initializing the bindings.
+ */
+export type LoadOptions = {
+{%- if wasi %}
+    /** An initialized `@wasmer/wasi` object.
+    wasi: Wasi,
+{%- endif %}
+    imports: Record<string, WebAssembly.ModuleImports>,
+};
+
+/**
+ * Load the WebAssembly module.
+ */
+export default async function(options?: Partial<LoadOptions>): Promise<{{class_name}}>;

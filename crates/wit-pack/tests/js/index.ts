@@ -1,10 +1,11 @@
-import load, { WitPack, Exports, Metadata, Module, Result, Error as WitPackError, File } from "@wasmer/wit-pack";
+import load from "@wasmer/wit-pack/src/index.js";
+import { WitPack, Exports, Metadata, Module, Result, Error as WitPackError, File } from "@wasmer/wit-pack/src/wit-pack/wit-pack.js";
 import fs from "fs/promises";
 import path from "path";
 
 async function main() {
     // First, we need to initialize the WebAssembly module.
-    const witPack = await load();
+    const witPack = await load() as WitPack;
 
     // If we want to use wit-pack to generate some bindings for itself (how meta!)
     // we need to load the corresponding *.wasm and *.wit files.

@@ -1,8 +1,0 @@
----
-source: crates/wit-pack/src/js/mod.rs
-expression: file.utf8_contents().unwrap()
----
-
-/** Load the WebAssembly module. */
-export default function(): Promise<Exports>;
-

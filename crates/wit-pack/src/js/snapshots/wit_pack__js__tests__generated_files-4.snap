@@ -1,0 +1,33 @@
+---
+source: crates/wit-pack/src/js/mod.rs
+expression: "files[\"src/wit-pack/index.js\"].utf8_contents().unwrap()"
+---
+import fs from "fs/promises";
+import * as url from "url";
+import { WitPack } from "./wit_pack_wasm.wasm.js";
+
+let module = undefined;
+
+/** Lazily fetch and compile the WebAssembly module */
+async function getModule() {
+    if (!module) {
+        const path = url.fileURLToPath(new URL("./wit_pack_wasm.wasm.wasm", import.meta.url));
+        const wasm = await fs.readFile(path);
+
+        module = WebAssembly.compileStreaming
+            ? WebAssembly.compileStreaming(wasm)
+            : WebAssembly.compile(wasm);
+    }
+
+    return await module;
+}
+
+export default async function(options) {
+    const wrapper = new WitPack();
+    const module = await getModule();
+    const imports = options.imports || {};
+
+    await wrapper.instantiate(module, imports);
+
+    return wrapper;
+}
