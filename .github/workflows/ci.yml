@@ -9,6 +9,7 @@ on:
 env:
   DEFAULT_CRATE_NAME: wit_pack
   RUST_BACKTRACE: 1
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
 
 jobs:
   check:
