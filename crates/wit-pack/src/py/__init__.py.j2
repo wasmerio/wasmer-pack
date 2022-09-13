@@ -1,0 +1,25 @@
+'''
+{{description}}
+'''
+
+__version__ = "{{version}}"
+
+import wasmer as _wasmer
+import pathlib as _pathlib
+
+from .bindings import *
+
+_store = _wasmer.Store()
+_wasm = _pathlib.Path(__file__).parent.joinpath("{{module_name}}.wasm").read_bytes()
+_module = _wasmer.Module(_store, _wasm)
+
+
+def load() -> {{class_name}}:
+    {% if wasi%}
+    env = _wasmer.wasi.StateBuilder("").finalize()
+    imports = env.generate_imports(_store, _wasmer.wasi.Version.LATEST)
+    {% else %}
+    imports = {}
+    {% endif %}
+
+    return {{class_name}}(_store, imports, _module)

@@ -71,8 +71,14 @@ impl IntoIterator for Files {
 impl<P: AsRef<Path>> Index<P> for Files {
     type Output = SourceFile;
 
+    #[track_caller]
     fn index(&self, index: P) -> &Self::Output {
-        self.members.get(index.as_ref()).unwrap()
+        let index = index.as_ref();
+
+        match self.members.get(index) {
+            Some(file) => file,
+            None => panic!("No such file, \"{}\"", index.display()),
+        }
     }
 }
 

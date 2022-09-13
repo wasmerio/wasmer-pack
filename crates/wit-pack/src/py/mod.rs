@@ -2,10 +2,21 @@ use std::path::Path;
 
 use anyhow::{Context, Error};
 use heck::ToPascalCase;
+use minijinja::Environment;
+use once_cell::sync::Lazy;
+use serde::de::IntoDeserializer;
 use wit_bindgen_gen_core::Generator;
 use wit_bindgen_gen_wasmer_py::WasmerPy;
 
 use crate::{Files, Interface, Metadata, Module, SourceFile};
+
+static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
+    let mut env = Environment::new();
+    env.add_template("__init__.py", include_str!("__init__.py.j2"))
+        .unwrap();
+
+    env
+});
 
 /// Generate Python bindings.
 pub fn generate_python(
@@ -19,6 +30,8 @@ pub fn generate_python(
 
     let mut files = Files::new();
 
+    generate_bindings(&interface.0, package_name, &mut files);
+
     files.insert(
         Path::new(&package_name)
             .join(&module.name)
@@ -26,18 +39,25 @@ pub fn generate_python(
         SourceFile::from(&module.wasm),
     );
 
-    generate_bindings(&interface.0, package_name, &mut files);
+    files.insert(
+        Path::new(&package_name).join("__init__.py"),
+        dunder_init_file(metadata, module.abi, &module.name, interface_name)?,
+    );
 
-    let dunder_init: SourceFile =
-        dunder_init_file(metadata, module.abi, &module.name, interface_name);
-    files.insert(Path::new(&package_name).join("__init__.py"), dunder_init);
+    files.insert(
+        Path::new("pyproject.toml"),
+        generate_pyproject_toml(metadata, package_name)?,
+    );
 
-    let pyproject = generate_pyproject_toml(metadata, package_name);
-    files.insert(Path::new("pyproject.toml"), pyproject);
-
-    files.insert(Path::new("MANIFEST.in"), "include **/*.wasm".into());
+    files.insert(Path::new("MANIFEST.in"), generate_manifest()?);
 
     Ok(files)
+}
+
+fn generate_manifest() -> Result<SourceFile, Error> {
+    let rendered = TEMPLATES.get_template("MANIFEST.in").unwrap().render(())?;
+
+    Ok(rendered.into())
 }
 
 fn sanitize_python_package_name(name: &str) -> Result<&str, Error> {
@@ -53,7 +73,7 @@ fn sanitize_python_package_name(name: &str) -> Result<&str, Error> {
     Ok(name)
 }
 
-fn generate_pyproject_toml(metadata: &Metadata, package_name: &str) -> SourceFile {
+fn generate_pyproject_toml(metadata: &Metadata, package_name: &str) -> Result<SourceFile, Error> {
     let Metadata {
         version,
         description,
@@ -71,9 +91,9 @@ fn generate_pyproject_toml(metadata: &Metadata, package_name: &str) -> SourceFil
         },
     };
 
-    let serialized = toml::to_vec(&project).expect("Serialization should always succeed");
+    let serialized = toml::to_string(&project)?;
 
-    serialized.into()
+    Ok(serialized.into())
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
@@ -96,57 +116,26 @@ fn dunder_init_file(
     abi: crate::Abi,
     module_name: &str,
     interface_name: &str,
-) -> SourceFile {
+) -> Result<SourceFile, Error> {
     let Metadata {
         version,
         description,
         package_name,
     } = metadata;
-    let class_name = interface_name.to_pascal_case();
-
-    let description = description
+    let ctx = minijinja::context! {
+        interface_name,
+        module_name,
+        version,
+        description => description
         .clone()
-        .unwrap_or_else(|| format!("Bindings to {package_name}."));
-
-    let imports = if abi == crate::Abi::Wasi {
-        format!(
-            r#"
-    from wasmer import wasi
-    env = wasi.StateBuilder("").finalize()
-    imports = env.generate_imports(store, wasi.Version.LATEST)
-"#
-        )
-    } else {
-        r#"
-    imports = {}
-"#
-        .to_owned()
+        .unwrap_or_else(|| format!("Bindings to {package_name}.")),
+        class_name => interface_name.to_pascal_case(),
+        wasi => matches!(abi, crate::Abi::Wasi),
     };
-    let src = format!(
-        r#"
-'''
-{description}
-'''
 
-__version__ = "{version}"
+    let rendered = TEMPLATES.get_template("__init__.py").unwrap().render(ctx)?;
 
-import wasmer as _wasmer
-import pathlib as _pathlib
-
-from .bindings import *
-
-store = _wasmer.Store()
-wasm = _pathlib.Path(__file__).parent.joinpath("{module_name}.wasm").read_bytes()
-module = _wasmer.Module(store, wasm)
-
-
-def load() -> {class_name}:
-{imports}
-    return {class_name}(store, imports, module)
-"#
-    );
-
-    SourceFile::from(src)
+    Ok(rendered.into())
 }
 
 fn generate_bindings(interface: &wit_parser::Interface, package_name: &str, files: &mut Files) {
@@ -197,8 +186,12 @@ mod tests {
 
         let files = generate_python(&metadata, &module, &interface).unwrap();
 
-        let file_names: HashSet<&Path> = files.iter().map(|(path, _)| path).collect();
-        assert_eq!(file_names, expected);
+        insta::assert_display_snapshot!(files["pyproject.toml"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["MANIFEST.in"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["wit_pack/__init__.py"].utf8_contents().unwrap());
+
+        let actual_files: HashSet<_> = files.iter().map(|(p, _)| p).collect();
+        assert_eq!(actual_files, expected);
     }
 
     #[test]
