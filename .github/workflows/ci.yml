@@ -9,6 +9,7 @@ on:
 env:
   DEFAULT_CRATE_NAME: wit_pack
   RUST_BACKTRACE: 1
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
 
 jobs:
   check:
@@ -33,6 +34,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+      - name: Give GitHub Actions access to wasmerio/pirita
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.PIRITA_REPO_DEPLOY_KEY }}
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -50,7 +55,7 @@ jobs:
           python-version: "3.9"
           # cache-dependency-path: |
           #   crates/wit-pack/tests/python/Pipfile.lock
-      
+
       # We disabled Pipenv because installation on CI was failing when
       # testing multiple Pipenv files
       # - name: Install Pipenv
@@ -94,6 +99,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+      - name: Give GitHub Actions access to wasmerio/pirita
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.PIRITA_REPO_DEPLOY_KEY }}
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -128,6 +137,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+      - name: Give GitHub Actions access to wasmerio/pirita
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.PIRITA_REPO_DEPLOY_KEY }}
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
