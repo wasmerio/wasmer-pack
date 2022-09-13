@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Error};
 use clap::Parser;
-use pirita::{Manifest, ParseOptions, WebCMmap};
+use webc::{Manifest, ParseOptions, WebCMmap};
 use wit_pack::{Interface, Metadata, Module};
 
 fn main() -> Result<(), Error> {

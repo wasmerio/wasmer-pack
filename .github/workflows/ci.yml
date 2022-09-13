@@ -34,13 +34,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-      # Note: some of our dependencies are from private repos so we use a PAT
-      # for credentials
-      - name: Configure Private Access Token
-        shell: bash
-        run: |
-          test="git = \"https://wasmer:${{ secrets.GH_PAT }}@github.com/wasmerio/pirita.git\""
-          sed  -i 's#git = "https://github.com/wasmerio/pirita.git"#$test#g' Cargo.toml
+      - name: Give GitHub Actions access to wasmerio/pirita
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.PIRITA_REPO_DEPLOY_KEY }}
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -102,11 +99,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-      - name: Configure Private Access Token
-        shell: bash
-        run: |
-          test="git = \"https://wasmer:${{ secrets.GH_PAT }}@github.com/wasmerio/pirita.git\""
-          sed  -i 's#git = "https://github.com/wasmerio/pirita.git"#$test#g' Cargo.toml
+      - name: Give GitHub Actions access to wasmerio/pirita
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.PIRITA_REPO_DEPLOY_KEY }}
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -141,11 +137,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-      - name: Configure Private Access Token
-        shell: bash
-        run: |
-          test="git = \"https://wasmer:${{ secrets.GH_PAT }}@github.com/wasmerio/pirita.git\""
-          sed  -i 's#git = "https://github.com/wasmerio/pirita.git"#$test#g' Cargo.toml
+      - name: Give GitHub Actions access to wasmerio/pirita
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.PIRITA_REPO_DEPLOY_KEY }}
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
