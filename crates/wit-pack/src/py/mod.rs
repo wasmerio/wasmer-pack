@@ -4,7 +4,6 @@ use anyhow::{Context, Error};
 use heck::ToPascalCase;
 use minijinja::Environment;
 use once_cell::sync::Lazy;
-use serde::de::IntoDeserializer;
 use wit_bindgen_gen_core::Generator;
 use wit_bindgen_gen_wasmer_py::WasmerPy;
 
@@ -13,6 +12,8 @@ use crate::{Files, Interface, Metadata, Module, SourceFile};
 static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
     let mut env = Environment::new();
     env.add_template("__init__.py", include_str!("__init__.py.j2"))
+        .unwrap();
+    env.add_template("MANIFEST.in", include_str!("MANIFEST.in.j2"))
         .unwrap();
 
     env
