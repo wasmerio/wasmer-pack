@@ -1,6 +1,7 @@
 use std::{
     collections::BTreeMap,
     fmt::{self, Debug, Formatter},
+    ops::Index,
     path::{Path, PathBuf},
 };
 
@@ -19,7 +20,7 @@ impl Files {
         }
     }
 
-    pub fn push(&mut self, path: impl Into<PathBuf>, file: SourceFile) {
+    pub fn insert(&mut self, path: impl Into<PathBuf>, file: SourceFile) {
         self.members.insert(path.into(), file);
     }
 
@@ -64,6 +65,20 @@ impl IntoIterator for Files {
 
     fn into_iter(self) -> Self::IntoIter {
         self.members.into_iter()
+    }
+}
+
+impl<P: AsRef<Path>> Index<P> for Files {
+    type Output = SourceFile;
+
+    #[track_caller]
+    fn index(&self, index: P) -> &Self::Output {
+        let index = index.as_ref();
+
+        match self.members.get(index) {
+            Some(file) => file,
+            None => panic!("No such file, \"{}\"", index.display()),
+        }
     }
 }
 

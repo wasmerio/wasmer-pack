@@ -72,8 +72,8 @@ fn use_python_bindings() {
         .join("tests")
         .join("python");
 
-    execute("pip install -r requirements.txt", &python_dir);
-    execute("python3 main.py", &python_dir);
+    execute("pipenv install", &python_dir);
+    execute("pipenv run python3 main.py", &python_dir);
 }
 
 #[test]
@@ -94,8 +94,8 @@ fn use_wasi_python_bindings() {
         .join("tests")
         .join("python-wasi");
 
-    execute("pip install -r requirements.txt", &python_dir);
-    execute("python3 main.py", &python_dir);
+    execute("pipenv install", &python_dir);
+    execute("pipenv run python3 main.py", &python_dir);
 }
 
 #[derive(Debug)]
@@ -127,29 +127,6 @@ impl Fixtures {
 
         Fixtures { exports, wasm }
     }
-
-    // fn load_wasi() -> Self {
-    //     let project_root = project_root();
-
-    //     let exports = project_root
-    //         .join("crates")
-    //         .join("wasm")
-    //         .join("wit-pack.exports.wit");
-    //     assert!(exports.exists());
-
-    //     execute(
-    //         "RUSTFLAGS=\"-Z wasi-exec-model=reactor\" cargo +nightly build --target=wasm32-wasi --package=wit-pack-wasm",
-    //         &project_root,
-    //     );
-
-    //     let wasm = project_root
-    //         .join("target")
-    //         .join("wasm32-wasi")
-    //         .join("debug")
-    //         .join("wit_pack_wasm.wasm");
-
-    //     Fixtures { exports, wasm }
-    // }
 
     fn load_wasi() -> Self {
         let project_root = project_root();

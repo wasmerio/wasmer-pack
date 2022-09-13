@@ -1,13 +1,31 @@
-use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-use anyhow::{Context, Error};
+use anyhow::Error;
 use heck::ToPascalCase;
+use minijinja::Environment;
+use once_cell::sync::Lazy;
 use wit_bindgen_gen_core::Generator;
 use wit_bindgen_gen_js::Js;
 use wit_parser::Interface;
 
 use crate::{Files, Metadata, Module, SourceFile};
+
+/// The version of `@wasmer/wasi` pulled in when using a WASI library.
+const WASMER_WASI_VERSION: &str = "^1.1.2";
+
+static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
+    let mut env = Environment::new();
+    env.add_template("bindings.js", include_str!("bindings.js.j2"))
+        .unwrap();
+    env.add_template("bindings.d.ts", include_str!("bindings.d.ts.j2"))
+        .unwrap();
+    env.add_template("index.js", include_str!("index.js.j2"))
+        .unwrap();
+    env.add_template("index.d.ts", include_str!("index.d.ts.j2"))
+        .unwrap();
+
+    env
+});
 
 /// Generate JavaScript bindings for a package.
 pub fn generate_javascript(
@@ -15,224 +33,179 @@ pub fn generate_javascript(
     module: &Module,
     interface: &crate::Interface,
 ) -> Result<Files, Error> {
-    let interface_name = &interface.0.name;
-    let package_name =
-        sanitize_javascript_package_name(&metadata.package_name).context("Invalid package name")?;
-    let package_version = &metadata.version;
+    let inputs = Inputs {
+        metadata,
+        libraries: vec![Library { interface, module }],
+        commands: Vec::new(),
+    };
+    _generate_javascript(&inputs)
+}
 
+fn _generate_javascript(inputs: &Inputs) -> Result<Files, Error> {
     let mut files = Files::new();
 
-    files.push(
-        Path::new("src").join(&module.name).with_extension("wasm"),
-        SourceFile::from(&module.wasm),
+    for lib in &inputs.libraries {
+        generate_library_bindings(lib, &mut files)?;
+    }
+
+    for cmd in &inputs.commands {
+        generate_command_bindings(cmd, &mut files)?;
+    }
+
+    files.insert("src/index.js", generate_top_level(inputs)?);
+    files.insert("src/index.d.ts", generate_top_level_typings(inputs)?);
+
+    let package_json = generate_package_json(
+        inputs.needs_wasi(),
+        &inputs.metadata.package_name,
+        &inputs.metadata.version,
     );
-
-    generate_bindings(&interface.0, &mut files);
-
-    let glue_code = Path::new("src").join(interface_name).with_extension("js");
-    inject_load_function(module, interface_name, files.get_mut(&glue_code).unwrap())?;
-
-    let typings_file = Path::new("src").join(interface_name).with_extension("d.ts");
-    patch_typings_file(interface_name, files.get_mut(&typings_file).unwrap());
-
-    let package_json =
-        generate_package_json(module.abi, package_name, package_version, interface_name);
-    files.push(PathBuf::from("package.json"), package_json);
+    files.insert("package.json", package_json);
 
     Ok(files)
 }
 
-fn patch_typings_file(interface_name: &str, typings_file: &mut SourceFile) {
-    let class_name = interface_name.to_pascal_case();
+fn generate_top_level_typings(inputs: &Inputs) -> Result<SourceFile, Error> {
+    let rendered = TEMPLATES
+        .get_template("index.d.ts")
+        .unwrap()
+        .render(inputs.js_context())?;
 
-    writeln!(&mut typings_file.0).unwrap();
-    writeln!(&mut typings_file.0, "/** Load the WebAssembly module. */").unwrap();
-    writeln!(
-        &mut typings_file.0,
-        r#"export default function(): Promise<{class_name}>;"#
-    )
-    .unwrap();
+    Ok(rendered.into())
+}
+
+fn generate_top_level(inputs: &Inputs) -> Result<SourceFile, Error> {
+    let ctx = minijinja::context! {
+        libraries => inputs.library_context(),
+    };
+    let rendered = TEMPLATES.get_template("index.js").unwrap().render(ctx)?;
+
+    Ok(rendered.into())
+}
+
+fn generate_command_bindings(_cmd: &Command<'_>, _files: &mut Files) -> Result<(), Error> {
+    Ok(())
+}
+
+#[derive(Debug, Clone)]
+struct Library<'a> {
+    interface: &'a crate::Interface,
+    module: &'a Module,
+}
+
+impl Library<'_> {
+    fn js_context(&self) -> impl serde::Serialize + '_ {
+        minijinja::context! {
+            interface_name => &self.interface.0.name,
+            module_name => &self.module.name,
+            class_name => self.interface.0.name.to_pascal_case(),
+            wasi => matches!(self.module.abi, crate::Abi::Wasi),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+struct Command<'a> {
+    name: &'a str,
+    module: &'a Module,
+}
+
+#[derive(Debug, Clone)]
+struct Inputs<'a> {
+    metadata: &'a Metadata,
+    libraries: Vec<Library<'a>>,
+    commands: Vec<Command<'a>>,
+}
+
+impl Inputs<'_> {
+    fn needs_wasi(&self) -> bool {
+        self.libraries
+            .iter()
+            .any(|lib| matches!(lib.module.abi, crate::Abi::Wasi))
+    }
+
+    fn js_context(&self) -> impl serde::Serialize + '_ {
+        minijinja::context! {
+            libraries => self.library_context(),
+        }
+    }
+
+    fn library_context(&self) -> Vec<impl serde::Serialize + '_> {
+        self.libraries
+            .iter()
+            .map(|lib| lib.js_context())
+            .collect::<Vec<_>>()
+    }
+}
+
+fn generate_library_bindings(library: &Library<'_>, files: &mut Files) -> Result<(), Error> {
+    let Library { interface, module } = library;
+    let interface_name = &interface.0.name;
+    let dir = Path::new("src").join(interface_name);
+
+    for (filename, bytes) in generate_bindings(&interface.0).iter() {
+        files.insert(dir.join(filename), bytes.into());
+    }
+
+    let index_js = TEMPLATES
+        .get_template("bindings.js")
+        .unwrap()
+        .render(library.js_context())?;
+    files.insert(dir.join("index.js"), index_js.into());
+
+    let typings_file = library_typings_file(library)?;
+    files.insert(dir.join("index.d.ts"), typings_file);
+
+    files.insert(
+        dir.join(&module.name).with_extension("wasm"),
+        SourceFile::from(&module.wasm),
+    );
+
+    Ok(())
+}
+
+fn library_typings_file(library: &Library<'_>) -> Result<SourceFile, Error> {
+    let rendered = TEMPLATES
+        .get_template("bindings.d.ts")
+        .unwrap()
+        .render(library.js_context())?;
+
+    Ok(rendered.into())
 }
 
 fn generate_package_json(
-    abi: crate::Abi,
+    needs_wasi: bool,
     package_name: &str,
     package_version: &str,
-    interface_name: &str,
 ) -> SourceFile {
-    let package_json = if abi == crate::Abi::Wasi {
+    let dependencies = if needs_wasi {
         serde_json::json!({
-            "name": package_name,
-            "version": package_version,
-            "main": format!("src/{interface_name}.js"),
-            "types": format!("src/{interface_name}.d.ts"),
-            "type": "module",
-            "dependencies": {
-                "@wasmer/wasi": "^1.1.2",
-            },
+            "@wasmer/wasi": WASMER_WASI_VERSION,
         })
     } else {
-        serde_json::json!({
-            "name": package_name,
-            "version": package_version,
-            "main": format!("src/{interface_name}.js"),
-            "types": format!("src/{interface_name}.d.ts"),
-            "type": "module",
-        })
+        serde_json::json!({})
     };
+
+    let package_json = serde_json::json!({
+        "name": package_name,
+        "version": package_version,
+        "main": format!("src/index.js"),
+        "types": format!("src/index.d.ts"),
+        "type": "module",
+        "dependencies": dependencies,
+    });
 
     format!("{package_json:#}").into()
 }
 
-/// Try to make sure the provided string can be used as a JavaScript package
-/// name.
-///
-/// This won't catch everything, but it should provide a "good enough" first
-/// approximation.
-fn sanitize_javascript_package_name(name: &str) -> Result<&str, Error> {
-    anyhow::ensure!(!name.is_empty(), "Package names can't be empty");
-
-    for (i, c) in name.char_indices() {
-        anyhow::ensure!(
-            matches!(c, '.' | '-' | '_' | '/' | '@' | 'a'..='z' | 'A'..='Z' | '0'..='9'),
-            "Invalid character, '{c}', at index {i}",
-        );
-    }
-
-    let words: Vec<_> = name.split('/').collect();
-
-    match *words.as_slice() {
-        [_top_level_name] => {}
-        [namespace, _name] => {
-            anyhow::ensure!(
-                namespace.starts_with('@'),
-                "The namespace should start with a '@'"
-            );
-        }
-        _ => anyhow::bail!("Namespaced JavaScript packages look like @namespace/package"),
-    }
-
-    Ok(name)
-}
-
-fn generate_bindings(interface: &Interface, files: &mut Files) {
+fn generate_bindings(interface: &Interface) -> wit_bindgen_gen_core::Files {
     let imports: &[wit_parser::Interface] = std::slice::from_ref(interface);
     let exports = &[];
     let mut generated = wit_bindgen_gen_core::Files::default();
 
     Js::new().generate_all(imports, exports, &mut generated);
 
-    let dir = Path::new("src");
-
-    for (path, contents) in generated.iter() {
-        files.push(dir.join(path), contents.into());
-    }
-}
-
-fn inject_load_function(
-    module: &Module,
-    interface_name: &str,
-    file: &mut SourceFile,
-) -> Result<(), Error> {
-    let module_name = &module.name;
-    let class_name = interface_name.to_pascal_case();
-
-    writeln!(
-        &mut file.0,
-        r#"
-import fs from "fs/promises";
-import path from "path";
-import * as url from "url";
-"#
-    )
-    .unwrap();
-
-    if matches!(module.abi, crate::Abi::Wasi) {
-        writeln!(
-            &mut file.0,
-            r#"
-import {{init as initWasi, WASI }} from "@wasmer/wasi";
-"#
-        )
-        .unwrap();
-    }
-
-    writeln!(
-        &mut file.0,
-        r#"
-export default async function() {{
-    const wrapper = new {class_name}();
-
-    const scriptDir = url.fileURLToPath(new URL('.', import.meta.url));
-    const wasm = await fs.readFile(path.join(scriptDir, "{module_name}.wasm"));
-"#
-    )
-    .unwrap();
-
-    writeln!(
-        &mut file.0,
-        r#"
-    let moduleToAwait;
-    if (WebAssembly.compileStreaming) {{
-      moduleToAwait = WebAssembly.compileStreaming(wasm);
-    }}
-    else {{
-      moduleToAwait = WebAssembly.compile(wasm);
-    }}
-"#
-    )
-    .unwrap();
-
-    if matches!(module.abi, crate::Abi::Wasi) {
-        writeln!(
-            &mut file.0,
-            r#"
-    const toAwait = await Promise.all([initWasi(), moduleToAwait]);
-    const module = toAwait[1];
-    let wasi = new WASI({{}});
-    const imports = wasi.getImports(module);
-"#
-        )
-        .unwrap();
-    } else {
-        writeln!(
-            &mut file.0,
-            r#"
-    const module = await moduleToAwait;
-    const imports = {{}};
-"#
-        )
-        .unwrap();
-    }
-
-    writeln!(
-        &mut file.0,
-        r#"
-    await wrapper.instantiate(module, imports);
-"#
-    )
-    .unwrap();
-
-    if matches!(module.abi, crate::Abi::Wasi) {
-        writeln!(
-            &mut file.0,
-            r#"
-    wasi.instantiate(wrapper.instance);
-    "#
-        )
-        .unwrap();
-    }
-
-    writeln!(
-        &mut file.0,
-        r#"
-    return wrapper;
-}}
-"#
-    )
-    .unwrap();
-
-    Ok(())
+    generated
 }
 
 #[cfg(test)]
@@ -242,40 +215,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn glue_code() {
-        let mut file = SourceFile::default();
-        let module = Module {
-            name: "wit-pack-wasm".to_string(),
-            abi: crate::Abi::None,
-            wasm: Vec::new(),
-        };
-
-        inject_load_function(&module, "wit-pack", &mut file).unwrap();
-
-        let contents = file.utf8_contents().unwrap();
-        insta::assert_display_snapshot!(contents);
-        assert!(contents.contains("export default async function()"));
-    }
-
-    #[test]
-    fn typings() {
-        let interface_name = "exports";
-        let mut file = SourceFile::default();
-
-        patch_typings_file(interface_name, &mut file);
-
-        insta::assert_display_snapshot!(file.utf8_contents().unwrap());
-        assert!(file
-            .utf8_contents()
-            .unwrap()
-            .contains("export default function(): Promise<Exports>;"));
-    }
-
-    #[test]
     fn package_json() {
         let package_name = "@wasmerio/wit-pack";
 
-        let got = generate_package_json(crate::Abi::None, package_name, "0.0.0", "wit-pack");
+        let got = generate_package_json(false, package_name, "0.0.0");
 
         insta::assert_display_snapshot!(got.utf8_contents().unwrap());
     }
@@ -284,7 +227,7 @@ mod tests {
     fn package_json_wasi() {
         let package_name = "@wasmerio/wabt";
 
-        let got = generate_package_json(crate::Abi::Wasi, package_name, "0.0.0", "wabt");
+        let got = generate_package_json(true, package_name, "0.0.0");
 
         insta::assert_display_snapshot!(got.utf8_contents().unwrap());
     }
@@ -293,15 +236,19 @@ mod tests {
     fn generated_files() {
         let expected: HashSet<&Path> = [
             "package.json",
-            "src/wit-pack.js",
-            "src/wit-pack.d.ts",
-            "src/wit_pack_wasm.wasm",
-            "src/intrinsics.js",
+            "src/index.js",
+            "src/index.d.ts",
+            "src/wit-pack/index.js",
+            "src/wit-pack/index.d.ts",
+            "src/wit-pack/intrinsics.js",
+            "src/wit-pack/wit_pack_wasm.wasm",
+            "src/wit-pack/wit-pack.d.ts",
+            "src/wit-pack/wit-pack.js",
         ]
         .iter()
         .map(Path::new)
         .collect();
-        let metadata = Metadata::new("wit-pack", "1.2.3");
+        let metadata = Metadata::new("@wasmer/wit-pack", "1.2.3");
         let module = Module {
             name: "wit_pack_wasm.wasm".to_string(),
             abi: crate::Abi::None,
@@ -318,27 +265,13 @@ mod tests {
 
         let files = generate_javascript(&metadata, &module, &interface).unwrap();
 
-        let file_names: HashSet<&Path> = files.iter().map(|(path, _)| path).collect();
-        assert_eq!(file_names, expected);
-    }
+        insta::assert_display_snapshot!(files["package.json"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["src/index.js"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["src/index.d.ts"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["src/wit-pack/index.js"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["src/wit-pack/index.d.ts"].utf8_contents().unwrap());
 
-    #[test]
-    fn sanitize_js_package_names() {
-        let inputs = vec![
-            ("package", true),
-            ("@wasmer/package", true),
-            ("@wasmer/package-name", true),
-            (
-                "abcdefghijklmopqrstuvwxyz-ABCDEFGHIJKLMOPQRSTUVWXYZ_0123456789",
-                true,
-            ),
-            ("wasmer/package", false),
-            ("", false),
-        ];
-
-        for (original, is_okay) in inputs {
-            let got = sanitize_javascript_package_name(original);
-            assert_eq!(got.is_ok(), is_okay, "{original}");
-        }
+        let actual_files: HashSet<_> = files.iter().map(|(p, _)| p).collect();
+        assert_eq!(actual_files, expected);
     }
 }

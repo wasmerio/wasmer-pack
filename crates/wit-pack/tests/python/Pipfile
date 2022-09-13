@@ -5,8 +5,3 @@ name = "pypi"
 
 [packages]
 wit-pack = {path = "./../../../../target/tmp/python"}
-
-[dev-packages]
-
-[requires]
-python_version = "3.9"

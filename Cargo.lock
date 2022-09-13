@@ -342,10 +342,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "once_cell"
-version = "1.13.1"
+name = "minijinja"
+version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "074864da206b4973b84eb91683020dbefd6a8c3f0f38e054d93954e891935e4e"
+checksum = "450c32bf0055201c231d737143581710b093271cc862dcc273e1c027b4bd384d"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "once_cell"
+version = "1.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2f7254b99e31cad77da24b08ebf628882739a608578bb1bcdfc1f9c21260d7c0"
 
 [[package]]
 name = "os_str_bytes"
@@ -822,6 +831,8 @@ dependencies = [
  "cargo_metadata",
  "heck 0.4.0",
  "insta",
+ "minijinja",
+ "once_cell",
  "serde",
  "serde_json",
  "toml",
