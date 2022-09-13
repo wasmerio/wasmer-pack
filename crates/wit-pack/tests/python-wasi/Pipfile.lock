@@ -1,12 +1,10 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "65d3d78efc66f48404ec37f0b1683910192d7b83ca0aaf7522b88a8dbc6e2c28"
+            "sha256": "8bdcce0d78dfd5b77854fb7799ddf28de2344f3e68755fef92f0dc8e358f0911"
         },
         "pipfile-spec": 6,
-        "requires": {
-            "python_version": "3.9"
-        },
+        "requires": {},
         "sources": [
             {
                 "name": "pypi",
@@ -18,7 +16,7 @@
     "default": {
         "wabt": {
             "path": "./../../../../target/tmp/python-wasi",
-            "version": "==0.1.4"
+            "version": "==0.1.5"
         },
         "wasmer": {
             "hashes": [

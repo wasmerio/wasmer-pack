@@ -1,12 +1,10 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8ffc3cdafc0299395c44f2ff39c5ecc825ada992faf8d6f8c5ef60edecc25a5d"
+            "sha256": "7e5cb396fa7de6642747bfc8701c348aa95fb9350566880740b818c88cbe2f18"
         },
         "pipfile-spec": 6,
-        "requires": {
-            "python_version": "3.9"
-        },
+        "requires": {},
         "sources": [
             {
                 "name": "pypi",
@@ -56,7 +54,7 @@
         },
         "wit-pack": {
             "path": "./../../../../target/tmp/python",
-            "version": "==0.1.0"
+            "version": "==0.1.5"
         }
     },
     "develop": {}

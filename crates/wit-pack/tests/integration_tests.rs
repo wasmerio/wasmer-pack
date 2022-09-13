@@ -55,7 +55,6 @@ fn use_wasi_javascript_bindings() {
 }
 
 #[test]
-#[ignore]
 fn use_python_bindings() {
     let Fixtures { exports, wasm } = Fixtures::load();
 
@@ -73,8 +72,8 @@ fn use_python_bindings() {
         .join("tests")
         .join("python");
 
-    execute("pip install -r requirements.txt", &python_dir);
-    execute("python3 main.py", &python_dir);
+    execute("pipenv install", &python_dir);
+    execute("pipenv run python3 main.py", &python_dir);
 }
 
 #[test]
@@ -95,8 +94,8 @@ fn use_wasi_python_bindings() {
         .join("tests")
         .join("python-wasi");
 
-    execute("pip install -r requirements.txt", &python_dir);
-    execute("python3 main.py", &python_dir);
+    execute("pipenv install", &python_dir);
+    execute("pipenv run python3 main.py", &python_dir);
 }
 
 #[derive(Debug)]
