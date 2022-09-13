@@ -39,8 +39,8 @@ jobs:
       - name: Configure Private Access Token
         shell: bash
         run: |
-          test="git = \"https:\/\/wasmer:${{ secrets.GH_PAT }}@github.com\/wasmerio\/pirita.git\""
-          sed  -i "s/git = \"https:\/\/github.com\/wasmerio\/pirita.git\"/$test/g" Cargo.toml
+          test="git = \"https://wasmer:${{ secrets.GH_PAT }}@github.com/wasmerio/pirita.git\""
+          sed  -i 's#git = "https://github.com/wasmerio/pirita.git"#$test#g' Cargo.toml
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -105,8 +105,8 @@ jobs:
       - name: Configure Private Access Token
         shell: bash
         run: |
-          test="git = \"https:\/\/wasmer:${{ secrets.GH_PAT }}@github.com\/wasmerio\/pirita.git\""
-          sed  -i "s/git = \"https:\/\/github.com\/wasmerio\/pirita.git\"/$test/g" Cargo.toml
+          test="git = \"https://wasmer:${{ secrets.GH_PAT }}@github.com/wasmerio/pirita.git\""
+          sed  -i 's#git = "https://github.com/wasmerio/pirita.git"#$test#g' Cargo.toml
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -144,8 +144,8 @@ jobs:
       - name: Configure Private Access Token
         shell: bash
         run: |
-          test="git = \"https:\/\/wasmer:${{ secrets.GH_PAT }}@github.com\/wasmerio\/pirita.git\""
-          sed  -i "s/git = \"https:\/\/github.com\/wasmerio\/pirita.git\"/$test/g" Cargo.toml
+          test="git = \"https://wasmer:${{ secrets.GH_PAT }}@github.com/wasmerio/pirita.git\""
+          sed  -i 's#git = "https://github.com/wasmerio/pirita.git"#$test#g' Cargo.toml
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
