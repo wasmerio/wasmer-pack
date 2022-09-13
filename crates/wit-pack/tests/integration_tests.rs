@@ -7,7 +7,6 @@ use std::{
 use wit_pack::{Abi, Interface, Metadata, Module};
 
 #[test]
-#[ignore]
 fn use_javascript_bindings() {
     let Fixtures { exports, wasm } = Fixtures::load();
 
@@ -32,7 +31,6 @@ fn use_javascript_bindings() {
 }
 
 #[test]
-#[ignore]
 fn use_wasi_javascript_bindings() {
     let Fixtures { exports, wasm } = Fixtures::load_wasi();
 
@@ -130,29 +128,6 @@ impl Fixtures {
 
         Fixtures { exports, wasm }
     }
-
-    // fn load_wasi() -> Self {
-    //     let project_root = project_root();
-
-    //     let exports = project_root
-    //         .join("crates")
-    //         .join("wasm")
-    //         .join("wit-pack.exports.wit");
-    //     assert!(exports.exists());
-
-    //     execute(
-    //         "RUSTFLAGS=\"-Z wasi-exec-model=reactor\" cargo +nightly build --target=wasm32-wasi --package=wit-pack-wasm",
-    //         &project_root,
-    //     );
-
-    //     let wasm = project_root
-    //         .join("target")
-    //         .join("wasm32-wasi")
-    //         .join("debug")
-    //         .join("wit_pack_wasm.wasm");
-
-    //     Fixtures { exports, wasm }
-    // }
 
     fn load_wasi() -> Self {
         let project_root = project_root();
