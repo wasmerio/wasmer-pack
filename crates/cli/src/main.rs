@@ -43,10 +43,12 @@ impl Codegen {
             Language::Python => wit_pack::generate_python(&metadata, &module, &interface)?,
         };
 
-        let out_dir = out_dir
-            .as_deref()
-            .unwrap_or_else(|| Path::new(&metadata.package_name));
-        files.save_to_disk(out_dir)?;
+        let out_dir = out_dir.unwrap_or_else(|| {
+            PathBuf::from(&metadata.package_name.namespace()).join(metadata.package_name.name())
+        });
+        files
+            .save_to_disk(&out_dir)
+            .with_context(|| format!("Unable to save to \"{}\"", out_dir.display()))?;
 
         Ok(())
     }
@@ -100,13 +102,12 @@ fn load_pirita_file(path: &Path) -> Result<(Metadata, Module, Interface), Error>
         wasm: module.to_vec(),
     };
 
-    let (unversioned_name, _) = package.split_once("@").unwrap();
+    let (unversioned_name, version) = package.split_once("@").unwrap();
+    let package_name = unversioned_name
+        .parse()
+        .context("Unable to parse the package name")?;
 
-    Ok((
-        Metadata::new(format!("@{unversioned_name}"), "0.0.0"),
-        module,
-        interface,
-    ))
+    Ok((Metadata::new(package_name, version), module, interface))
 }
 
 fn wasm_abi(module: &[u8]) -> wit_pack::Abi {

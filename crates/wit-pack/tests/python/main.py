@@ -27,7 +27,7 @@ def unwrap(value: Union[Ok[T], Err[Error]]) -> T:
 
 
 def load_bindings(wit_pack: WitPack) -> Tuple[Metadata, Exports, Module]:
-    metadata = Metadata.new(wit_pack, "wit_pack", "1.2.3")
+    metadata = Metadata.new(wit_pack, "wasmer/wit-pack", "1.2.3")
 
     exports_wit = project_root.joinpath("crates", "wasm", "wit-pack.exports.wit")
     name = str(exports_wit)

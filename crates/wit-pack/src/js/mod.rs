@@ -55,11 +55,9 @@ fn _generate_javascript(inputs: &Inputs) -> Result<Files, Error> {
     files.insert("src/index.js", generate_top_level(inputs)?);
     files.insert("src/index.d.ts", generate_top_level_typings(inputs)?);
 
-    let package_json = generate_package_json(
-        inputs.needs_wasi(),
-        &inputs.metadata.package_name,
-        &inputs.metadata.version,
-    );
+    let package_name = inputs.metadata.package_name.javascript_package();
+    let package_json =
+        generate_package_json(inputs.needs_wasi(), &package_name, &inputs.metadata.version);
     files.insert("package.json", package_json);
 
     Ok(files)
@@ -248,7 +246,7 @@ mod tests {
         .iter()
         .map(Path::new)
         .collect();
-        let metadata = Metadata::new("@wasmer/wit-pack", "1.2.3");
+        let metadata = Metadata::new("wasmer/wit-pack".parse().unwrap(), "1.2.3");
         let module = Module {
             name: "wit_pack_wasm.wasm".to_string(),
             abi: crate::Abi::None,

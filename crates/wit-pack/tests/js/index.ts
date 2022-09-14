@@ -12,7 +12,7 @@ async function main() {
 
     const projectRoot = path.resolve(".", "../../../..");
 
-    const metadata = Metadata.new(witPack, "@wasmer/wit-pack", "0.0.0");
+    const metadata = Metadata.new(witPack, "wasmer/wit-pack", "0.0.0");
     const module = await loadWasmModule(witPack, projectRoot);
     const wit = path.join(projectRoot, "crates", "wasm", "wit-pack.exports.wit");
     const witFile = await fs.readFile(wit, {encoding: "utf8"});

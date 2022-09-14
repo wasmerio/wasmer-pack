@@ -10,7 +10,8 @@
 //! use wit_pack::{Module, Interface, Metadata, Abi};
 //!
 //! // First, load the relevant information from disk...
-//! let metadata = Metadata::new("@username/my-package", "1.2.3");
+//! let package_name = "username/my-package".parse()?;
+//! let metadata = Metadata::new(package_name, "1.2.3");
 //! let module = Module::from_path("./module.wasm", Abi::None)?;
 //! let interface = Interface::from_path("./exports.wit")?;
 //!
@@ -23,19 +24,15 @@
 //! ```
 
 mod files;
-mod interface;
 mod js;
-mod metadata;
-mod module;
 mod py;
+mod types;
 mod wit_version;
 
 pub use crate::{
     files::{Files, SourceFile},
-    interface::Interface,
     js::generate_javascript,
-    metadata::Metadata,
-    module::{Abi, Module},
     py::generate_python,
+    types::{Abi, Interface, Metadata, Module},
     wit_version::WIT_PARSER_VERSION,
 };

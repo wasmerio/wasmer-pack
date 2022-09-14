@@ -3,7 +3,7 @@ source: crates/wit-pack/src/py/mod.rs
 expression: "files[\"wit_pack/__init__.py\"].utf8_contents().unwrap()"
 ---
 '''
-Bindings to wit_pack.
+Bindings to wasmer/wit-pack.
 '''
 
 __version__ = "1.2.3"

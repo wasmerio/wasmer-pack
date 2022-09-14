@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use anyhow::{Context, Error};
+use anyhow::Error;
 use heck::ToPascalCase;
 use minijinja::Environment;
 use once_cell::sync::Lazy;
@@ -25,13 +25,12 @@ pub fn generate_python(
     module: &Module,
     interface: &Interface,
 ) -> Result<Files, Error> {
-    let package_name =
-        sanitize_python_package_name(&metadata.package_name).context("Invalid package name")?;
+    let package_name = metadata.package_name.python_name();
     let interface_name = interface.0.name.as_str();
 
     let mut files = Files::new();
 
-    generate_bindings(&interface.0, package_name, &mut files);
+    generate_bindings(&interface.0, &package_name, &mut files);
 
     files.insert(
         Path::new(&package_name)
@@ -47,7 +46,7 @@ pub fn generate_python(
 
     files.insert(
         Path::new("pyproject.toml"),
-        generate_pyproject_toml(metadata, package_name)?,
+        generate_pyproject_toml(metadata, &package_name)?,
     );
 
     files.insert(Path::new("MANIFEST.in"), generate_manifest()?);
@@ -59,19 +58,6 @@ fn generate_manifest() -> Result<SourceFile, Error> {
     let rendered = TEMPLATES.get_template("MANIFEST.in").unwrap().render(())?;
 
     Ok(rendered.into())
-}
-
-fn sanitize_python_package_name(name: &str) -> Result<&str, Error> {
-    anyhow::ensure!(!name.is_empty(), "Package names can't be empty");
-
-    for (i, c) in name.char_indices() {
-        anyhow::ensure!(
-            matches!(c, '_' | 'a'..='z' | 'A'..='Z' | '0'..='9'),
-            "Invalid character, '{c}', at index {i}",
-        );
-    }
-
-    Ok(name)
 }
 
 fn generate_pyproject_toml(metadata: &Metadata, package_name: &str) -> Result<SourceFile, Error> {
@@ -170,7 +156,7 @@ mod tests {
         .iter()
         .map(Path::new)
         .collect();
-        let metadata = Metadata::new("wit_pack", "1.2.3");
+        let metadata = Metadata::new("wasmer/wit-pack".parse().unwrap(), "1.2.3");
         let module = Module {
             name: "wit_pack_wasm.wasm".to_string(),
             abi: crate::Abi::None,
@@ -193,26 +179,5 @@ mod tests {
 
         let actual_files: HashSet<_> = files.iter().map(|(p, _)| p).collect();
         assert_eq!(actual_files, expected);
-    }
-
-    #[test]
-    fn sanitize_python_package_names() {
-        let inputs = vec![
-            ("package", true),
-            ("package_name", true),
-            ("package-name", false),
-            ("wasmer/package", false),
-            ("@wasmer/package-name", false),
-            (
-                "abcdefghijklmopqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ0123456789",
-                true,
-            ),
-            ("", false),
-        ];
-
-        for (original, is_okay) in inputs {
-            let got = sanitize_python_package_name(original);
-            assert_eq!(got.is_ok(), is_okay, "{original}");
-        }
     }
 }

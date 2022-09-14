@@ -71,7 +71,7 @@ pub struct Metadata(RefCell<upstream::Metadata>);
 impl crate::wit_pack::Metadata for Metadata {
     fn new(package_name: String, version: String) -> wit_bindgen_rust::Handle<crate::Metadata> {
         Handle::new(Metadata(RefCell::new(upstream::Metadata::new(
-            package_name,
+            package_name.parse().expect("Invalid package name"),
             version,
         ))))
     }
