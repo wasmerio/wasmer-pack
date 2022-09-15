@@ -98,13 +98,13 @@ fn wit_pack_fixture() -> Package {
         .join("debug")
         .join("wit_pack_wasm.wasm");
 
-    Package {
-        metadata: Metadata::new("wasmer/wit-pack".parse().unwrap(), "0.0.0"),
-        libraries: vec![Library {
+    Package::new(
+        Metadata::new("wasmer/wit-pack".parse().unwrap(), "0.0.0"),
+        vec![Library {
             module: Module::from_path(&wasm, Abi::None).unwrap(),
             interface: Interface::from_path(exports).unwrap(),
         }],
-    }
+    )
 }
 
 fn wabt_fixture() -> Package {
@@ -116,9 +116,9 @@ fn wabt_fixture() -> Package {
         .join("tests")
         .join("wabt");
 
-    Package {
-        metadata: Metadata::new("wasmer/wabt".parse().unwrap(), "0.0.0"),
-        libraries: vec![
+    Package::new(
+        Metadata::new("wasmer/wabt".parse().unwrap(), "0.0.0"),
+        vec![
             Library {
                 module: Module::from_path(wabt_dir.join("libwabt.wasm"), Abi::Wasi).unwrap(),
                 interface: Interface::from_path(wabt_dir.join("wabt.exports.wit")).unwrap(),
@@ -130,7 +130,7 @@ fn wabt_fixture() -> Package {
                 interface: Interface::from_path(wabt_dir.join("wabt2.exports.wit")).unwrap(),
             },
         ],
-    }
+    )
 }
 
 #[track_caller]

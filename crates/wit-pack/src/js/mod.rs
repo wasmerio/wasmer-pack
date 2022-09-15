@@ -26,7 +26,7 @@ static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
 pub fn generate_javascript(package: &Package) -> Result<Files, Error> {
     let mut files = Files::new();
 
-    for lib in &package.libraries {
+    for lib in package.libraries() {
         files.insert_child_directory(
             Path::new("src").join(lib.interface_name()),
             library_bindings(lib)?,
@@ -39,7 +39,7 @@ pub fn generate_javascript(package: &Package) -> Result<Files, Error> {
         "export default function(): Promise<unknown>;".into(),
     );
 
-    let package_json = generate_package_json(package.requires_wasi(), &package.metadata);
+    let package_json = generate_package_json(package.requires_wasi(), package.metadata());
     files.insert("package.json", package_json);
 
     Ok(files)
@@ -167,10 +167,7 @@ mod tests {
             )),
         )
         .unwrap();
-        let pkg = Package {
-            metadata,
-            libraries: vec![Library { module, interface }],
-        };
+        let pkg = Package::new(metadata, vec![Library { module, interface }]);
 
         let files = generate_javascript(&pkg).unwrap();
 

@@ -9,14 +9,51 @@ use heck::{ToPascalCase, ToSnakeCase};
 
 #[derive(Debug, Clone)]
 pub struct Package {
-    pub metadata: Metadata,
-    pub libraries: Vec<Library>,
+    metadata: Metadata,
+    libraries: Vec<Library>,
 }
 
 impl Package {
+    /// Create a new [`Package`].
+    ///
+    /// # Panics
+    ///
+    /// This assumes all libraries have a unique [`Library::interface_name()`].
+    pub fn new(metadata: Metadata, libraries: impl IntoIterator<Item = Library>) -> Self {
+        let libraries: Vec<_> = libraries.into_iter().collect();
+
+        assert_unique_names("library", libraries.iter().map(|lib| lib.interface_name()));
+
+        Package {
+            metadata,
+            libraries,
+        }
+    }
+
+    pub fn metadata(&self) -> &Metadata {
+        &self.metadata
+    }
+
+    pub fn libraries(&self) -> impl Iterator<Item = &'_ Library> + '_ {
+        self.libraries.iter()
+    }
+
     pub fn requires_wasi(&self) -> bool {
         self.libraries.iter().any(|lib| lib.requires_wasi())
     }
+}
+
+fn assert_unique_names<'a>(kind: &str, names: impl IntoIterator<Item = &'a str>) {
+    let mut already_seen: Vec<&str> = Vec::new();
+
+    for name in names {
+        match already_seen.binary_search(&name) {
+            Ok(_) => panic!("Duplicate {kind} name: {name}"),
+            Err(index) => already_seen.insert(index, name),
+        }
+    }
+
+    todo!()
 }
 
 /// The name of a package from WAPM (e.g. `wasmer/wit-pack`).

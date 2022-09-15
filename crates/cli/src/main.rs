@@ -43,9 +43,10 @@ impl Codegen {
             Language::Python => wit_pack::generate_python(&pkg)?,
         };
 
+        let metadata = pkg.metadata();
+
         let out_dir = out_dir.unwrap_or_else(|| {
-            PathBuf::from(pkg.metadata.package_name.namespace())
-                .join(pkg.metadata.package_name.name())
+            PathBuf::from(metadata.package_name.namespace()).join(metadata.package_name.name())
         });
         files
             .save_to_disk(&out_dir)
@@ -108,10 +109,10 @@ fn load_pirita_file(path: &Path) -> Result<Package, Error> {
         .parse()
         .context("Unable to parse the package name")?;
 
-    Ok(Package {
-        metadata: Metadata::new(package_name, version),
-        libraries: vec![Library { module, interface }],
-    })
+    Ok(Package::new(
+        Metadata::new(package_name, version),
+        vec![Library { module, interface }],
+    ))
 }
 
 fn wasm_abi(module: &[u8]) -> wit_pack::Abi {

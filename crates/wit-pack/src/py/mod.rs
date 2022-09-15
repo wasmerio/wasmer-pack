@@ -31,11 +31,12 @@ static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
 
 /// Generate Python bindings.
 pub fn generate_python(package: &Package) -> Result<Files, Error> {
-    let package_name = package.metadata.package_name.python_name();
+    let metadata = package.metadata();
+    let package_name = metadata.package_name.python_name();
 
     let mut files = Files::new();
 
-    for library in &package.libraries {
+    for library in package.libraries() {
         files.insert_child_directory(
             Path::new(&package_name).join(library.interface_name().replace('-', "_")),
             library_bindings(library)?,
@@ -44,12 +45,12 @@ pub fn generate_python(package: &Package) -> Result<Files, Error> {
 
     files.insert(
         Path::new(&package_name).join("__init__.py"),
-        top_level_dunder_init(&package.metadata)?,
+        top_level_dunder_init(&metadata)?,
     );
 
     files.insert(
         Path::new("pyproject.toml"),
-        generate_pyproject_toml(&package.metadata, &package_name)?,
+        generate_pyproject_toml(&metadata, &package_name)?,
     );
 
     files.insert(
@@ -97,7 +98,7 @@ fn library_dunder_init(library: &Library) -> Result<SourceFile, Error> {
 fn generate_manifest(package: &Package, package_name: &str) -> Result<SourceFile, Error> {
     let ctx = minijinja::context! {
         package_name,
-        libraries => package.libraries.iter()
+        libraries => package.libraries()
             .map(|lib| lib.interface_name())
             .collect::<Vec<_>>(),
     };
@@ -213,10 +214,7 @@ mod tests {
             )),
         )
         .unwrap();
-        let package = Package {
-            metadata,
-            libraries: vec![Library { interface, module }],
-        };
+        let package = Package::new(metadata, vec![Library { interface, module }]);
 
         let files = generate_python(&package).unwrap();
 
