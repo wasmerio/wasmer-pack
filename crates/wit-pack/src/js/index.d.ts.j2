@@ -1,5 +1,0 @@
-{% with lib = libraries | first %}
-import { {{lib.class_name}} } from "./{{lib.interface_name}}/{{lib.interface_name}}";
-
-export default function(): Promise<{{lib.class_name}}>;
-{% endwith %}

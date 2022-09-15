@@ -116,6 +116,10 @@ impl<P: AsRef<Path>> Index<P> for Files {
 pub struct SourceFile(pub Vec<u8>);
 
 impl SourceFile {
+    pub fn empty() -> Self {
+        SourceFile(Vec::new())
+    }
+
     pub fn new(contents: Vec<u8>) -> Self {
         SourceFile(contents)
     }
