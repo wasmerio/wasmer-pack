@@ -35,6 +35,10 @@ On the other hand, if CI takes 30 minutes to complete, developers will want to
 avoid your project like the plague because getting even the most trivial changes
 merged becomes a multi-hour chore.
 
+To help this, we have [a GitHub Action][workflow-timer] which will post
+passive-aggressive comments on each PR to let you know how much your changes
+have affected CI times.
+
 ### Goal 2: It Just Works
 
 Users of `wit-pack` should be able to compile the project from scratch and use
@@ -86,7 +90,8 @@ The checklist:
 [exports]: ./crates/wasm//wit-pack.exports.wit
 [fast-rust-builds]: https://matklad.github.io/2021/09/04/fast-rust-builds.html
 [pirita]: https://github.com/wasmerio/pirita
-[wasm]: ./crates/wasm/
-[wit]: https://github.com/wasmerio/wit-bindgen/blob/c04723063c7a5a7389660ca97f85ffd9bc9ef0b8/WIT.md
-[wit-pack]: ./crates/wit-pack/
 [releases]: https://github.com/wasmerio/wit-pack/actions/workflows/releases.yml
+[wasm]: ./crates/wasm/
+[wit-pack]: ./crates/wit-pack/
+[wit]: https://github.com/wasmerio/wit-bindgen/blob/c04723063c7a5a7389660ca97f85ffd9bc9ef0b8/WIT.md
+[workflow-timer]: https://github.com/Michael-F-Bryan/workflow-timer
