@@ -45,17 +45,17 @@ pub fn generate_python(package: &Package) -> Result<Files, Error> {
 
     files.insert(
         Path::new(&package_name).join("__init__.py"),
-        top_level_dunder_init(&metadata)?,
+        top_level_dunder_init(metadata)?,
     );
 
     files.insert(
         Path::new("pyproject.toml"),
-        generate_pyproject_toml(&metadata, &package_name)?,
+        generate_pyproject_toml(metadata, &package_name)?,
     );
 
     files.insert(
         Path::new("MANIFEST.in"),
-        generate_manifest(&package, &package_name)?,
+        generate_manifest(package, &package_name)?,
     );
 
     Ok(files)

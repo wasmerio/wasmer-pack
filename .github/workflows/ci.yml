@@ -67,6 +67,10 @@ jobs:
         with:
           command: test
           args: --workspace --verbose --locked
+      - name: Time Reporter
+        uses: Michael-F-Bryan/workflow-timer@v0.1.5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   lints:
     name: Linting and Formatting
