@@ -9,16 +9,17 @@
 //! ```rust,no_run
 //! use wit_pack::{Abi, Module, Interface, Metadata, Library, Package};
 //!
-//! // First, load the relevant information from disk...
+//! // First, we need to give the package some metadata
 //! let package_name = "username/my-package".parse()?;
 //! let metadata = Metadata::new(package_name, "1.2.3");
+//!
+//! // Then we'll load the libraries from disk (this example only uses one)
 //! let module = Module::from_path("./module.wasm", Abi::None)?;
 //! let interface = Interface::from_path("./exports.wit")?;
-//! let pkg = Package { metadata,
-//!     libraries: vec![
-//!         Library { module, interface},
-//!     ],
-//! };
+//! let libraries = vec![Library { module, interface }];
+//!
+//! // finally, we've got all the information we need
+//! let pkg = Package ::new(metadata, libraries);
 //!
 //! // Now we can generate the bindings for our language
 //! let js = wit_pack::generate_javascript(&pkg)?;

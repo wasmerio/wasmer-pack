@@ -52,8 +52,6 @@ fn assert_unique_names<'a>(kind: &str, names: impl IntoIterator<Item = &'a str>)
             Err(index) => already_seen.insert(index, name),
         }
     }
-
-    todo!()
 }
 
 /// The name of a package from WAPM (e.g. `wasmer/wit-pack`).
