@@ -4,63 +4,63 @@
 
 ([API Docs][api-docs])
 
-> **TODO:** Write up an interesting description.
+Import your WebAssembly code just like any other dependency.
 
 ## Getting Started
 
-The easiest way to get started is with the `wit-pack` CLI.
+The easiest way to get started by installing with the `wit-pack` CLI.
 
 ```console
 $ cargo install --git https://github.com/wasmerio/wit-pack
 $ wit-pack --version
+wit-pack-cli 0.2.3
 ```
 
-This repository contains a `wapm.toml` which is used to publish the `wit-pack`
-CLI and library to WAPM.
-
-First, we need to compile the library to WebAssembly.
+The `wit-pack` command accepts input in the form of [Pirita][pirita] containers,
+so let's download a container we can generate bindings for.
 
 ```console
-$ cargo build --package=wit-pack-wasm --target=wasm32-unknown-unknown
-$ ls target/wasm32-unknown-unknown/debug/*.wasm
-target/wasm32-unknown-unknown/debug/wit_pack_wasm.wasm
+$ curl -O https://registry-cdn.wapm.dev/packages/wasmer/wit-pack/wit-pack-0.2.3.webc
 ```
 
-Now we can generate a JavaScript package to use this WebAssembly.
+Now we've got everything we need to generate Python bindings to the `wit-pack`
+package.
 
 ```console
-$ wit-pack --module=wit-pack --out-dir=wit-pack-js
-$ tree wit-pack-js
-wit-pack-js
+$ wit-pack python wit-pack-0.2.3.webc --out-dir ./py
+$ tree ./py
+./py
+├── MANIFEST.in
+├── pyproject.toml
+└── wit_pack
+    ├── __init__.py
+    └── wit_pack
+        ├── bindings.py
+        ├── __init__.py
+        └── wit-pack-wasm
+
+2 directories, 6 files
+```
+
+We can generate JavaScript bindings with a similar command
+
+```console
+$ wit-pack js wit-pack-0.2.3.webc --out-dir ./js
+$ tree ./js
+./js
 ├── package.json
 └── src
-    ├── exports.wasm
-    ├── generated
-    │   ├── exports.d.ts
-    │   ├── exports.js
-    │   └── intrinsics.js
     ├── index.d.ts
-    └── index.js
+    ├── index.js
+    └── wit-pack
+        ├── index.d.ts
+        ├── index.js
+        ├── intrinsics.js
+        ├── wit-pack.d.ts
+        ├── wit-pack.js
+        └── wit-pack-wasm
 
-2 directories, 7 files
-```
-
-You can now use the package just like any other JavaScript dependency.
-
-```ts
-import { load } from "./wit-pack-js";
-import fs from "fs/promises";
-
-const wasm = await fs.readFile("foo.wasm");
-const wit = await fs.readFile("interface.wit");
-const result = witPack.parse("myLibrary", wit, wasm);
-
-if (!result.ok) {
-    throw new Error(result.err.message);
-}
-
-const files = result.val;
-files.forEach(console.log);
+2 directories, 9 files
 ```
 
 ## License
@@ -73,3 +73,4 @@ trustworthiness of each of your dependencies, including this one.
 
 [api-docs]: https://wasmerio.github.io/wit-pack
 [crev]: https://github.com/crev-dev/cargo-crev
+[pirita]: https://github.com/wasmerio/pirita
