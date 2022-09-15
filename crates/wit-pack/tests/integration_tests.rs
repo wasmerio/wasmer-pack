@@ -110,27 +110,26 @@ fn wit_pack_fixture() -> Package {
 fn wabt_fixture() -> Package {
     let project_root = project_root();
 
-    let exports = project_root
+    let wabt_dir = project_root
         .join("crates")
         .join("wit-pack")
         .join("tests")
-        .join("wabt")
-        .join("wabt.exports.wit");
-    assert!(exports.exists());
-
-    let wasm = project_root
-        .join("crates")
-        .join("wit-pack")
-        .join("tests")
-        .join("wabt")
-        .join("libwabt.wasm");
+        .join("wabt");
 
     Package {
         metadata: Metadata::new("wasmer/wabt".parse().unwrap(), "0.0.0"),
-        libraries: vec![Library {
-            module: Module::from_path(&wasm, Abi::Wasi).unwrap(),
-            interface: Interface::from_path(exports).unwrap(),
-        }],
+        libraries: vec![
+            Library {
+                module: Module::from_path(wabt_dir.join("libwabt.wasm"), Abi::Wasi).unwrap(),
+                interface: Interface::from_path(wabt_dir.join("wabt.exports.wit")).unwrap(),
+            },
+            // Note: we have a duplicate copy of libwabt to check support for
+            // multiple libraries
+            Library {
+                module: Module::from_path(wabt_dir.join("libwabt.wasm"), Abi::Wasi).unwrap(),
+                interface: Interface::from_path(wabt_dir.join("wabt2.exports.wit")).unwrap(),
+            },
+        ],
     }
 }
 

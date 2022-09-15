@@ -1,8 +1,12 @@
 #!/bin/env python3
 
-from pathlib import Path
-from typing import Tuple, Union
+import sys
 from wabt.wabt import load, WasmFeature, Ok
+
+try:
+    import wabt.wabt2 as _
+except:
+    raise AssertionError("wit-pack should have generated a wabt.wabt2 module")
 
 
 def main():
