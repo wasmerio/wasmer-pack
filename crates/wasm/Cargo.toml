@@ -1,6 +1,6 @@
 [package]
 name = "wit-pack-wasm"
-version = "0.1.5"
+version = "0.2.3"
 edition = "2021"
 description = "The WebAssembly interface to wit-pack."
 publish = false
@@ -22,4 +22,4 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 anyhow = "1.0.62"
 wit-bindgen-rust = { git = "https://github.com/wasmerio/wit-bindgen", version = "0.1.0" }
-wit-pack = { version = "0.1.0", path = "../wit-pack" }
+wit-pack = { version = "0.2.0", path = "../wit-pack" }

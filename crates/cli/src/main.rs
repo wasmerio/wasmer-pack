@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Error};
 use clap::Parser;
-use webc::{Manifest, ParseOptions, WebC, WebCMmap};
+use webc::{Manifest, ParseOptions, WebC, WebCOwned};
 use wit_pack::{Interface, Library, Metadata, Module, Package};
 
 fn main() -> Result<(), Error> {
@@ -65,11 +65,13 @@ enum Language {
 fn load_pirita_file(path: &Path) -> Result<Package, Error> {
     let options = ParseOptions::default();
 
-    let webc = WebCMmap::parse(path.to_path_buf(), &options)
-        .with_context(|| format!("Unable to load \"{}\" as a WEBC file", path.display()))?;
-    let Manifest { bindings, .. } = webc.get_metadata();
+    let raw =
+        std::fs::read(path).with_context(|| format!("Unable to read \"{}\"", path.display()))?;
+    let webc = WebCOwned::parse(raw, &options)
+        .with_context(|| format!("Unable to parse \"{}\" as a WEBC file", path.display()))?;
 
     let fully_qualified_package_name = webc.get_package_name();
+    let Manifest { bindings, .. } = webc.get_metadata();
 
     let libraries = bindings
         .iter()
