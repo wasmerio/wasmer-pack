@@ -78,7 +78,7 @@ fn load_pirita_file(path: &Path) -> Result<Package, Error> {
         .map(|b| load_library(b, &webc, &fully_qualified_package_name))
         .collect::<Result<Vec<_>, _>>()?;
 
-    let (unversioned_name, version) = fully_qualified_package_name.split_once("@").unwrap();
+    let (unversioned_name, version) = fully_qualified_package_name.split_once('@').unwrap();
     let package_name = unversioned_name
         .parse()
         .context("Unable to parse the package name")?;
