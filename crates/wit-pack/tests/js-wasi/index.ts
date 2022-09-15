@@ -1,4 +1,4 @@
-import load from "wabt";
+import load from "wabt/src/wabt/index.js";
 import {WASM_FEATURE_SIMD, WASM_FEATURE_BULK_MEMORY } from "wabt/src/wabt/wabt.js";
 
 async function main() {

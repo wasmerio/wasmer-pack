@@ -1,6 +1,6 @@
 ---
 source: crates/wit-pack/src/js/mod.rs
-assertion_line: 175
+assertion_line: 179
 expression: "files[\"src/index.d.ts\"].utf8_contents().unwrap()"
 ---
-
+export default function(): Promise<unknown>;

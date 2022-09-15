@@ -33,8 +33,11 @@ pub fn generate_javascript(package: &Package) -> Result<Files, Error> {
         );
     }
 
-    files.insert("src/index.js", SourceFile::empty());
-    files.insert("src/index.d.ts", SourceFile::empty());
+    files.insert("src/index.js", "export default function() {}".into());
+    files.insert(
+        "src/index.d.ts",
+        "export default function(): Promise<unknown>;".into(),
+    );
 
     let package_json = generate_package_json(package.requires_wasi(), &package.metadata);
     files.insert("package.json", package_json);
@@ -72,6 +75,7 @@ impl Library {
             wasi => self.requires_wasi(),
             class_name => self.class_name(),
             interface_name => self.interface_name(),
+            module_filename => self.module_filename(),
         }
     }
 }

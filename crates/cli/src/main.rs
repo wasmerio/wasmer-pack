@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Error};
 use clap::Parser;
 use webc::{Manifest, ParseOptions, WebCMmap};
-use wit_pack::{Interface, Metadata, Module};
+use wit_pack::{Interface, Library, Metadata, Module, Package};
 
 fn main() -> Result<(), Error> {
     let cmd = Cmd::parse();
@@ -36,15 +36,16 @@ impl Codegen {
     fn run(self, language: Language) -> Result<(), Error> {
         let Codegen { out_dir, input } = self;
 
-        let (metadata, module, interface) = load_pirita_file(&input)?;
+        let pkg = load_pirita_file(&input)?;
 
         let files = match language {
-            Language::JavaScript => wit_pack::generate_javascript(&metadata, &module, &interface)?,
-            Language::Python => wit_pack::generate_python(&metadata, &module, &interface)?,
+            Language::JavaScript => wit_pack::generate_javascript(&pkg)?,
+            Language::Python => wit_pack::generate_python(&pkg)?,
         };
 
         let out_dir = out_dir.unwrap_or_else(|| {
-            PathBuf::from(&metadata.package_name.namespace()).join(metadata.package_name.name())
+            PathBuf::from(pkg.metadata.package_name.namespace())
+                .join(pkg.metadata.package_name.name())
         });
         files
             .save_to_disk(&out_dir)
@@ -60,7 +61,7 @@ enum Language {
     Python,
 }
 
-fn load_pirita_file(path: &Path) -> Result<(Metadata, Module, Interface), Error> {
+fn load_pirita_file(path: &Path) -> Result<Package, Error> {
     let options = ParseOptions::default();
 
     let webc = WebCMmap::parse(path.to_path_buf(), &options)
@@ -107,7 +108,10 @@ fn load_pirita_file(path: &Path) -> Result<(Metadata, Module, Interface), Error>
         .parse()
         .context("Unable to parse the package name")?;
 
-    Ok((Metadata::new(package_name, version), module, interface))
+    Ok(Package {
+        metadata: Metadata::new(package_name, version),
+        libraries: vec![Library { module, interface }],
+    })
 }
 
 fn wasm_abi(module: &[u8]) -> wit_pack::Abi {

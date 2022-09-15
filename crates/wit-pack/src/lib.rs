@@ -7,16 +7,21 @@
 //! language, you can always use this crate directly.
 //!
 //! ```rust,no_run
-//! use wit_pack::{Module, Interface, Metadata, Abi};
+//! use wit_pack::{Abi, Module, Interface, Metadata, Library, Package};
 //!
 //! // First, load the relevant information from disk...
 //! let package_name = "username/my-package".parse()?;
 //! let metadata = Metadata::new(package_name, "1.2.3");
 //! let module = Module::from_path("./module.wasm", Abi::None)?;
 //! let interface = Interface::from_path("./exports.wit")?;
+//! let pkg = Package { metadata,
+//!     libraries: vec![
+//!         Library { module, interface},
+//!     ],
+//! };
 //!
 //! // Now we can generate the bindings for our language
-//! let js = wit_pack::generate_javascript(&metadata, &module, &interface)?;
+//! let js = wit_pack::generate_javascript(&pkg)?;
 //!
 //! // And finally, save them to disk
 //! js.save_to_disk("./out")?;

@@ -1,6 +1,6 @@
 ---
 source: crates/wit-pack/src/js/mod.rs
-assertion_line: 174
+assertion_line: 178
 expression: "files[\"src/index.js\"].utf8_contents().unwrap()"
 ---
-
+export default function() {}

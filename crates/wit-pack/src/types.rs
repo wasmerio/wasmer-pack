@@ -206,7 +206,11 @@ impl Module {
     /// they pass in the correct [`Abi`].
     pub fn from_path(path: impl AsRef<Path>, abi: Abi) -> Result<Self, Error> {
         let path = path.as_ref();
-        let name = sanitized_module_name(path)?.to_string();
+        let name = path
+            .file_name()
+            .context("Empty filename")?
+            .to_string_lossy()
+            .into_owned();
 
         let wasm = std::fs::read(path)
             .with_context(|| format!("Unable to read \"{}\"", path.display()))?;
@@ -234,21 +238,6 @@ impl FromStr for Abi {
             _ => Err(Error::msg("Expected either \"none\" or \"wasi\"")),
         }
     }
-}
-
-fn sanitized_module_name(path: &Path) -> Result<&str, Error> {
-    // This matches the logic used by wit-bindgen when deriving a module's name.
-    // https://github.com/bytecodealliance/wit-bindgen/blob/cb871cfa1ee460b51eb1d144b175b9aab9c50aba/crates/parser/src/lib.rs#L344-L352
-
-    let name = path
-        .file_name()
-        .context("wit path must end in a file name")?
-        .to_str()
-        .context("wit filename must be valid unicode")?;
-
-    let first_segment = name.split('.').next().expect("Guaranteed to not be empty");
-
-    Ok(first_segment)
 }
 
 /// The interface exported by the WebAssembly module.
@@ -279,19 +268,6 @@ impl Interface {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn sanitized_names() {
-        let inputs = vec![
-            ("exports.wit", "exports"),
-            ("wit-pack.exports.wit", "wit-pack"),
-        ];
-
-        for (filename, expected) in inputs {
-            let got = sanitized_module_name(filename.as_ref()).unwrap();
-            assert_eq!(got, expected);
-        }
-    }
 
     #[test]
     fn sanitize_package_names() {

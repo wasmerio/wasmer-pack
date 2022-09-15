@@ -1,6 +1,6 @@
 ---
 source: crates/wit-pack/src/js/mod.rs
-assertion_line: 176
+assertion_line: 180
 expression: "files[\"src/wit-pack/index.js\"].utf8_contents().unwrap()"
 ---
 import fs from "fs/promises";
@@ -12,7 +12,7 @@ let module = undefined;
 /** Lazily fetch and compile the WebAssembly module */
 async function getModule() {
     if (!module) {
-        const path = url.fileURLToPath(new URL("./.wasm", import.meta.url));
+        const path = url.fileURLToPath(new URL("./wit_pack_wasm.wasm", import.meta.url));
         const wasm = await fs.readFile(path);
 
         module = WebAssembly.compileStreaming

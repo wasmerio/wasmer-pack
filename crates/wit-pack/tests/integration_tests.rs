@@ -126,7 +126,7 @@ fn wabt_fixture() -> Package {
         .join("libwabt.wasm");
 
     Package {
-        metadata: Metadata::new("wasmer/wit-btpack".parse().unwrap(), "0.0.0"),
+        metadata: Metadata::new("wasmer/wabt".parse().unwrap(), "0.0.0"),
         libraries: vec![Library {
             module: Module::from_path(&wasm, Abi::Wasi).unwrap(),
             interface: Interface::from_path(exports).unwrap(),
