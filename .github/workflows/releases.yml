@@ -26,18 +26,16 @@ jobs:
           toolchain: "1.59.0" # Required by wit-bindgen-gen-rust
       - name: Install WebAssembly targets
         run: rustup target add wasm32-unknown-unknown wasm32-wasi
-      - name: Install the Wasmer Runtime
-        run: curl https://get.wasmer.io -sSfL | sh
+      - name: Setup Wasmer
+        uses: wasmerio/setup-wasmer@v1
       - name: Install cargo-wapm
         uses: actions-rs/cargo@v1
         with:
           command: install
           args: cargo-wapm --verbose --debug
-      - name: Publish to wapm.dev
+      - name: Login to wapm.dev
         run: |
           wapm config set registry.url https://registry.wapm.dev
-          cargo wapm --workspace
-      - name: Publish to wapm.io
-        run: |
-          wapm config set registry.url https://registry.wapm.io
-          cargo wapm --workspace
+          wapm login ${{ secrets.WAPM_DEV_TOKEN }}
+      - name: Publish to wapm.dev
+        run: cargo wapm --workspace
