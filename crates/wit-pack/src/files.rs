@@ -24,6 +24,15 @@ impl Files {
         self.members.insert(path.into(), file);
     }
 
+    pub fn insert_child_directory(&mut self, dir: impl AsRef<Path>, files: Files) {
+        let dir = dir.as_ref();
+
+        for (path, file) in files {
+            let path = dir.join(path);
+            self.insert(path, file);
+        }
+    }
+
     pub fn iter(&self) -> impl Iterator<Item = (&Path, &SourceFile)> + '_ {
         self.members.iter().map(|(k, v)| (k.as_path(), v))
     }
@@ -68,6 +77,26 @@ impl IntoIterator for Files {
     }
 }
 
+impl Extend<(PathBuf, SourceFile)> for Files {
+    fn extend<T: IntoIterator<Item = (PathBuf, SourceFile)>>(&mut self, iter: T) {
+        for (path, file) in iter {
+            self.insert(path, file);
+        }
+    }
+}
+
+impl From<wit_bindgen_gen_core::Files> for Files {
+    fn from(files: wit_bindgen_gen_core::Files) -> Self {
+        let mut f = Files::new();
+
+        for (path, contents) in files.iter() {
+            f.insert(path, contents.into());
+        }
+
+        f
+    }
+}
+
 impl<P: AsRef<Path>> Index<P> for Files {
     type Output = SourceFile;
 
@@ -87,6 +116,10 @@ impl<P: AsRef<Path>> Index<P> for Files {
 pub struct SourceFile(pub Vec<u8>);
 
 impl SourceFile {
+    pub fn empty() -> Self {
+        SourceFile(Vec::new())
+    }
+
     pub fn new(contents: Vec<u8>) -> Self {
         SourceFile(contents)
     }

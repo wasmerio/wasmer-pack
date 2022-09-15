@@ -1,8 +1,6 @@
 '''
-{{description}}
+Bindings to the {{interface_name}} library.
 '''
-
-__version__ = "{{version}}"
 
 import wasmer as _wasmer
 import pathlib as _pathlib
@@ -10,7 +8,7 @@ import pathlib as _pathlib
 from .bindings import *
 
 _store = _wasmer.Store()
-_wasm = _pathlib.Path(__file__).parent.joinpath("{{module_name}}.wasm").read_bytes()
+_wasm = _pathlib.Path(__file__).parent.joinpath("{{module_filename}}").read_bytes()
 _module = _wasmer.Module(_store, _wasm)
 
 
@@ -23,3 +21,4 @@ def load() -> {{class_name}}:
     {% endif %}
 
     return {{class_name}}(_store, imports, _module)
+

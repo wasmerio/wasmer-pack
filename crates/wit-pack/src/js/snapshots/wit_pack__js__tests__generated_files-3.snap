@@ -2,8 +2,4 @@
 source: crates/wit-pack/src/js/mod.rs
 expression: "files[\"src/index.d.ts\"].utf8_contents().unwrap()"
 ---
-
-import { WitPack } from "./wit-pack/wit-pack";
-
-export default function(): Promise<WitPack>;
-
+export default function(): Promise<unknown>;

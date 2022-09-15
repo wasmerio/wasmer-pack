@@ -2,8 +2,8 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Error};
 use clap::Parser;
-use webc::{Manifest, ParseOptions, WebCMmap};
-use wit_pack::{Interface, Metadata, Module};
+use webc::{Manifest, ParseOptions, WebC, WebCMmap};
+use wit_pack::{Interface, Library, Metadata, Module, Package};
 
 fn main() -> Result<(), Error> {
     let cmd = Cmd::parse();
@@ -36,17 +36,21 @@ impl Codegen {
     fn run(self, language: Language) -> Result<(), Error> {
         let Codegen { out_dir, input } = self;
 
-        let (metadata, module, interface) = load_pirita_file(&input)?;
+        let pkg = load_pirita_file(&input)?;
 
         let files = match language {
-            Language::JavaScript => wit_pack::generate_javascript(&metadata, &module, &interface)?,
-            Language::Python => wit_pack::generate_python(&metadata, &module, &interface)?,
+            Language::JavaScript => wit_pack::generate_javascript(&pkg)?,
+            Language::Python => wit_pack::generate_python(&pkg)?,
         };
 
-        let out_dir = out_dir
-            .as_deref()
-            .unwrap_or_else(|| Path::new(&metadata.package_name));
-        files.save_to_disk(out_dir)?;
+        let metadata = pkg.metadata();
+
+        let out_dir = out_dir.unwrap_or_else(|| {
+            PathBuf::from(metadata.package_name.namespace()).join(metadata.package_name.name())
+        });
+        files
+            .save_to_disk(&out_dir)
+            .with_context(|| format!("Unable to save to \"{}\"", out_dir.display()))?;
 
         Ok(())
     }
@@ -58,37 +62,53 @@ enum Language {
     Python,
 }
 
-fn load_pirita_file(path: &Path) -> Result<(Metadata, Module, Interface), Error> {
+fn load_pirita_file(path: &Path) -> Result<Package, Error> {
     let options = ParseOptions::default();
 
     let webc = WebCMmap::parse(path.to_path_buf(), &options)
         .with_context(|| format!("Unable to load \"{}\" as a WEBC file", path.display()))?;
     let Manifest { bindings, .. } = webc.get_metadata();
 
-    let bindings = match bindings.as_slice() {
-        [b] => b
-            .get_wit_bindings()
-            .with_context(|| format!("Expected WIT bindings, but found \"{}\"", b.kind))?,
-        [..] => {
-            anyhow::bail!("Generating bindings for multiple modules isn't supported at the moment")
-        }
-    };
+    let fully_qualified_package_name = webc.get_package_name();
 
-    let package = webc.get_package_name();
+    let libraries = bindings
+        .iter()
+        .map(|b| load_library(b, &webc, &fully_qualified_package_name))
+        .collect::<Result<Vec<_>, _>>()?;
+
+    let (unversioned_name, version) = fully_qualified_package_name.split_once("@").unwrap();
+    let package_name = unversioned_name
+        .parse()
+        .context("Unable to parse the package name")?;
+
+    Ok(Package::new(
+        Metadata::new(package_name, version),
+        libraries,
+    ))
+}
+
+fn load_library(
+    bindings: &webc::Binding,
+    webc: &WebC,
+    fully_qualified_package_name: &str,
+) -> Result<Library, Error> {
+    let bindings = bindings
+        .get_wit_bindings()
+        .with_context(|| format!("Expected WIT bindings, but found \"{}\"", bindings.kind))?;
 
     let exports = bindings.exports.trim_start_matches("metadata://");
     let exports = webc
-        .get_volume(&package, "metadata")
+        .get_volume(fully_qualified_package_name, "metadata")
         .context("The container doesn't have a \"metadata\" volume")?
         .get_file(exports)
         .with_context(|| format!("Unable to find the \"{}\" volume", bindings.exports))?;
     let exports = std::str::from_utf8(exports).context("The WIT file should be a UTF-8 string")?;
     let interface =
         Interface::from_wit(&bindings.exports, exports).context("Unable to parse the WIT file")?;
-
     let exports = bindings.module.trim_start_matches("atoms://");
+
     let module = webc
-        .get_atom(&package, exports)
+        .get_atom(fully_qualified_package_name, exports)
         .with_context(|| format!("Unable to get the \"{}\" atom", bindings.module))?;
     let module = Module {
         name: Path::new(exports)
@@ -100,13 +120,7 @@ fn load_pirita_file(path: &Path) -> Result<(Metadata, Module, Interface), Error>
         wasm: module.to_vec(),
     };
 
-    let (unversioned_name, _) = package.split_once("@").unwrap();
-
-    Ok((
-        Metadata::new(format!("@{unversioned_name}"), "0.0.0"),
-        module,
-        interface,
-    ))
+    Ok(Library { module, interface })
 }
 
 fn wasm_abi(module: &[u8]) -> wit_pack::Abi {

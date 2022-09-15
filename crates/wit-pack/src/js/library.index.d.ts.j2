@@ -9,7 +9,7 @@ import { {{class_name}} } from "./{{interface_name}}";
  */
 export type LoadOptions = {
 {%- if wasi %}
-    /** An initialized `@wasmer/wasi` object.
+    /** An initialized `@wasmer/wasi` object. */
     wasi: Wasi,
 {%- endif %}
     imports: Record<string, WebAssembly.ModuleImports>,

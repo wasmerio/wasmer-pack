@@ -7,15 +7,22 @@
 //! language, you can always use this crate directly.
 //!
 //! ```rust,no_run
-//! use wit_pack::{Module, Interface, Metadata, Abi};
+//! use wit_pack::{Abi, Module, Interface, Metadata, Library, Package};
 //!
-//! // First, load the relevant information from disk...
-//! let metadata = Metadata::new("@username/my-package", "1.2.3");
+//! // First, we need to give the package some metadata
+//! let package_name = "username/my-package".parse()?;
+//! let metadata = Metadata::new(package_name, "1.2.3");
+//!
+//! // Then we'll load the libraries from disk (this example only uses one)
 //! let module = Module::from_path("./module.wasm", Abi::None)?;
 //! let interface = Interface::from_path("./exports.wit")?;
+//! let libraries = vec![Library { module, interface }];
+//!
+//! // finally, we've got all the information we need
+//! let pkg = Package ::new(metadata, libraries);
 //!
 //! // Now we can generate the bindings for our language
-//! let js = wit_pack::generate_javascript(&metadata, &module, &interface)?;
+//! let js = wit_pack::generate_javascript(&pkg)?;
 //!
 //! // And finally, save them to disk
 //! js.save_to_disk("./out")?;
@@ -23,19 +30,15 @@
 //! ```
 
 mod files;
-mod interface;
 mod js;
-mod metadata;
-mod module;
 mod py;
+mod types;
 mod wit_version;
 
 pub use crate::{
     files::{Files, SourceFile},
-    interface::Interface,
     js::generate_javascript,
-    metadata::Metadata,
-    module::{Abi, Module},
     py::generate_python,
+    types::{Abi, Interface, Library, Metadata, Module, Package, PackageName},
     wit_version::WIT_PARSER_VERSION,
 };

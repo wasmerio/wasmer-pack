@@ -1,1 +1,3 @@
-include **/*.wasm
+{%- for library in libraries %}
+include {{package_name}}/{{ library | replace('-', '_') }}/*.wasm
+{% endfor %}

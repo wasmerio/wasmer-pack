@@ -117,7 +117,7 @@ v8-compile-cache-lib@^3.0.1:
   integrity sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==
 
 "wabt@file:../../../../target/tmp/javascript-wasi":
-  version "0.1.5"
+  version "0.0.0"
   dependencies:
     "@wasmer/wasi" "^1.1.2"
 

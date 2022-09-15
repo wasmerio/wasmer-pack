@@ -11,7 +11,7 @@ let module = undefined;
 /** Lazily fetch and compile the WebAssembly module */
 async function getModule() {
     if (!module) {
-        const path = url.fileURLToPath(new URL("./wit_pack_wasm.wasm.wasm", import.meta.url));
+        const path = url.fileURLToPath(new URL("./wit_pack_wasm.wasm", import.meta.url));
         const wasm = await fs.readFile(path);
 
         module = WebAssembly.compileStreaming

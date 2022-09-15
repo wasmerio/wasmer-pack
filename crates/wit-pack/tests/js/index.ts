@@ -1,5 +1,5 @@
-import load from "@wasmer/wit-pack/src/index.js";
-import { WitPack, Exports, Metadata, Module, Result, Error as WitPackError, File } from "@wasmer/wit-pack/src/wit-pack/wit-pack.js";
+import load from "@wasmer/wit-pack/src/wit-pack/index.js";
+import { WitPack, Interface, Metadata, Module, Result, Error as WitPackError, File } from "@wasmer/wit-pack/src/wit-pack/wit-pack.js";
 import fs from "fs/promises";
 import path from "path";
 
@@ -12,14 +12,18 @@ async function main() {
 
     const projectRoot = path.resolve(".", "../../../..");
 
-    const metadata = Metadata.new(witPack, "@wasmer/wit-pack", "0.0.0");
-    const module = await loadWasmModule(witPack, projectRoot);
     const wit = path.join(projectRoot, "crates", "wasm", "wit-pack.exports.wit");
     const witFile = await fs.readFile(wit, {encoding: "utf8"});
-    const exports = unwrap(Exports.fromWit(witPack, path.basename(wit), witFile));
+    const pkg = {
+        metadata: Metadata.new(witPack, "wasmer/wit-pack", "0.0.0"),
+        libraries: [{
+            interface: unwrap(Interface.fromWit(witPack, path.basename(wit), witFile)),
+            module: await loadWasmModule(witPack, projectRoot),
+        }],
+    };
 
     // Now we can generate the JavaScript bindings
-    const result = witPack.generateJavascript(metadata, exports, module);
+    const result = witPack.generateJavascript(pkg);
     const files: File[] = unwrap(result);
 
     // We should have been given a list of the generated files

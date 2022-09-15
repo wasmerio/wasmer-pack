@@ -12,20 +12,18 @@ pub struct WitPack;
 
 impl crate::wit_pack::WitPack for WitPack {
     fn generate_javascript(
-        metadata: Handle<Metadata>,
-        exports: Handle<Exports>,
-        module: Handle<Module>,
+        pkg: crate::wit_pack::Package,
     ) -> Result<Vec<wit_pack::File>, wit_pack::Error> {
-        let js = upstream::generate_javascript(&metadata.0.borrow(), &module.0, &exports.0)?;
+        let pkg = pkg.into();
+        let js = upstream::generate_javascript(&pkg)?;
         Ok(unwrap_files(js))
     }
 
     fn generate_python(
-        metadata: Handle<Metadata>,
-        exports: Handle<Exports>,
-        module: Handle<Module>,
+        pkg: crate::wit_pack::Package,
     ) -> Result<Vec<wit_pack::File>, wit_pack::Error> {
-        let py = upstream::generate_python(&metadata.0.borrow(), &module.0, &exports.0)?;
+        let pkg = pkg.into();
+        let py = upstream::generate_python(&pkg)?;
         Ok(unwrap_files(py))
     }
 }
@@ -40,17 +38,17 @@ fn unwrap_files(files: upstream::Files) -> Vec<wit_pack::File> {
         .collect()
 }
 
-pub struct Exports(upstream::Interface);
+pub struct Interface(upstream::Interface);
 
-impl crate::wit_pack::Exports for Exports {
-    fn from_wit(name: String, contents: String) -> Result<Handle<Exports>, wit_pack::Error> {
+impl crate::wit_pack::Interface for Interface {
+    fn from_wit(name: String, contents: String) -> Result<Handle<Interface>, wit_pack::Error> {
         let exports = upstream::Interface::from_wit(&name, &contents)?;
-        Ok(Handle::new(Exports(exports)))
+        Ok(Handle::new(Interface(exports)))
     }
 
-    fn from_path(path: String) -> Result<Handle<Exports>, wit_pack::Error> {
+    fn from_path(path: String) -> Result<Handle<Interface>, wit_pack::Error> {
         let exports = upstream::Interface::from_path(&path)?;
-        Ok(Handle::new(Exports(exports)))
+        Ok(Handle::new(Interface(exports)))
     }
 }
 
@@ -71,7 +69,7 @@ pub struct Metadata(RefCell<upstream::Metadata>);
 impl crate::wit_pack::Metadata for Metadata {
     fn new(package_name: String, version: String) -> wit_bindgen_rust::Handle<crate::Metadata> {
         Handle::new(Metadata(RefCell::new(upstream::Metadata::new(
-            package_name,
+            package_name.parse().expect("Invalid package name"),
             version,
         ))))
     }
@@ -100,8 +98,19 @@ impl From<Error> for crate::wit_pack::Error {
     }
 }
 
-// #[cfg(target = "wasm32-wasi")]
-// fn main() {
-//     // We only add this function to test wasm32 wasi
-//     println!("Hello, world!");
-// }
+impl From<crate::wit_pack::Package> for upstream::Package {
+    fn from(pkg: crate::wit_pack::Package) -> Self {
+        let crate::wit_pack::Package {
+            metadata,
+            libraries,
+        } = pkg;
+        let metadata = metadata.0.borrow();
+        upstream::Package::new(
+            upstream::Metadata::clone(&metadata),
+            libraries.into_iter().map(|lib| upstream::Library {
+                module: lib.module.0.clone(),
+                interface: lib.interface.0.clone(),
+            }),
+        )
+    }
+}

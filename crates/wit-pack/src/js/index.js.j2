@@ -1,7 +1,0 @@
-{% for library in libraries %}
-import load from "./{{library.interface_name}}/index.js";
-{% endfor %}
-
-export default async function(options) {
-    return await load(options);
-}

@@ -3,13 +3,23 @@ resource metadata {
     set-description: func(description: string)
 }
 
-resource exports {
-    static from-wit: func(name: string, contents: string) -> expected<exports, error>
-    static from-path: func(path: string) -> expected<exports, error>
+record package {
+    metadata: metadata,
+    libraries: list<library>,
+}
+
+resource %interface {
+    static from-wit: func(name: string, contents: string) -> expected<%interface, error>
+    static from-path: func(path: string) -> expected<%interface, error>
 }
 
 resource module {
     static new: func(name: string, abi: abi, wasm: list<u8>) -> module
+}
+
+record library {
+    %interface: %interface,
+    module: module,
 }
 
 enum abi {
@@ -33,13 +43,5 @@ record file {
     contents: list<u8>,
 }
 
-generate-javascript: func(
-    metadata: metadata,
-    exports: exports,
-    module: module,
-) -> expected<list<file>, error>
-generate-python: func(
-    metadata: metadata,
-    exports: exports,
-    module: module,
-) -> expected<list<file>, error>
+generate-javascript: func(pkg: package) -> expected<list<file>, error>
+generate-python: func(pkg: package) -> expected<list<file>, error>
