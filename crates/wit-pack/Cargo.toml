@@ -1,6 +1,6 @@
 [package]
 name = "wit-pack"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Wasmer Engineering Team <engineering@wasmer.io>"]
 repository = "https://github.com/wasmerio/wit-pack"
 edition = "2021"
