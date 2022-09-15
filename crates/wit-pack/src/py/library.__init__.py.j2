@@ -8,7 +8,7 @@ import pathlib as _pathlib
 from .bindings import *
 
 _store = _wasmer.Store()
-_wasm = _pathlib.Path(__file__).parent.joinpath("{{module_filename}}.wasm").read_bytes()
+_wasm = _pathlib.Path(__file__).parent.joinpath("{{module_filename}}").read_bytes()
 _module = _wasmer.Module(_store, _wasm)
 
 

@@ -52,7 +52,10 @@ pub fn generate_python(package: &Package) -> Result<Files, Error> {
         generate_pyproject_toml(&package.metadata, &package_name)?,
     );
 
-    files.insert(Path::new("MANIFEST.in"), generate_manifest()?);
+    files.insert(
+        Path::new("MANIFEST.in"),
+        generate_manifest(&package, &package_name)?,
+    );
 
     Ok(files)
 }
@@ -66,6 +69,11 @@ fn library_bindings(library: &Library) -> Result<Files, Error> {
     );
 
     files.insert("__init__.py", library_dunder_init(library)?);
+
+    files.insert(
+        library.module_filename(),
+        SourceFile::from(&library.module.wasm),
+    );
 
     Ok(files)
 }
@@ -86,8 +94,17 @@ fn library_dunder_init(library: &Library) -> Result<SourceFile, Error> {
     Ok(rendered.into())
 }
 
-fn generate_manifest() -> Result<SourceFile, Error> {
-    let rendered = TEMPLATES.get_template("MANIFEST.in").unwrap().render(())?;
+fn generate_manifest(package: &Package, package_name: &str) -> Result<SourceFile, Error> {
+    let ctx = minijinja::context! {
+        package_name,
+        libraries => package.libraries.iter()
+            .map(|lib| lib.interface_name())
+            .collect::<Vec<_>>(),
+    };
+    let rendered = TEMPLATES
+        .get_template("MANIFEST.in")
+        .unwrap()
+        .render(&ctx)?;
 
     Ok(rendered.into())
 }
@@ -206,6 +223,9 @@ mod tests {
         insta::assert_display_snapshot!(files["pyproject.toml"].utf8_contents().unwrap());
         insta::assert_display_snapshot!(files["MANIFEST.in"].utf8_contents().unwrap());
         insta::assert_display_snapshot!(files["wit_pack/__init__.py"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["wit_pack/wit_pack/__init__.py"]
+            .utf8_contents()
+            .unwrap());
 
         let actual_files: HashSet<_> = files.iter().map(|(p, _)| p).collect();
         assert_eq!(actual_files, expected);

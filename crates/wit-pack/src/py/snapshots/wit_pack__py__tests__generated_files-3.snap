@@ -3,24 +3,7 @@ source: crates/wit-pack/src/py/mod.rs
 expression: "files[\"wit_pack/__init__.py\"].utf8_contents().unwrap()"
 ---
 '''
-Bindings to wasmer/wit-pack.
+Bindings to wasmer/wit-pack v1.2.3.
 '''
 
 __version__ = "1.2.3"
-
-import wasmer as _wasmer
-import pathlib as _pathlib
-
-from .bindings import *
-
-_store = _wasmer.Store()
-_wasm = _pathlib.Path(__file__).parent.joinpath("wit_pack_wasm.wasm.wasm").read_bytes()
-_module = _wasmer.Module(_store, _wasm)
-
-
-def load() -> WitPack:
-    
-    imports = {}
-    
-
-    return WitPack(_store, imports, _module)

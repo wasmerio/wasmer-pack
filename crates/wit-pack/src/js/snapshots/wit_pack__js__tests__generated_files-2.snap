@@ -2,10 +2,4 @@
 source: crates/wit-pack/src/js/mod.rs
 expression: "files[\"src/index.js\"].utf8_contents().unwrap()"
 ---
-
-import load from "./wit-pack/index.js";
-
-
-export default async function(options) {
-    return await load(options);
-}
+export default function() {}
