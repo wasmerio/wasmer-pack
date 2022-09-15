@@ -33,6 +33,6 @@ pub use crate::{
     files::{Files, SourceFile},
     js::generate_javascript,
     py::generate_python,
-    types::{Abi, Interface, Metadata, Module},
+    types::{Abi, Interface, Library, Metadata, Module, Package, PackageName},
     wit_version::WIT_PARSER_VERSION,
 };

@@ -4,7 +4,7 @@ use std::{
     process::{Command, Output, Stdio},
 };
 
-use wit_pack::{Abi, Interface, Metadata, Module};
+use wit_pack::{Abi, Interface, Library, Metadata, Module, Package};
 
 #[test]
 fn use_javascript_bindings() {
@@ -59,19 +59,11 @@ fn use_wasi_javascript_bindings() {
 
 #[test]
 fn use_python_bindings() {
-    let Fixtures { exports, wasm } = Fixtures::load();
-
-    let metadata = Metadata::new(
-        "wasmer/wit_pack".parse().unwrap(),
-        env!("CARGO_PKG_VERSION"),
-    );
-    let module = Module::from_path(&wasm, Abi::None).unwrap();
-    let interface = Interface::from_path(&exports).unwrap();
-
+    let pkg = wit_pack_fixture();
     let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("python");
     let _ = std::fs::remove_dir_all(&out_dir);
 
-    let py = wit_pack::generate_python(&metadata, &module, &interface).unwrap();
+    let py = wit_pack::generate_python(&pkg).unwrap();
     py.save_to_disk(&out_dir).unwrap();
 
     let python_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -84,16 +76,11 @@ fn use_python_bindings() {
 
 #[test]
 fn use_wasi_python_bindings() {
-    let Fixtures { exports, wasm } = Fixtures::load_wasi();
-
-    let metadata = Metadata::new("wasmer/wabt".parse().unwrap(), env!("CARGO_PKG_VERSION"));
-    let module = Module::from_path(&wasm, Abi::Wasi).unwrap();
-    let interface = Interface::from_path(&exports).unwrap();
-
+    let pkg = wabt_fixture();
     let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("python-wasi");
     let _ = std::fs::remove_dir_all(&out_dir);
 
-    let py = wit_pack::generate_python(&metadata, &module, &interface).unwrap();
+    let py = wit_pack::generate_python(&pkg).unwrap();
     py.save_to_disk(&out_dir).unwrap();
 
     let python_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -102,6 +89,62 @@ fn use_wasi_python_bindings() {
 
     execute("pipenv install", &python_dir);
     execute("pipenv run python3 main.py", &python_dir);
+}
+
+fn wit_pack_fixture() -> Package {
+    let project_root = project_root();
+
+    let exports = project_root
+        .join("crates")
+        .join("wasm")
+        .join("wit-pack.exports.wit");
+    assert!(exports.exists());
+
+    execute(
+        "cargo build --target=wasm32-unknown-unknown --package=wit-pack-wasm",
+        &project_root,
+    );
+
+    let wasm = project_root
+        .join("target")
+        .join("wasm32-unknown-unknown")
+        .join("debug")
+        .join("wit_pack_wasm.wasm");
+
+    Package {
+        metadata: Metadata::new("wasmer/wit-pack".parse().unwrap(), "0.0.0"),
+        libraries: vec![Library {
+            module: Module::from_path(&wasm, Abi::None).unwrap(),
+            interface: Interface::from_path(exports).unwrap(),
+        }],
+    }
+}
+
+fn wabt_fixture() -> Package {
+    let project_root = project_root();
+
+    let exports = project_root
+        .join("crates")
+        .join("wit-pack")
+        .join("tests")
+        .join("wabt")
+        .join("wabt.exports.wit");
+    assert!(exports.exists());
+
+    let wasm = project_root
+        .join("crates")
+        .join("wit-pack")
+        .join("tests")
+        .join("wabt")
+        .join("libwabt.wasm");
+
+    Package {
+        metadata: Metadata::new("wasmer/wit-btpack".parse().unwrap(), "0.0.0"),
+        libraries: vec![Library {
+            module: Module::from_path(&wasm, Abi::None).unwrap(),
+            interface: Interface::from_path(exports).unwrap(),
+        }],
+    }
 }
 
 #[derive(Debug)]
