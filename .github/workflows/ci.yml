@@ -67,6 +67,8 @@ jobs:
         with:
           command: test
           args: --workspace --verbose --locked
+      - name: Time Reporter
+        uses: DeviesDevelopment/workflow-timer@v0.0.2
 
   lints:
     name: Linting and Formatting
