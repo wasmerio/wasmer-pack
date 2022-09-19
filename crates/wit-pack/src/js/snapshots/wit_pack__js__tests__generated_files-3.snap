@@ -1,5 +1,32 @@
 ---
 source: crates/wit-pack/src/js/mod.rs
-expression: "files[\"src/index.d.ts\"].utf8_contents().unwrap()"
+expression: "files[\"src/commands/first.js\"].utf8_contents().unwrap()"
 ---
-export default function(): Promise<unknown>;
+import fs from "fs";
+import { init as initWasi, WASI } from "@wasmer/wasi";
+
+let module = undefined;
+
+/** Lazily fetch and compile the WebAssembly module */
+async function getModule() {
+    if (!module) {
+        const path = url.fileURLToPath(new URL("./first.wasm", import.meta.url));
+        const wasm = await fs.readFile(path);
+
+        module = WebAssembly.compileStreaming
+            ? WebAssembly.compileStreaming(wasm)
+            : WebAssembly.compile(wasm);
+    }
+
+    return await module;
+}
+
+export default async function(options) {
+    const [module, _] = await Promise.all([getModule(), initWasi()]);
+    const wasi = options?.wasi || new WASI({}, module);
+    const imports = options?.imports || {};
+
+    await wasi.instantiate(module, imports);
+
+    return { code: wasi.start() };
+}

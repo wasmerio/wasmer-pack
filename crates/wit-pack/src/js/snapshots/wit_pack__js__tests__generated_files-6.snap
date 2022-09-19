@@ -1,0 +1,25 @@
+---
+source: crates/wit-pack/src/js/mod.rs
+expression: "files[\"src/index.d.ts\"].utf8_contents().unwrap()"
+---
+
+import { Wasi } from "@wasmer/wasi";
+
+export type RunOptions = {
+    /** An initialized `@wasmer/wasi` object. */
+    wasi: Wasi,
+    imports: Record<string, WebAssembly.ModuleImports>,
+};
+
+export type ExitStatus = {
+    code: number,
+};
+
+export type Package = {
+    commands: {
+        first: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
+        second: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
+    }
+};
+
+export default function(): Promise<Package>;

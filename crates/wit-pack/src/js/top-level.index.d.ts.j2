@@ -1,0 +1,25 @@
+{%- if commands %}
+import { Wasi } from "@wasmer/wasi";
+
+export type RunOptions = {
+    /** An initialized `@wasmer/wasi` object. */
+    wasi: Wasi,
+    imports: Record<string, WebAssembly.ModuleImports>,
+};
+
+export type ExitStatus = {
+    code: number,
+};
+{%- endif%}
+
+export type Package = {
+    {%- if commands %}
+    commands: {
+        {%- for cmd in commands %}
+        {{cmd.name}}: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
+        {%- endfor%}
+    }
+    {%- endif %}
+};
+
+export default function(): Promise<Package>;
