@@ -5,3 +5,6 @@ name = "pypi"
 
 [packages]
 wit-pack = {path = "./../../../../target/tmp/python"}
+wasmer = "*"
+wasmer-compiler-cranelift = "*"
+pytest = "*"

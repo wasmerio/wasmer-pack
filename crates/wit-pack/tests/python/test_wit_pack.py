@@ -21,6 +21,13 @@ from wit_pack.wit_pack import (
 project_root = Path(__file__).parents[4]
 
 
+def test_load_library():
+    wit_pack = load()
+
+    assert callable(wit_pack.generate_javascript)
+    assert callable(wit_pack.generate_python)
+
+
 def unwrap(value: Union[Ok[T], Err[Error]]) -> T:
     if isinstance(value, Err):
         raise Exception(value.value.verbose)
@@ -49,29 +56,29 @@ def load_bindings(wit_pack: WitPack) -> Package:
     return Package(metadata, libraries)
 
 
-def main():
+def test_generate_bindings_for_wit_pack():
     wit_pack = load()
     pkg = load_bindings(wit_pack)
 
-    files = unwrap(wit_pack.generate_python(pkg))
+    try:
+        files = unwrap(wit_pack.generate_python(pkg))
 
-    expected = {
-        "pyproject.toml",
-        "wit_pack/wit_pack/wit_pack_wasm.wasm",
-        "wit_pack/wit_pack/__init__.py",
-        "wit_pack/__init__.py",
-        "wit_pack/wit_pack/bindings.py",
-        "MANIFEST.in",
-    }
-    filenames = {f.filename for f in files}
-    print("Expected", expected)
-    print("Actual", filenames)
+        expected = {
+            "pyproject.toml",
+            "wit_pack/wit_pack/wit_pack_wasm.wasm",
+            "wit_pack/wit_pack/__init__.py",
+            "wit_pack/__init__.py",
+            "wit_pack/wit_pack/bindings.py",
+            "MANIFEST.in",
+        }
+        filenames = {f.filename for f in files}
+        print("Expected", expected)
+        print("Actual", filenames)
 
-    assert filenames == expected
+        assert filenames == expected
 
-    # Note: wit-bindgen's glue code forces us to manually free things
-    # pkg.drop()
-
-
-if __name__ == "__main__":
-    main()
+    finally:
+        pkg.metadata.drop()
+        for lib in pkg.libraries:
+            lib.interface.drop()
+            lib.module.drop()
