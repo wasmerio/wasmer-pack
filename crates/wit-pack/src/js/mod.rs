@@ -60,7 +60,7 @@ fn command_bindings(cmd: &Command) -> Result<Files, Error> {
     let mut files = Files::new();
     let module_filename = format!("{}.wasm", cmd.name);
     let ctx = minijinja::context! {
-        name => &cmd.name,
+        name => cmd.name.replace('-', "_"),
         module_filename,
     };
 
@@ -90,7 +90,8 @@ fn top_level<'pkg>(commands: impl Iterator<Item = &'pkg Command>) -> Result<File
     let commands = commands
         .map(|cmd| {
             minijinja::context! {
-                name => &cmd.name,
+                module => &cmd.name,
+                ident => cmd.name.replace('-', "_"),
             }
         })
         .collect::<Vec<_>>();
@@ -217,9 +218,9 @@ mod tests {
             "src/commands/first.d.ts",
             "src/commands/first.js",
             "src/commands/first.wasm",
-            "src/commands/second.d.ts",
-            "src/commands/second.js",
-            "src/commands/second.wasm",
+            "src/commands/second-with-dashes.d.ts",
+            "src/commands/second-with-dashes.js",
+            "src/commands/second-with-dashes.wasm",
             "src/index.d.ts",
             "src/index.js",
             "src/wit-pack/index.d.ts",
@@ -252,7 +253,7 @@ mod tests {
                 wasm: Vec::new(),
             },
             Command {
-                name: "second".to_string(),
+                name: "second-with-dashes".to_string(),
                 wasm: Vec::new(),
             },
         ];
@@ -263,8 +264,12 @@ mod tests {
         insta::assert_display_snapshot!(files["package.json"].utf8_contents().unwrap());
         insta::assert_display_snapshot!(files["src/commands/first.d.ts"].utf8_contents().unwrap());
         insta::assert_display_snapshot!(files["src/commands/first.js"].utf8_contents().unwrap());
-        insta::assert_display_snapshot!(files["src/commands/second.d.ts"].utf8_contents().unwrap());
-        insta::assert_display_snapshot!(files["src/commands/second.js"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["src/commands/second-with-dashes.d.ts"]
+            .utf8_contents()
+            .unwrap());
+        insta::assert_display_snapshot!(files["src/commands/second-with-dashes.js"]
+            .utf8_contents()
+            .unwrap());
         insta::assert_display_snapshot!(files["src/index.d.ts"].utf8_contents().unwrap());
         insta::assert_display_snapshot!(files["src/index.js"].utf8_contents().unwrap());
         insta::assert_display_snapshot!(files["src/wit-pack/index.d.ts"].utf8_contents().unwrap());

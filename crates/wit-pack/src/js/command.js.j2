@@ -1,4 +1,5 @@
-import fs from "fs";
+import fs from "fs/promises";
+import url from "url";
 import { init as initWasi, WASI } from "@wasmer/wasi";
 
 let module = undefined;

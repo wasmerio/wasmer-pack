@@ -18,8 +18,8 @@ export type ExitStatus = {
 export type Package = {
     commands: {
         first: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
-        second: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
+        second_with_dashes: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
     }
 };
 
-export default function(): Promise<Package>;
+export default function(): Package;

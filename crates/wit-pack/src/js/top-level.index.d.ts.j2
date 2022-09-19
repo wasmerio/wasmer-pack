@@ -16,10 +16,10 @@ export type Package = {
     {%- if commands %}
     commands: {
         {%- for cmd in commands %}
-        {{cmd.name}}: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
+        {{cmd.ident}}: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
         {%- endfor%}
     }
     {%- endif %}
 };
 
-export default function(): Promise<Package>;
+export default function(): Package;

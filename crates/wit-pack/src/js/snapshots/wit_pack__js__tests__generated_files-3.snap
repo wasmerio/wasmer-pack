@@ -2,7 +2,8 @@
 source: crates/wit-pack/src/js/mod.rs
 expression: "files[\"src/commands/first.js\"].utf8_contents().unwrap()"
 ---
-import fs from "fs";
+import fs from "fs/promises";
+import url from "url";
 import { init as initWasi, WASI } from "@wasmer/wasi";
 
 let module = undefined;

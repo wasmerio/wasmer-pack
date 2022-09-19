@@ -130,7 +130,19 @@ fn wabt_fixture() -> Package {
             interface: Interface::from_path(wabt_dir.join("wabt2.exports.wit")).unwrap(),
         },
     ];
-    let commands = Vec::new();
+    let mut commands = Vec::new();
+
+    for entry in wabt_dir.read_dir().unwrap() {
+        let entry = entry.unwrap();
+        let path = entry.path();
+
+        if path.extension().is_none() {
+            commands.push(wit_pack::Command {
+                name: path.file_stem().unwrap().to_str().unwrap().to_string(),
+                wasm: std::fs::read(&path).unwrap(),
+            });
+        }
+    }
 
     Package::new(metadata, libraries, commands)
 }

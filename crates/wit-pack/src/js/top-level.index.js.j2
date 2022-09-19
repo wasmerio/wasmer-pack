@@ -1,13 +1,13 @@
-{% for cmd in commands %}
-import {{cmd.name}} from "./commands/{{cmd.name}}.js";
-{% endfor %}
+{%- for cmd in commands %}
+import {{cmd.ident}} from "./commands/{{cmd.module}}.js";
+{%- endfor %}
 
 export default function() {
     return {
         {%- if commands %}
         commands: {
             {%- for cmd in commands %}
-            {{cmd.name}},
+            {{cmd.ident}},
             {%- endfor %}
         }
         {%- endif %}
