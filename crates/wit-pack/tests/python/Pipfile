@@ -8,3 +8,4 @@ wit-pack = {path = "./../../../../target/tmp/python"}
 wasmer = "*"
 wasmer-compiler-cranelift = "*"
 pytest = "*"
+mypy = "*"

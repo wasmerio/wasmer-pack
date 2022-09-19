@@ -8,3 +8,4 @@ wabt = {path = "./../../../../target/tmp/python-wasi"}
 pytest = "*"
 wasmer = "*"
 wasmer-compiler-cranelift = "*"
+mypy = "*"

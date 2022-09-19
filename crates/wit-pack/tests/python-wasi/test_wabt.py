@@ -22,7 +22,7 @@ def test_generated_library():
     )
 
 
-def _test_generated_commands_exist():
+def test_generated_commands_exist():
     pkg = wabt.load()
 
     assert callable(pkg.commands.wasm_interp)
@@ -33,7 +33,7 @@ def _test_generated_commands_exist():
     assert callable(pkg.commands.wat2wasm)
 
 
-def _test_invoke_wat2wasm_executable(tmp_path: Path):
+def test_invoke_wat2wasm_executable(tmp_path: Path):
     pkg = wabt.load()
     env = (
         wasi.StateBuilder("wat2wasm")

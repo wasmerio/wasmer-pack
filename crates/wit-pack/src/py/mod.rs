@@ -8,7 +8,7 @@ use wit_bindgen_gen_wasmer_py::WasmerPy;
 
 use crate::{
     types::{Library, Package},
-    Files, Metadata, SourceFile,
+    Command, Files, Metadata, SourceFile,
 };
 
 static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
@@ -25,6 +25,11 @@ static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
     .unwrap();
     env.add_template("MANIFEST.in", include_str!("MANIFEST.in.j2"))
         .unwrap();
+    env.add_template(
+        "commands.__init__.py",
+        include_str!("commands.__init__.py.j2"),
+    )
+    .unwrap();
 
     env
 });
@@ -43,6 +48,13 @@ pub fn generate_python(package: &Package) -> Result<Files, Error> {
         );
     }
 
+    if !package.commands().is_empty() {
+        files.insert_child_directory(
+            Path::new(&package_name).join("commands"),
+            command_bindings(package.commands())?,
+        );
+    }
+
     files.insert(
         Path::new(&package_name).join("__init__.py"),
         top_level_dunder_init(metadata)?,
@@ -56,6 +68,34 @@ pub fn generate_python(package: &Package) -> Result<Files, Error> {
     files.insert(
         Path::new("MANIFEST.in"),
         generate_manifest(package, &package_name)?,
+    );
+
+    Ok(files)
+}
+
+fn command_bindings(commands: &[Command]) -> Result<Files, Error> {
+    let mut files = Files::new();
+    let mut cmds = Vec::new();
+
+    for cmd in commands {
+        let ident = cmd.name.replace('-', "_");
+        let module_filename = format!("{}.wasm", cmd.name);
+
+        files.insert(&module_filename, SourceFile::from(&cmd.wasm));
+        cmds.push(minijinja::context! {ident, module_filename});
+    }
+
+    let ctx = minijinja::context! {
+        commands => cmds,
+    };
+
+    files.insert(
+        "__init__.py",
+        TEMPLATES
+            .get_template("commands.__init__.py")
+            .unwrap()
+            .render(&ctx)?
+            .into(),
     );
 
     Ok(files)
@@ -193,6 +233,9 @@ mod tests {
             "MANIFEST.in",
             "pyproject.toml",
             "wit_pack/__init__.py",
+            "wit_pack/commands/__init__.py",
+            "wit_pack/commands/first.wasm",
+            "wit_pack/commands/second-with-dashes.wasm",
             "wit_pack/wit_pack/__init__.py",
             "wit_pack/wit_pack/bindings.py",
             "wit_pack/wit_pack/wit_pack_wasm.wasm",
@@ -214,7 +257,16 @@ mod tests {
             )),
         )
         .unwrap();
-        let commands = Vec::new();
+        let commands = vec![
+            Command {
+                name: "first".into(),
+                wasm: Vec::new(),
+            },
+            Command {
+                name: "second-with-dashes".into(),
+                wasm: Vec::new(),
+            },
+        ];
         let package = Package::new(metadata, vec![Library { interface, module }], commands);
 
         let files = generate_python(&package).unwrap();
@@ -223,6 +275,9 @@ mod tests {
         insta::assert_display_snapshot!(files["MANIFEST.in"].utf8_contents().unwrap());
         insta::assert_display_snapshot!(files["wit_pack/__init__.py"].utf8_contents().unwrap());
         insta::assert_display_snapshot!(files["wit_pack/wit_pack/__init__.py"]
+            .utf8_contents()
+            .unwrap());
+        insta::assert_display_snapshot!(files["wit_pack/commands/__init__.py"]
             .utf8_contents()
             .unwrap());
 

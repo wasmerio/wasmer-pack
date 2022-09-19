@@ -1,0 +1,47 @@
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional, Any
+from wasmer import Instance, Module, Store, wasi # type: ignore
+
+__all__ = [
+    "ExitStatus",
+    {%- for cmd in commands %}
+    "{{cmd.ident}}",
+    {%- endfor %}
+]
+
+@dataclass
+class ExitStatus:
+    """The status code returned when the executable finished."""
+    code: int
+
+    @property
+    def success(self):
+        return self.code == 0
+
+_store = Store()
+_cache: dict[str, Module] = {}
+
+def _get_module(filename: str) -> Module:
+    if filename in _cache:
+        return _cache[filename]
+
+    wasm = Path(__file__).parent.joinpaths(filename).readbytes()
+    module = Module(_store, wasm)
+    _cache[filename] = module
+    return module
+
+{% for cmd in commands %}
+def {{cmd.ident}}(wasi: wasi.Wasi, imports: Optional[dict[str, Any]]) -> ExitStatus:
+    module = _get_module("{{cmd.module_filename}}")
+    version = wasi.get_version(module, strict=True)
+
+    if not imports:
+        imports = {}
+    imports.update(wasi_env.generate_import_object(store, wasi_version))
+
+    instance = Instance(module, imports)
+
+    code = instance.exports._start()
+    return ExitStatus(code=code)
+{% endfor %}
