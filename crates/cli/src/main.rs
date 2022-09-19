@@ -86,6 +86,7 @@ fn load_pirita_file(path: &Path) -> Result<Package, Error> {
     Ok(Package::new(
         Metadata::new(package_name, version),
         libraries,
+        Vec::new(),
     ))
 }
 

@@ -11,6 +11,7 @@ use heck::{ToPascalCase, ToSnakeCase};
 pub struct Package {
     metadata: Metadata,
     libraries: Vec<Library>,
+    commands: Vec<Command>,
 }
 
 impl Package {
@@ -19,14 +20,14 @@ impl Package {
     /// # Panics
     ///
     /// This assumes all libraries have a unique [`Library::interface_name()`].
-    pub fn new(metadata: Metadata, libraries: impl IntoIterator<Item = Library>) -> Self {
-        let libraries: Vec<_> = libraries.into_iter().collect();
-
+    pub fn new(metadata: Metadata, libraries: Vec<Library>, commands: Vec<Command>) -> Self {
         assert_unique_names("library", libraries.iter().map(|lib| lib.interface_name()));
+        assert_unique_names("command", commands.iter().map(|cmd| cmd.name.as_str()));
 
         Package {
             metadata,
             libraries,
+            commands,
         }
     }
 
@@ -298,6 +299,12 @@ impl Interface {
             .with_context(|| format!("Unable to parse \"{}\"", path.display()))?;
         Ok(Interface(wit))
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct Command {
+    pub name: String,
+    pub wasm: Vec<u8>,
 }
 
 #[cfg(test)]

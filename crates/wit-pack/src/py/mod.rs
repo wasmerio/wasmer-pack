@@ -214,7 +214,8 @@ mod tests {
             )),
         )
         .unwrap();
-        let package = Package::new(metadata, vec![Library { interface, module }]);
+        let commands = Vec::new();
+        let package = Package::new(metadata, vec![Library { interface, module }], commands);
 
         let files = generate_python(&package).unwrap();
 

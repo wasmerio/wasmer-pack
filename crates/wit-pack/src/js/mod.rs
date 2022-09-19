@@ -167,7 +167,8 @@ mod tests {
             )),
         )
         .unwrap();
-        let pkg = Package::new(metadata, vec![Library { module, interface }]);
+        let commands = Vec::new();
+        let pkg = Package::new(metadata, vec![Library { module, interface }], commands);
 
         let files = generate_javascript(&pkg).unwrap();
 

@@ -98,13 +98,14 @@ fn wit_pack_fixture() -> Package {
         .join("debug")
         .join("wit_pack_wasm.wasm");
 
-    Package::new(
-        Metadata::new("wasmer/wit-pack".parse().unwrap(), "0.0.0"),
-        vec![Library {
-            module: Module::from_path(&wasm, Abi::None).unwrap(),
-            interface: Interface::from_path(exports).unwrap(),
-        }],
-    )
+    let metadata = Metadata::new("wasmer/wit-pack".parse().unwrap(), "0.0.0");
+    let libraries = vec![Library {
+        module: Module::from_path(&wasm, Abi::None).unwrap(),
+        interface: Interface::from_path(exports).unwrap(),
+    }];
+    let commands = Vec::new();
+
+    Package::new(metadata, libraries, commands)
 }
 
 fn wabt_fixture() -> Package {
@@ -116,21 +117,22 @@ fn wabt_fixture() -> Package {
         .join("tests")
         .join("wabt");
 
-    Package::new(
-        Metadata::new("wasmer/wabt".parse().unwrap(), "0.0.0"),
-        vec![
-            Library {
-                module: Module::from_path(wabt_dir.join("libwabt.wasm"), Abi::Wasi).unwrap(),
-                interface: Interface::from_path(wabt_dir.join("wabt.exports.wit")).unwrap(),
-            },
-            // Note: we have a duplicate copy of libwabt to check support for
-            // multiple libraries
-            Library {
-                module: Module::from_path(wabt_dir.join("libwabt.wasm"), Abi::Wasi).unwrap(),
-                interface: Interface::from_path(wabt_dir.join("wabt2.exports.wit")).unwrap(),
-            },
-        ],
-    )
+    let metadata = Metadata::new("wasmer/wabt".parse().unwrap(), "0.0.0");
+    let libraries = vec![
+        Library {
+            module: Module::from_path(wabt_dir.join("libwabt.wasm"), Abi::Wasi).unwrap(),
+            interface: Interface::from_path(wabt_dir.join("wabt.exports.wit")).unwrap(),
+        },
+        // Note: we have a duplicate copy of libwabt to check support for
+        // multiple libraries
+        Library {
+            module: Module::from_path(wabt_dir.join("libwabt.wasm"), Abi::Wasi).unwrap(),
+            interface: Interface::from_path(wabt_dir.join("wabt2.exports.wit")).unwrap(),
+        },
+    ];
+    let commands = Vec::new();
+
+    Package::new(metadata, libraries, commands)
 }
 
 #[track_caller]
