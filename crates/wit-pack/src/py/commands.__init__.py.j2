@@ -19,29 +19,32 @@ class ExitStatus:
     def success(self):
         return self.code == 0
 
-_store = Store()
-_cache: dict[str, Module] = {}
+class Commands:
+    def __init__(self):
+        self._store = Store()
+        self._cache: dict[str, Module] = {}
 
-def _get_module(filename: str) -> Module:
-    if filename in _cache:
-        return _cache[filename]
+    def _get_module(self, filename: str) -> Module:
+        if filename in self._cache:
+            return self._cache[filename]
 
-    wasm = Path(__file__).parent.joinpaths(filename).readbytes()
-    module = Module(_store, wasm)
-    _cache[filename] = module
-    return module
+        wasm = Path(__file__).parent.joinpath(filename).read_bytes()
+        module = Module(self._store, wasm)
+        self._cache[filename] = module
+        return module
 
-{% for cmd in commands %}
-def {{cmd.ident}}(wasi: wasi.Wasi, imports: Optional[dict[str, Any]]) -> ExitStatus:
-    module = _get_module("{{cmd.module_filename}}")
-    version = wasi.get_version(module, strict=True)
+    {% for cmd in commands %}
+    def {{cmd.ident}}(self, env: wasi.Environment, imports: Optional[dict[str, Any]] = None) -> ExitStatus:
+        module = self._get_module("{{cmd.module_filename}}")
+        version = wasi.get_version(module, strict=True)
 
-    if not imports:
-        imports = {}
-    imports.update(wasi_env.generate_import_object(store, wasi_version))
+        assert version is not None, '"{{cmd.module_filename}}" is not a valid WASI executable'
 
-    instance = Instance(module, imports)
+        imports = {**imports} if imports else {}
+        imports.update(env.generate_import_object(self._store, version))
 
-    code = instance.exports._start()
-    return ExitStatus(code=code)
-{% endfor %}
+        instance = Instance(module, imports)
+
+        code = instance.exports._start()
+        return ExitStatus(code=code)
+    {% endfor %}

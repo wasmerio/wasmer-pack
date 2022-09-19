@@ -1,9 +1,10 @@
 #!/bin/env python3
 
 from pathlib import Path
+from wasmer import wasi
+import pytest
 from wabt.wabt import load as loadWabt, WasmFeature, Ok
-import wabt
-from wasmer import engine, wasi, Store, Module, ImportObject, Instance
+from wabt import Wabt
 
 
 def test_two_modules_were_generated():
@@ -14,7 +15,6 @@ def test_two_modules_were_generated():
 def test_generated_library():
     wabt = loadWabt()
 
-    # wat2wasm test
     wasm_result = wabt.wat2wasm("(module)", WasmFeature.MUTABLE_GLOBALS)
     assert isinstance(wasm_result, Ok)
     assert wasm_result.value == bytearray(
@@ -23,18 +23,21 @@ def test_generated_library():
 
 
 def test_generated_commands_exist():
-    pkg = wabt.load()
+    wabt = Wabt()
 
-    assert callable(pkg.commands.wasm_interp)
-    assert callable(pkg.commands.wasm_strip)
-    assert callable(pkg.commands.wasm_validate)
-    assert callable(pkg.commands.wasm2wat)
-    assert callable(pkg.commands.wast2json)
-    assert callable(pkg.commands.wat2wasm)
+    assert callable(wabt.commands.wasm_interp)
+    assert callable(wabt.commands.wasm_strip)
+    assert callable(wabt.commands.wasm_validate)
+    assert callable(wabt.commands.wasm2wat)
+    assert callable(wabt.commands.wast2json)
+    assert callable(wabt.commands.wat2wasm)
 
 
+@pytest.mark.skip(
+    reason="The @Michael-F-Bryan/wabt package on wapm.dev doesn't contain valid WASI executables"
+)
 def test_invoke_wat2wasm_executable(tmp_path: Path):
-    pkg = wabt.load()
+    wabt = Wabt()
     env = (
         wasi.StateBuilder("wat2wasm")
         .argument("./input.wat")
@@ -44,7 +47,7 @@ def test_invoke_wat2wasm_executable(tmp_path: Path):
     )
     tmp_path.joinpath("input.wat").write_text("(module)")
 
-    exit_status = pkg.commands.wat2wasm(env)
+    exit_status = wabt.commands.wat2wasm(env)
 
     assert exit_status.code == 0
     generated = tmp_path.joinpath("output.wasm")

@@ -2,3 +2,5 @@ target/
 node_modules/
 *.webc
 yarn-error.log
+.mypy_cache
+.pytest_cache

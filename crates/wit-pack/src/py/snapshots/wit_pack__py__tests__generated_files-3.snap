@@ -5,5 +5,17 @@ expression: "files[\"wit_pack/__init__.py\"].utf8_contents().unwrap()"
 '''
 Bindings to wasmer/wit-pack v1.2.3.
 '''
+from .commands import Commands
 
 __version__ = "1.2.3"
+
+class WitPack:
+    def __init__(self):
+        self._commands = Commands()
+        
+    @property
+    def commands(self):
+        """
+        The WASI executables in this package.
+        """
+        return self._commands

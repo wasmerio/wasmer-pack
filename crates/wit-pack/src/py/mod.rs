@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use anyhow::Error;
+use heck::ToPascalCase;
 use minijinja::Environment;
 use once_cell::sync::Lazy;
 use wit_bindgen_gen_core::Generator;
@@ -57,7 +58,7 @@ pub fn generate_python(package: &Package) -> Result<Files, Error> {
 
     files.insert(
         Path::new(&package_name).join("__init__.py"),
-        top_level_dunder_init(metadata)?,
+        top_level_dunder_init(&package)?,
     );
 
     files.insert(
@@ -141,6 +142,10 @@ fn generate_manifest(package: &Package, package_name: &str) -> Result<SourceFile
         libraries => package.libraries()
             .map(|lib| lib.interface_name())
             .collect::<Vec<_>>(),
+        commands => package.commands()
+            .iter()
+            .map(|cmd| cmd.name.as_str())
+            .collect::<Vec<_>>(),
     };
     let rendered = TEMPLATES
         .get_template("MANIFEST.in")
@@ -188,17 +193,24 @@ struct Project<'a> {
     dependencies: Vec<&'a str>,
 }
 
-fn top_level_dunder_init(metadata: &Metadata) -> Result<SourceFile, Error> {
+fn top_level_dunder_init(package: &Package) -> Result<SourceFile, Error> {
     let Metadata {
         version,
         description,
         package_name,
-    } = metadata;
+    } = package.metadata();
+    let commands = package
+        .commands()
+        .iter()
+        .map(|cmd| cmd.name.as_str())
+        .collect::<Vec<_>>();
 
     let ctx = minijinja::context! {
         version,
         description,
         package_name => package_name.to_string(),
+        ident => package_name.name().to_pascal_case(),
+        commands,
     };
 
     let rendered = TEMPLATES
