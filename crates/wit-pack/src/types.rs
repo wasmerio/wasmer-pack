@@ -43,8 +43,8 @@ impl Package {
         !self.commands.is_empty() || self.libraries.iter().any(|lib| lib.requires_wasi())
     }
 
-    pub fn commands(&self) -> impl Iterator<Item = &'_ Command> + '_ {
-        self.commands.iter()
+    pub fn commands(&self) -> &[Command] {
+        &self.commands
     }
 }
 

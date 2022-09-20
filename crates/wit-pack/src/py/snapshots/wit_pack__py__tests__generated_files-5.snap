@@ -1,0 +1,67 @@
+---
+source: crates/wit-pack/src/py/mod.rs
+expression: "files[\"wit_pack/commands/__init__.py\"].utf8_contents().unwrap()"
+---
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional, Any
+from wasmer import Instance, Module, Store, wasi # type: ignore
+
+__all__ = [
+    "ExitStatus",
+    "first",
+    "second_with_dashes",
+]
+
+@dataclass
+class ExitStatus:
+    """The status code returned when the executable finished."""
+    code: int
+
+    @property
+    def success(self):
+        return self.code == 0
+
+class Commands:
+    def __init__(self):
+        self._store = Store()
+        self._cache: dict[str, Module] = {}
+
+    def _get_module(self, filename: str) -> Module:
+        if filename in self._cache:
+            return self._cache[filename]
+
+        wasm = Path(__file__).parent.joinpath(filename).read_bytes()
+        module = Module(self._store, wasm)
+        self._cache[filename] = module
+        return module
+
+    
+    def first(self, env: wasi.Environment, imports: Optional[dict[str, Any]] = None) -> ExitStatus:
+        module = self._get_module("first.wasm")
+        version = wasi.get_version(module, strict=True)
+
+        assert version is not None, '"first.wasm" is not a valid WASI executable'
+
+        imports = {**imports} if imports else {}
+        imports.update(env.generate_import_object(self._store, version))
+
+        instance = Instance(module, imports)
+
+        code = instance.exports._start()
+        return ExitStatus(code=code)
+    
+    def second_with_dashes(self, env: wasi.Environment, imports: Optional[dict[str, Any]] = None) -> ExitStatus:
+        module = self._get_module("second-with-dashes.wasm")
+        version = wasi.get_version(module, strict=True)
+
+        assert version is not None, '"second-with-dashes.wasm" is not a valid WASI executable'
+
+        imports = {**imports} if imports else {}
+        imports.update(env.generate_import_object(self._store, version))
+
+        instance = Instance(module, imports)
+
+        code = instance.exports._start()
+        return ExitStatus(code=code)
+    

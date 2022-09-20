@@ -6,4 +6,25 @@ Bindings to {{package_name}} v{{version}}.
 {%- endif %}
 '''
 
+{%- if commands %}
+from .commands import Commands
+{%- endif %}
+
 __version__ = "{{version}}"
+
+class {{ident}}:
+    def __init__(self):
+        {%- if commands %}
+        self._commands = Commands()
+        {% else %}
+        pass
+        {%- endif %}
+
+    {%- if commands %}
+    @property
+    def commands(self):
+        """
+        The WASI executables in this package.
+        """
+        return self._commands
+    {%- endif %}

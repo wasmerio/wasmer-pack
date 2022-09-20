@@ -58,7 +58,11 @@ fn use_python_bindings() {
         .join("python");
 
     execute("pipenv install", &python_dir);
-    execute("pipenv run python3 main.py", &python_dir);
+    execute("pipenv run pytest", &python_dir);
+    execute(
+        format!("pipenv run mypy {}", out_dir.join("wit_pack").display()),
+        &python_dir,
+    );
 }
 
 #[test]
@@ -75,7 +79,11 @@ fn use_wasi_python_bindings() {
         .join("python-wasi");
 
     execute("pipenv install", &python_dir);
-    execute("pipenv run python3 main.py", &python_dir);
+    execute("pipenv run pytest", &python_dir);
+    execute(
+        format!("pipenv run mypy {}", out_dir.join("wabt").display()),
+        &python_dir,
+    );
 }
 
 fn wit_pack_fixture() -> Package {

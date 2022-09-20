@@ -2,8 +2,9 @@
 Bindings to the {{interface_name}} library.
 '''
 
-import wasmer as _wasmer
 import pathlib as _pathlib
+import typing as _typing
+import wasmer as _wasmer # type: ignore
 
 from .bindings import *
 
@@ -15,9 +16,9 @@ _module = _wasmer.Module(_store, _wasm)
 def load() -> {{class_name}}:
     {% if wasi%}
     env = _wasmer.wasi.StateBuilder("").finalize()
-    imports = env.generate_imports(_store, _wasmer.wasi.Version.LATEST)
+    imports: dict[str, _typing.Any] = env.generate_imports(_store, _wasmer.wasi.Version.LATEST)
     {% else %}
-    imports = {}
+    imports: dict[str, _typing.Any] = {}
     {% endif %}
 
     return {{class_name}}(_store, imports, _module)

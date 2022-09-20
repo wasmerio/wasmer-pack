@@ -86,8 +86,9 @@ fn command_bindings(cmd: &Command) -> Result<Files, Error> {
     Ok(files)
 }
 
-fn top_level<'pkg>(commands: impl Iterator<Item = &'pkg Command>) -> Result<Files, Error> {
+fn top_level(commands: &[Command]) -> Result<Files, Error> {
     let commands = commands
+        .iter()
         .map(|cmd| {
             minijinja::context! {
                 module => &cmd.name,
