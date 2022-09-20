@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Error};
 use clap::Parser;
 use webc::{Manifest, ParseOptions, WebC, WebCOwned};
-use wit_pack::{Interface, Library, Metadata, Module, Package};
+use wit_pack::{Command, Interface, Library, Metadata, Module, Package};
 
 fn main() -> Result<(), Error> {
     let cmd = Cmd::parse();
@@ -71,23 +71,39 @@ fn load_pirita_file(path: &Path) -> Result<Package, Error> {
         .with_context(|| format!("Unable to parse \"{}\" as a WEBC file", path.display()))?;
 
     let fully_qualified_package_name = webc.get_package_name();
-    let Manifest { bindings, .. } = webc.get_metadata();
+    let metadata = metadata(&fully_qualified_package_name)?;
+    let libraries = libraries(&webc, &fully_qualified_package_name)?;
+    let commands = commands(&webc);
 
+    Ok(Package::new(metadata, libraries, commands))
+}
+
+fn commands(webc: &WebC<'_>) -> Vec<Command> {
+    webc.get_all_atoms()
+        .into_iter()
+        .map(|(name, wasm)| Command {
+            name,
+            wasm: wasm.to_vec(),
+        })
+        .collect()
+}
+
+fn libraries(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Vec<Library>, Error> {
+    let Manifest { bindings, .. } = webc.get_metadata();
     let libraries = bindings
         .iter()
-        .map(|b| load_library(b, &webc, &fully_qualified_package_name))
+        .map(|b| load_library(b, &webc, fully_qualified_package_name))
         .collect::<Result<Vec<_>, _>>()?;
 
+    Ok(libraries)
+}
+
+fn metadata(fully_qualified_package_name: &str) -> Result<Metadata, Error> {
     let (unversioned_name, version) = fully_qualified_package_name.split_once('@').unwrap();
     let package_name = unversioned_name
         .parse()
         .context("Unable to parse the package name")?;
-
-    Ok(Package::new(
-        Metadata::new(package_name, version),
-        libraries,
-        Vec::new(),
-    ))
+    Ok(Metadata::new(package_name, version))
 }
 
 fn load_library(
