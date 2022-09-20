@@ -77,7 +77,8 @@ The checklist:
 
 - [ ] Create a new PR named something like *"Release v1.2.3"*
 - [ ] Update [`CHANGELOG.md`](./CHANGELOG.md) to include any user-facing changes
-      since the last release
+      since the last release (the `[Unreleased]` link at the bottom is
+      particularly helpful here)
 - [ ] Run [`cargo release`][cargo-release] to bump version numbers, tag commits,
       and push changes to GitHub
 - [ ] Make sure the [*"Releases"*][releases] job has passed, and new binaries
