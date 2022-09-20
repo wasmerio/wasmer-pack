@@ -26,7 +26,6 @@ fn use_javascript_bindings() {
 }
 
 #[test]
-#[ignore = "TODO: Re-enable when Jest is working again"]
 fn use_wasi_javascript_bindings() {
     let pkg = wabt_fixture();
     let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("javascript-wasi");
