@@ -7,7 +7,7 @@ use wit_bindgen_gen_core::Generator;
 use wit_bindgen_gen_js::Js;
 use wit_parser::Interface;
 
-use crate::{Files, Library, Metadata, Package, SourceFile};
+use crate::{types::Command, Files, Library, Metadata, Package, SourceFile};
 
 /// The version of `@wasmer/wasi` pulled in when using a WASI library.
 const WASMER_WASI_VERSION: &str = "^1.1.2";
@@ -18,6 +18,17 @@ static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
         .unwrap();
     env.add_template("library.index.d.ts", include_str!("library.index.d.ts.j2"))
         .unwrap();
+    env.add_template("command.d.ts", include_str!("command.d.ts.j2"))
+        .unwrap();
+    env.add_template("command.js", include_str!("command.js.j2"))
+        .unwrap();
+    env.add_template("top-level.index.js", include_str!("top-level.index.js.j2"))
+        .unwrap();
+    env.add_template(
+        "top-level.index.d.ts",
+        include_str!("top-level.index.d.ts.j2"),
+    )
+    .unwrap();
 
     env
 });
@@ -33,14 +44,77 @@ pub fn generate_javascript(package: &Package) -> Result<Files, Error> {
         );
     }
 
-    files.insert("src/index.js", "export default function() {}".into());
-    files.insert(
-        "src/index.d.ts",
-        "export default function(): Promise<unknown>;".into(),
-    );
+    for cmd in package.commands() {
+        files.insert_child_directory(Path::new("src").join("commands"), command_bindings(cmd)?);
+    }
+
+    files.insert_child_directory("src", top_level(package.commands())?);
 
     let package_json = generate_package_json(package.requires_wasi(), package.metadata());
     files.insert("package.json", package_json);
+
+    Ok(files)
+}
+
+fn command_bindings(cmd: &Command) -> Result<Files, Error> {
+    let mut files = Files::new();
+    let module_filename = format!("{}.wasm", cmd.name);
+    let ctx = minijinja::context! {
+        name => cmd.name.replace('-', "_"),
+        module_filename,
+    };
+
+    files.insert(
+        Path::new(&cmd.name).with_extension("js"),
+        TEMPLATES
+            .get_template("command.js")
+            .unwrap()
+            .render(&ctx)?
+            .into(),
+    );
+
+    files.insert(
+        Path::new(&cmd.name).with_extension("d.ts"),
+        TEMPLATES
+            .get_template("command.d.ts")
+            .unwrap()
+            .render(&ctx)?
+            .into(),
+    );
+    files.insert(&module_filename, SourceFile::from(&cmd.wasm));
+
+    Ok(files)
+}
+
+fn top_level<'pkg>(commands: impl Iterator<Item = &'pkg Command>) -> Result<Files, Error> {
+    let commands = commands
+        .map(|cmd| {
+            minijinja::context! {
+                module => &cmd.name,
+                ident => cmd.name.replace('-', "_"),
+            }
+        })
+        .collect::<Vec<_>>();
+    let ctx = minijinja::context! { commands };
+    let mut files = Files::new();
+
+    files.insert(
+        "index.js",
+        TEMPLATES
+            .get_template("top-level.index.js")
+            .unwrap()
+            .render(&ctx)?
+            .into(),
+    );
+
+    files.insert(
+        "index.d.ts",
+        TEMPLATES
+            .get_template("top-level.index.d.ts")
+            .unwrap()
+            .render(&ctx)?
+            .into(),
+    );
 
     Ok(files)
 }
@@ -113,7 +187,7 @@ fn generate_bindings(interface: &Interface) -> Files {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
+    use std::collections::BTreeSet;
 
     use crate::{Metadata, Module};
 
@@ -139,12 +213,18 @@ mod tests {
 
     #[test]
     fn generated_files() {
-        let expected: HashSet<&Path> = [
+        let expected: BTreeSet<&Path> = [
             "package.json",
-            "src/index.js",
+            "src/commands/first.d.ts",
+            "src/commands/first.js",
+            "src/commands/first.wasm",
+            "src/commands/second-with-dashes.d.ts",
+            "src/commands/second-with-dashes.js",
+            "src/commands/second-with-dashes.wasm",
             "src/index.d.ts",
-            "src/wit-pack/index.js",
+            "src/index.js",
             "src/wit-pack/index.d.ts",
+            "src/wit-pack/index.js",
             "src/wit-pack/intrinsics.js",
             "src/wit-pack/wit_pack_wasm.wasm",
             "src/wit-pack/wit-pack.d.ts",
@@ -167,17 +247,35 @@ mod tests {
             )),
         )
         .unwrap();
-        let pkg = Package::new(metadata, vec![Library { module, interface }]);
+        let commands = vec![
+            Command {
+                name: "first".to_string(),
+                wasm: Vec::new(),
+            },
+            Command {
+                name: "second-with-dashes".to_string(),
+                wasm: Vec::new(),
+            },
+        ];
+        let pkg = Package::new(metadata, vec![Library { module, interface }], commands);
 
         let files = generate_javascript(&pkg).unwrap();
 
         insta::assert_display_snapshot!(files["package.json"].utf8_contents().unwrap());
-        insta::assert_display_snapshot!(files["src/index.js"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["src/commands/first.d.ts"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["src/commands/first.js"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["src/commands/second-with-dashes.d.ts"]
+            .utf8_contents()
+            .unwrap());
+        insta::assert_display_snapshot!(files["src/commands/second-with-dashes.js"]
+            .utf8_contents()
+            .unwrap());
         insta::assert_display_snapshot!(files["src/index.d.ts"].utf8_contents().unwrap());
-        insta::assert_display_snapshot!(files["src/wit-pack/index.js"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["src/index.js"].utf8_contents().unwrap());
         insta::assert_display_snapshot!(files["src/wit-pack/index.d.ts"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["src/wit-pack/index.js"].utf8_contents().unwrap());
 
-        let actual_files: HashSet<_> = files.iter().map(|(p, _)| p).collect();
+        let actual_files: BTreeSet<_> = files.iter().map(|(p, _)| p).collect();
         assert_eq!(actual_files, expected);
     }
 }

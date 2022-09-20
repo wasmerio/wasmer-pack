@@ -1,5 +1,7 @@
 ---
 source: crates/wit-pack/src/js/mod.rs
-expression: "files[\"src/index.js\"].utf8_contents().unwrap()"
+expression: "files[\"src/commands/first.d.ts\"].utf8_contents().unwrap()"
 ---
-export default function() {}
+import type { ExitStatus, RunOptions } from "../index";
+
+export default function(options?: Partial<RunOptions>): Promise<ExitStatus>;

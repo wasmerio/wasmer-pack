@@ -107,10 +107,14 @@ impl From<crate::wit_pack::Package> for upstream::Package {
         let metadata = metadata.0.borrow();
         upstream::Package::new(
             upstream::Metadata::clone(&metadata),
-            libraries.into_iter().map(|lib| upstream::Library {
-                module: lib.module.0.clone(),
-                interface: lib.interface.0.clone(),
-            }),
+            libraries
+                .into_iter()
+                .map(|lib| upstream::Library {
+                    module: lib.module.0.clone(),
+                    interface: lib.interface.0.clone(),
+                })
+                .collect(),
+            Vec::new(),
         )
     }
 }

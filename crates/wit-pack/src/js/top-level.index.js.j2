@@ -1,0 +1,15 @@
+{%- for cmd in commands %}
+import {{cmd.ident}} from "./commands/{{cmd.module}}.js";
+{%- endfor %}
+
+export default function() {
+    return {
+        {%- if commands %}
+        commands: {
+            {%- for cmd in commands %}
+            {{cmd.ident}},
+            {%- endfor %}
+        }
+        {%- endif %}
+    };
+}

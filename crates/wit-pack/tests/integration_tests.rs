@@ -22,7 +22,7 @@ fn use_javascript_bindings() {
     let _ = std::fs::remove_dir_all(js_dir.join("node_modules"));
 
     execute("yarn", &js_dir);
-    execute("yarn start", &js_dir);
+    execute("yarn test", &js_dir);
 }
 
 #[test]
@@ -41,7 +41,7 @@ fn use_wasi_javascript_bindings() {
     let _ = std::fs::remove_dir_all(js_dir.join("node_modules"));
 
     execute("yarn", &js_dir);
-    execute("yarn start", &js_dir);
+    execute("yarn test", &js_dir);
 }
 
 #[test]
@@ -98,13 +98,14 @@ fn wit_pack_fixture() -> Package {
         .join("debug")
         .join("wit_pack_wasm.wasm");
 
-    Package::new(
-        Metadata::new("wasmer/wit-pack".parse().unwrap(), "0.0.0"),
-        vec![Library {
-            module: Module::from_path(&wasm, Abi::None).unwrap(),
-            interface: Interface::from_path(exports).unwrap(),
-        }],
-    )
+    let metadata = Metadata::new("wasmer/wit-pack".parse().unwrap(), "0.0.0");
+    let libraries = vec![Library {
+        module: Module::from_path(&wasm, Abi::None).unwrap(),
+        interface: Interface::from_path(exports).unwrap(),
+    }];
+    let commands = Vec::new();
+
+    Package::new(metadata, libraries, commands)
 }
 
 fn wabt_fixture() -> Package {
@@ -116,21 +117,34 @@ fn wabt_fixture() -> Package {
         .join("tests")
         .join("wabt");
 
-    Package::new(
-        Metadata::new("wasmer/wabt".parse().unwrap(), "0.0.0"),
-        vec![
-            Library {
-                module: Module::from_path(wabt_dir.join("libwabt.wasm"), Abi::Wasi).unwrap(),
-                interface: Interface::from_path(wabt_dir.join("wabt.exports.wit")).unwrap(),
-            },
-            // Note: we have a duplicate copy of libwabt to check support for
-            // multiple libraries
-            Library {
-                module: Module::from_path(wabt_dir.join("libwabt.wasm"), Abi::Wasi).unwrap(),
-                interface: Interface::from_path(wabt_dir.join("wabt2.exports.wit")).unwrap(),
-            },
-        ],
-    )
+    let metadata = Metadata::new("wasmer/wabt".parse().unwrap(), "0.0.0");
+    let libraries = vec![
+        Library {
+            module: Module::from_path(wabt_dir.join("libwabt.wasm"), Abi::Wasi).unwrap(),
+            interface: Interface::from_path(wabt_dir.join("wabt.exports.wit")).unwrap(),
+        },
+        // Note: we have a duplicate copy of libwabt to check support for
+        // multiple libraries
+        Library {
+            module: Module::from_path(wabt_dir.join("libwabt.wasm"), Abi::Wasi).unwrap(),
+            interface: Interface::from_path(wabt_dir.join("wabt2.exports.wit")).unwrap(),
+        },
+    ];
+    let mut commands = Vec::new();
+
+    for entry in wabt_dir.read_dir().unwrap() {
+        let entry = entry.unwrap();
+        let path = entry.path();
+
+        if path.extension().is_none() {
+            commands.push(wit_pack::Command {
+                name: path.file_stem().unwrap().to_str().unwrap().to_string(),
+                wasm: std::fs::read(&path).unwrap(),
+            });
+        }
+    }
+
+    Package::new(metadata, libraries, commands)
 }
 
 #[track_caller]

@@ -3,7 +3,9 @@ source: crates/wit-pack/src/js/mod.rs
 expression: "files[\"package.json\"].utf8_contents().unwrap()"
 ---
 {
-  "dependencies": {},
+  "dependencies": {
+    "@wasmer/wasi": "^1.1.2"
+  },
   "main": "src/index.js",
   "name": "@wasmer/wit-pack",
   "type": "module",
