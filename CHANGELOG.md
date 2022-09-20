@@ -11,11 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Set up CI to automatically deploy to wapm.dev whenever GitHub receives a
+  tagged commit ([#24](https://github.com/wasmerio/wit-pack/pull/24))
 - Fleshed out the repo's documentation ([#25](https://github.com/wasmerio/wit-pack/pull/25))
   - Populated the `CHANGELOG.md`
   - Wrote up `CONTRIBUTING.md`
   - Rewrote the `README.md` walkthrough
 - Added a *"Time Reporter"* task to CI so we can keep an eye on CI times ([#25](https://github.com/wasmerio/wit-pack/pull/25))
+- Generate wrappers for calling WASI executables from JavaScript
+  ([#26](https://github.com/wasmerio/wit-pack/pull/26)) and Python
+  ([#27](https://github.com/wasmerio/wit-pack/pull/27))
+- Detect all available WASI executables in a Pirita file
+  ([#28](https://github.com/wasmerio/wit-pack/pull/28))
 
 # [0.2.3] - 2022-09-15
 
