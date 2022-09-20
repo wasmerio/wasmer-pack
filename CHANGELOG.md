@@ -46,9 +46,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `wit-pack` crate now allows packages to contain multiple WebAssembly
   modules ([#22](https://github.com/wasmerio/wit-pack/pull/22))
 
-## Changed
+## 💥 Breaking Changed 💥
 
-- The `wit-pack` CLI now takes a Pirita file as input ([#20](https://github.com/wasmerio/wit-pack/pull/20))
+- The `wit-pack` CLI now takes a Pirita file as its only input
+  ([#20](https://github.com/wasmerio/wit-pack/pull/20))
+  - This means the commandline interface has changed
+    ```console
+    # Instead of this
+    $ wit-pack js --exports exports.wit --name hello_world --version 0.1.1 --module wit.wasm -o=wit-js --abi=none
+
+    # you should now do this
+    $ wit-pack js -o=wit-js ./hello-world.webc
+    ```
 
 # [0.1.5] - 2022-09-12
 
