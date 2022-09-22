@@ -5,26 +5,8 @@ use clap::Parser;
 use webc::{Manifest, ParseOptions, WebC, WebCOwned};
 use wit_pack::{Command, Interface, Library, Metadata, Module, Package};
 
-fn main() -> Result<(), Error> {
-    let cmd = Cmd::parse();
-
-    match cmd {
-        Cmd::Js(js) => js.run(Language::JavaScript),
-        Cmd::Python(py) => py.run(Language::Python),
-    }
-}
-
 #[derive(Debug, Parser)]
-#[clap(version)]
-enum Cmd {
-    /// Generate bindings for use with NodeJS.
-    Js(Codegen),
-    /// Generate Python bindings.
-    Python(Codegen),
-}
-
-#[derive(Debug, Parser)]
-struct Codegen {
+pub struct Codegen {
     /// Where to save the generated bindings.
     #[clap(short, long)]
     out_dir: Option<PathBuf>,
@@ -33,7 +15,7 @@ struct Codegen {
 }
 
 impl Codegen {
-    fn run(self, language: Language) -> Result<(), Error> {
+    pub fn run(self, language: Language) -> Result<(), Error> {
         let Codegen { out_dir, input } = self;
 
         let pkg = load_pirita_file(&input)?;
@@ -57,7 +39,7 @@ impl Codegen {
 }
 
 #[derive(Debug, Copy, Clone)]
-enum Language {
+pub enum Language {
     JavaScript,
     Python,
 }
