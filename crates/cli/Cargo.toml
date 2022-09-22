@@ -1,6 +1,6 @@
 [package]
 name = "wit-pack-cli"
-version = "0.3.0-alpha"
+version = "0.3.0-beta"
 edition = "2021"
 rust-version = "1.59.0"
 description = "A code generator that lets you treat WebAssembly modules like native dependencies."
