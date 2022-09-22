@@ -63,16 +63,18 @@ pub fn generate_python(package: &Package) -> Result<Files, Error> {
         Path::new(&package_name).join("__init__.py"),
         top_level_dunder_init(&package)?,
     );
+    // Indicate that we use type hints
+    files.insert(
+        Path::new(&package_name).join("py.typed"),
+        SourceFile::empty(),
+    );
 
     files.insert(
-        Path::new("pyproject.toml"),
+        "pyproject.toml",
         generate_pyproject_toml(metadata, &package_name)?,
     );
 
-    files.insert(
-        Path::new("MANIFEST.in"),
-        generate_manifest(package, &package_name)?,
-    );
+    files.insert("MANIFEST.in", generate_manifest(package, &package_name)?);
 
     Ok(files)
 }
@@ -255,6 +257,7 @@ mod tests {
             "MANIFEST.in",
             "pyproject.toml",
             "wit_pack/__init__.py",
+            "wit_pack/py.typed",
             "wit_pack/commands/__init__.py",
             "wit_pack/commands/first.wasm",
             "wit_pack/commands/second-with-dashes.wasm",

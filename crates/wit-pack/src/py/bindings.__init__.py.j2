@@ -19,6 +19,10 @@ class LoadArgs:
     imports: Optional[dict[str, Any]]
 
 class Bindings:
+    """
+    Instantiate bindings to the various libraries in this package.
+    """
+
     def __init__(self, store: Store):
         self._store = store
         self._cache: dict[str, Module] = {}

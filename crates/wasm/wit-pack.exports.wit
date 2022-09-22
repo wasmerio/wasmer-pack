@@ -1,29 +1,57 @@
+/// Metadata describing a package.
 resource metadata {
-    static new: func(package-name: string, version: string) -> metadata
+    /// Create a new metadata object with all the required fields.
+    ///
+    /// The package name must be in the form `namespace/name`, where
+    /// both the namespace and name can only contain ASCII numbers and letters,
+    /// `-`, or `_`.
+    static new: func(package-name: string, version: string) -> expected<metadata, error>
+
+    /// A 1-sentence description of what the package does.
     set-description: func(description: string)
 }
 
+/// A package to generate bindings for.
 record package {
     metadata: metadata,
     libraries: list<library>,
+    commands: list<command>,
 }
 
+/// A WASI executable.
+record command {
+    /// The executable's name (must be a valid identifier).
+    name: string,
+    /// The WebAssembly bytecode for this executable.
+    wasm: list<u8>,
+}
+
+/// The interface exposed by a library.
 resource %interface {
+    /// Load a library's interface from it's WIT definition.
     static from-wit: func(name: string, contents: string) -> expected<%interface, error>
+    /// Load a library's interface from the definition on disk.
     static from-path: func(path: string) -> expected<%interface, error>
 }
 
-resource module {
-    static new: func(name: string, abi: abi, wasm: list<u8>) -> module
-}
-
+/// A library that we should generate bindings for.
 record library {
+    /// The interface exposed by this library.
     %interface: %interface,
-    module: module,
+    abi: abi,
+    /// The WebAssembly bytecode for this library.
+    wasm: list<u8>,
 }
 
+/// The ABI a library has been compiled against.
 enum abi {
+    /// No ABI.
+    ///
+    /// This corresponds Rust's `wasm32-unknown-unknown` target.
     none,
+    /// The WebAssembly Systems Interface.
+    ///
+    /// This corresponds Rust's `wasm32-wasi` target.
     wasi,
 }
 
@@ -38,10 +66,17 @@ record error {
     causes: list<string>,
 }
 
+/// Information about a file.
 record file {
+    /// The file's path.
     filename: string,
+    /// The file's contents.
     contents: list<u8>,
 }
 
+/// Generate a JavaScript project that can be used to access the provided
+/// package.
 generate-javascript: func(pkg: package) -> expected<list<file>, error>
+
+/// Generate a Python project that can be used to access the provided package.
 generate-python: func(pkg: package) -> expected<list<file>, error>

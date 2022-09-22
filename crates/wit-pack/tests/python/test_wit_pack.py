@@ -1,16 +1,16 @@
 #!/bin/env python3
 
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Union
 from wit_pack import WitPack as WitPackPackage
 from wit_pack.bindings.wit_pack import (
     Abi,
+    Command,
     Err,
     Error,
     Interface,
     Library,
     Metadata,
-    Module,
     Ok,
     Package,
     T,
@@ -38,7 +38,7 @@ def unwrap(value: Union[Ok[T], Err[Error]]) -> T:
 
 
 def load_bindings(wit_pack: WitPack) -> Package:
-    metadata = Metadata.new(wit_pack, "wasmer/wit-pack", "1.2.3")
+    metadata = unwrap(Metadata.new(wit_pack, "wasmer/wit-pack", "1.2.3"))
 
     exports_wit = project_root.joinpath("crates", "wasm", "wit-pack.exports.wit")
     name = str(exports_wit)
@@ -48,14 +48,13 @@ def load_bindings(wit_pack: WitPack) -> Package:
     wit_pack_wasm = project_root.joinpath(
         "target", "wasm32-unknown-unknown", "debug", "wit_pack_wasm.wasm"
     )
-    module = Module.new(
-        wit_pack, wit_pack_wasm.name, Abi.NONE, wit_pack_wasm.read_bytes()
-    )
     libraries = [
-        Library(exports, module),
+        Library(exports, Abi.NONE, wit_pack_wasm.read_bytes()),
     ]
+    # Note: we need to provide a dummy command because of a bug in wit-bindgen
+    commands = [Command("dummy", b"")]
 
-    return Package(metadata, libraries)
+    return Package(metadata, libraries, commands)
 
 
 def test_generate_bindings_for_wit_pack():
@@ -71,10 +70,13 @@ def test_generate_bindings_for_wit_pack():
             "MANIFEST.in",
             "pyproject.toml",
             "wit_pack/__init__.py",
+            "wit_pack/py.typed",
+            "wit_pack/commands/__init__.py",
+            "wit_pack/commands/dummy.wasm",
             "wit_pack/bindings/__init__.py",
             "wit_pack/bindings/wit_pack/__init__.py",
             "wit_pack/bindings/wit_pack/bindings.py",
-            "wit_pack/bindings/wit_pack/wit_pack_wasm.wasm",
+            "wit_pack/bindings/wit_pack/wit-pack.wasm",
         }
         filenames = {f.filename for f in files}
         print("Expected", expected)
@@ -86,4 +88,3 @@ def test_generate_bindings_for_wit_pack():
         pkg.metadata.drop()
         for lib in pkg.libraries:
             lib.interface.drop()
-            lib.module.drop()

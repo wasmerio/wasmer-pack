@@ -17,6 +17,10 @@ class ExitStatus:
         return self.code == 0
 
 class Commands:
+    """
+    Run the various WASI executables in this package.
+    """
+
     def __init__(self, store: Store):
         self._store = store
         self._cache: dict[str, Module] = {}

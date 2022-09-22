@@ -13,6 +13,10 @@ from .bindings import Bindings
 __version__ = "1.2.3"
 
 class WitPack:
+    """
+    The "wasmer/wit-pack" package.
+    """
+
     def __init__(self):
         self.store = Store()
         self._bindings = Bindings(self.store)
@@ -25,4 +29,7 @@ class WitPack:
         return self._commands
     @property
     def bindings(self):
+        """
+        Bindings to the libraries in this package.
+        """
         return self._bindings

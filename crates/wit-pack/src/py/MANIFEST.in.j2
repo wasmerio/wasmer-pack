@@ -1,3 +1,4 @@
+py.typed
 {%- for library in libraries %}
 include {{package_name}}/bindings/{{ library | replace('-', '_') }}/*.wasm
 {%- endfor %}
