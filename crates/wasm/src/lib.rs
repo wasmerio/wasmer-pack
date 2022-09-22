@@ -52,26 +52,16 @@ impl crate::wit_pack::Interface for Interface {
     }
 }
 
-pub struct Module(upstream::Module);
-
-impl crate::wit_pack::Module for Module {
-    fn new(name: String, abi: wit_pack::Abi, wasm: Vec<u8>) -> Handle<Module> {
-        Handle::new(Module(upstream::Module {
-            name,
-            abi: abi.into(),
-            wasm,
-        }))
-    }
-}
-
 pub struct Metadata(RefCell<upstream::Metadata>);
 
 impl crate::wit_pack::Metadata for Metadata {
-    fn new(package_name: String, version: String) -> wit_bindgen_rust::Handle<crate::Metadata> {
-        Handle::new(Metadata(RefCell::new(upstream::Metadata::new(
-            package_name.parse().expect("Invalid package name"),
-            version,
-        ))))
+    fn new(
+        package_name: String,
+        version: String,
+    ) -> Result<wit_bindgen_rust::Handle<crate::Metadata>, wit_pack::Error> {
+        let meta = upstream::Metadata::new(package_name.parse()?, version);
+
+        Ok(Handle::new(Metadata(RefCell::new(meta))))
     }
 
     fn set_description(&self, description: String) {
@@ -103,18 +93,38 @@ impl From<crate::wit_pack::Package> for upstream::Package {
         let crate::wit_pack::Package {
             metadata,
             libraries,
+            commands,
         } = pkg;
         let metadata = metadata.0.borrow();
         upstream::Package::new(
             upstream::Metadata::clone(&metadata),
-            libraries
-                .into_iter()
-                .map(|lib| upstream::Library {
-                    module: lib.module.0.clone(),
-                    interface: lib.interface.0.clone(),
-                })
-                .collect(),
-            Vec::new(),
+            libraries.into_iter().map(Into::into).collect(),
+            commands.into_iter().map(Into::into).collect(),
         )
+    }
+}
+
+impl From<wit_pack::Library> for upstream::Library {
+    fn from(lib: wit_pack::Library) -> Self {
+        let wit_pack::Library {
+            interface,
+            abi,
+            wasm,
+        } = lib;
+        upstream::Library {
+            module: upstream::Module {
+                name: format!("{}.wasm", interface.0.name()),
+                abi: abi.into(),
+                wasm,
+            },
+            interface: interface.0.clone(),
+        }
+    }
+}
+
+impl From<wit_pack::Command> for upstream::Command {
+    fn from(cmd: wit_pack::Command) -> Self {
+        let wit_pack::Command { name, wasm } = cmd;
+        upstream::Command { name, wasm }
     }
 }

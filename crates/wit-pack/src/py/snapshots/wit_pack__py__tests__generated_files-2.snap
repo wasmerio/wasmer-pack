@@ -2,6 +2,6 @@
 source: crates/wit-pack/src/py/mod.rs
 expression: "files[\"MANIFEST.in\"].utf8_contents().unwrap()"
 ---
-
-include wit_pack/wit_pack/*.wasm
+py.typed
+include wit_pack/bindings/wit_pack/*.wasm
 include wit_pack/commands/*.wasm
