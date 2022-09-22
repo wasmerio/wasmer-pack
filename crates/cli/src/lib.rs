@@ -74,7 +74,7 @@ fn libraries(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Vec<
     let Manifest { bindings, .. } = webc.get_metadata();
     let libraries = bindings
         .iter()
-        .map(|b| load_library(b, &webc, fully_qualified_package_name))
+        .map(|b| load_library(b, webc, fully_qualified_package_name))
         .collect::<Result<Vec<_>, _>>()?;
 
     Ok(libraries)

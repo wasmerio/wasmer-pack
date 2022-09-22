@@ -61,7 +61,7 @@ pub fn generate_python(package: &Package) -> Result<Files, Error> {
 
     files.insert(
         Path::new(&package_name).join("__init__.py"),
-        top_level_dunder_init(&package)?,
+        top_level_dunder_init(package)?,
     );
     // Indicate that we use type hints
     files.insert(
@@ -117,7 +117,7 @@ fn library_bindings(libraries: &[Library]) -> Result<Files, Error> {
         let class_name = lib.class_name();
 
         let mut bindings = generate_bindings(&lib.interface.0);
-        bindings.insert(&module_filename, lib.module.wasm.clone().into());
+        bindings.insert(module_filename, lib.module.wasm.clone().into());
         files.insert_child_directory(&ident, bindings);
 
         ctx.libraries.push(LibraryContext {
