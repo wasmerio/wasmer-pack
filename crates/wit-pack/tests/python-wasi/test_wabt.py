@@ -3,19 +3,22 @@
 from pathlib import Path
 from wasmer import wasi
 import pytest
-from wabt.wabt import load as loadWabt, WasmFeature, Ok
 from wabt import Wabt
+from wabt.bindings.wabt import WasmFeature, Ok
 
 
 def test_two_modules_were_generated():
-    import wabt.wabt as _
-    import wabt.wabt2 as _
+    wabt = Wabt()
+
+    assert callable(wabt.bindings.wabt)
+    assert callable(wabt.bindings.wabt2)
 
 
 def test_generated_library():
-    wabt = loadWabt()
+    wabt = Wabt()
+    instance = wabt.bindings.wabt()
 
-    wasm_result = wabt.wat2wasm("(module)", WasmFeature.MUTABLE_GLOBALS)
+    wasm_result = instance.wat2wasm("(module)", WasmFeature.MUTABLE_GLOBALS)
     assert isinstance(wasm_result, Ok)
     assert wasm_result.value == bytearray(
         b"\x00asm\x01\x00\x00\x00\x00\x08\x04name\x02\x01\x00\x00\t\x07linking\x02"
@@ -33,9 +36,6 @@ def test_generated_commands_exist():
     assert callable(wabt.commands.wat2wasm)
 
 
-@pytest.mark.skip(
-    reason="The @Michael-F-Bryan/wabt package on wapm.dev doesn't contain valid WASI executables"
-)
 def test_invoke_wat2wasm_executable(tmp_path: Path):
     wabt = Wabt()
     env = (

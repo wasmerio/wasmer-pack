@@ -1,5 +1,5 @@
 {%- for library in libraries %}
-include {{package_name}}/{{ library | replace('-', '_') }}/*.wasm
+include {{package_name}}/bindings/{{ library | replace('-', '_') }}/*.wasm
 {%- endfor %}
 {%- if commands %}
 include {{package_name}}/commands/*.wasm

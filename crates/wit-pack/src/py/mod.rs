@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use anyhow::Error;
-use heck::ToPascalCase;
+use heck::{ToPascalCase, ToSnakeCase};
 use minijinja::Environment;
 use once_cell::sync::Lazy;
 use wit_bindgen_gen_core::Generator;
@@ -15,8 +15,8 @@ use crate::{
 static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
     let mut env = Environment::new();
     env.add_template(
-        "library.__init__.py",
-        include_str!("library.__init__.py.j2"),
+        "bindings.__init__.py",
+        include_str!("bindings.__init__.py.j2"),
     )
     .unwrap();
     env.add_template(
@@ -42,14 +42,17 @@ pub fn generate_python(package: &Package) -> Result<Files, Error> {
 
     let mut files = Files::new();
 
-    for library in package.libraries() {
+    let libraries = package.libraries();
+    let commands = package.commands();
+
+    if !libraries.is_empty() {
         files.insert_child_directory(
-            Path::new(&package_name).join(library.interface_name().replace('-', "_")),
-            library_bindings(library)?,
+            Path::new(&package_name).join("bindings"),
+            library_bindings(libraries)?,
         );
     }
 
-    if !package.commands().is_empty() {
+    if !commands.is_empty() {
         files.insert_child_directory(
             Path::new(&package_name).join("commands"),
             command_bindings(package.commands())?,
@@ -102,44 +105,54 @@ fn command_bindings(commands: &[Command]) -> Result<Files, Error> {
     Ok(files)
 }
 
-fn library_bindings(library: &Library) -> Result<Files, Error> {
-    let mut files = generate_bindings(&library.interface.0);
+fn library_bindings(libraries: &[Library]) -> Result<Files, Error> {
+    let mut files = Files::new();
+    let mut ctx = LibrariesContext::default();
 
-    files.insert(
-        library.module_filename(),
-        library.module.wasm.clone().into(),
-    );
+    for lib in libraries {
+        let module_filename = lib.module_filename();
+        let ident = lib.interface_name().to_snake_case();
+        let class_name = lib.class_name();
 
-    files.insert("__init__.py", library_dunder_init(library)?);
+        let mut bindings = generate_bindings(&lib.interface.0);
+        bindings.insert(&module_filename, lib.module.wasm.clone().into());
+        files.insert_child_directory(&ident, bindings);
 
-    files.insert(
-        library.module_filename(),
-        SourceFile::from(&library.module.wasm),
-    );
+        ctx.libraries.push(LibraryContext {
+            ident,
+            class_name,
+            module_filename: module_filename.to_string(),
+            wasi: lib.requires_wasi(),
+        });
+    }
+
+    let dunder_init = TEMPLATES
+        .get_template("bindings.__init__.py")
+        .unwrap()
+        .render(&ctx)?;
+    files.insert("__init__.py", dunder_init.into());
 
     Ok(files)
 }
 
-fn library_dunder_init(library: &Library) -> Result<SourceFile, Error> {
-    let ctx = minijinja::context! {
-        wasi => library.requires_wasi(),
-        interface_name => library.interface_name(),
-        module_filename => library.module_filename(),
-        class_name => library.class_name(),
-    };
+#[derive(Debug, Default, serde::Serialize)]
+struct LibrariesContext {
+    libraries: Vec<LibraryContext>,
+}
 
-    let rendered = TEMPLATES
-        .get_template("library.__init__.py")
-        .unwrap()
-        .render(ctx)?;
-
-    Ok(rendered.into())
+#[derive(Debug, Default, serde::Serialize)]
+struct LibraryContext {
+    ident: String,
+    class_name: String,
+    module_filename: String,
+    wasi: bool,
 }
 
 fn generate_manifest(package: &Package, package_name: &str) -> Result<SourceFile, Error> {
     let ctx = minijinja::context! {
         package_name,
         libraries => package.libraries()
+        .iter()
             .map(|lib| lib.interface_name())
             .collect::<Vec<_>>(),
         commands => package.commands()
@@ -199,18 +212,14 @@ fn top_level_dunder_init(package: &Package) -> Result<SourceFile, Error> {
         description,
         package_name,
     } = package.metadata();
-    let commands = package
-        .commands()
-        .iter()
-        .map(|cmd| cmd.name.as_str())
-        .collect::<Vec<_>>();
 
     let ctx = minijinja::context! {
         version,
         description,
         package_name => package_name.to_string(),
         ident => package_name.name().to_pascal_case(),
-        commands,
+        commands => !package.commands().is_empty(),
+        libraries => !package.libraries().is_empty(),
     };
 
     let rendered = TEMPLATES
@@ -228,29 +237,31 @@ fn generate_bindings(interface: &wit_parser::Interface) -> Files {
 
     WasmerPy::default().generate_all(imports, exports, &mut generated);
 
-    generated.into()
+    let mut files = Files::from(generated);
+    files.insert("__init__.py", "from .bindings import *".into());
+
+    files
 }
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
-
-    use crate::Module;
-
     use super::*;
+    use crate::Module;
+    use std::collections::BTreeSet;
 
     #[test]
     fn generated_files() {
-        let expected: HashSet<&Path> = [
+        let expected: BTreeSet<&Path> = [
             "MANIFEST.in",
             "pyproject.toml",
             "wit_pack/__init__.py",
             "wit_pack/commands/__init__.py",
             "wit_pack/commands/first.wasm",
             "wit_pack/commands/second-with-dashes.wasm",
-            "wit_pack/wit_pack/__init__.py",
-            "wit_pack/wit_pack/bindings.py",
-            "wit_pack/wit_pack/wit_pack_wasm.wasm",
+            "wit_pack/bindings/__init__.py",
+            "wit_pack/bindings/wit_pack/__init__.py",
+            "wit_pack/bindings/wit_pack/bindings.py",
+            "wit_pack/bindings/wit_pack/wit_pack_wasm.wasm",
         ]
         .iter()
         .map(Path::new)
@@ -279,21 +290,25 @@ mod tests {
                 wasm: Vec::new(),
             },
         ];
-        let package = Package::new(metadata, vec![Library { interface, module }], commands);
+        let libraries = vec![Library { interface, module }];
+        let package = Package::new(metadata, libraries, commands);
 
         let files = generate_python(&package).unwrap();
+
+        let actual_files: BTreeSet<_> = files.iter().map(|(p, _)| p).collect();
+        assert_eq!(actual_files, expected);
 
         insta::assert_display_snapshot!(files["pyproject.toml"].utf8_contents().unwrap());
         insta::assert_display_snapshot!(files["MANIFEST.in"].utf8_contents().unwrap());
         insta::assert_display_snapshot!(files["wit_pack/__init__.py"].utf8_contents().unwrap());
-        insta::assert_display_snapshot!(files["wit_pack/wit_pack/__init__.py"]
+        insta::assert_display_snapshot!(files["wit_pack/bindings/__init__.py"]
             .utf8_contents()
             .unwrap());
         insta::assert_display_snapshot!(files["wit_pack/commands/__init__.py"]
             .utf8_contents()
             .unwrap());
 
-        let actual_files: HashSet<_> = files.iter().map(|(p, _)| p).collect();
+        let actual_files: BTreeSet<_> = files.iter().map(|(p, _)| p).collect();
         assert_eq!(actual_files, expected);
     }
 }

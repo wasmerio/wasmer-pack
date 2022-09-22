@@ -7,12 +7,6 @@ from pathlib import Path
 from typing import Optional, Any
 from wasmer import Instance, Module, Store, wasi # type: ignore
 
-__all__ = [
-    "ExitStatus",
-    "first",
-    "second_with_dashes",
-]
-
 @dataclass
 class ExitStatus:
     """The status code returned when the executable finished."""
@@ -23,8 +17,8 @@ class ExitStatus:
         return self.code == 0
 
 class Commands:
-    def __init__(self):
-        self._store = Store()
+    def __init__(self, store: Store):
+        self._store = store
         self._cache: dict[str, Module] = {}
 
     def _get_module(self, filename: str) -> Module:
@@ -44,12 +38,13 @@ class Commands:
         assert version is not None, '"first.wasm" is not a valid WASI executable'
 
         imports = {**imports} if imports else {}
-        imports.update(env.generate_import_object(self._store, version))
+        wasi_imports = env.generate_import_object(self._store, version)
+        imports.update(wasi_imports.to_dict())
 
         instance = Instance(module, imports)
 
         code = instance.exports._start()
-        return ExitStatus(code=code)
+        return ExitStatus(code=code or 0)
     
     def second_with_dashes(self, env: wasi.Environment, imports: Optional[dict[str, Any]] = None) -> ExitStatus:
         module = self._get_module("second-with-dashes.wasm")
@@ -58,10 +53,11 @@ class Commands:
         assert version is not None, '"second-with-dashes.wasm" is not a valid WASI executable'
 
         imports = {**imports} if imports else {}
-        imports.update(env.generate_import_object(self._store, version))
+        wasi_imports = env.generate_import_object(self._store, version)
+        imports.update(wasi_imports.to_dict())
 
         instance = Instance(module, imports)
 
         code = instance.exports._start()
-        return ExitStatus(code=code)
+        return ExitStatus(code=code or 0)
     

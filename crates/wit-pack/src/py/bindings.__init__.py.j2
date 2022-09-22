@@ -1,9 +1,5 @@
----
-source: crates/wit-pack/src/py/mod.rs
-expression: "files[\"wit_pack/bindings/__init__.py\"].utf8_contents().unwrap()"
----
 '''
-Bindings to the  library.
+Bindings to the {{interface_name}} library.
 '''
 
 from pathlib import Path
@@ -11,7 +7,11 @@ from typing import Optional, Any
 from dataclasses import dataclass
 
 from wasmer import Store, Module, wasi # type: ignore
-from .wit_pack.bindings import WitPack
+
+{%- for lib in libraries %}
+from .{{lib.ident}}.bindings import {{lib.class_name}}
+
+{%- endfor %}
 
 @dataclass
 class LoadArgs:
@@ -32,11 +32,20 @@ class Bindings:
         self._cache[filename] = module
         return module
 
-    def wit_pack(self, args: Optional[LoadArgs] = None) -> WitPack:
-        filename = "wit_pack/wit_pack_wasm.wasm"
+    {% for lib in libraries -%}
+    def {{lib.ident}}(self, args: Optional[LoadArgs] = None) -> {{lib.class_name}}:
+        filename = "{{lib.ident}}/{{lib.module_filename}}"
         module = self._get_module(filename)
 
         imports = {**args.imports} if (args and args.imports) else {}
 
-        return WitPack(self._store, imports, module)
-    
+        {%- if lib.wasi %}
+        version = wasi.get_version(module, strict=True)
+        assert version is not None, f'"{filename}" is not a valid WASI executable'
+        env = args.wasi if (args and args.wasi) else wasi.StateBuilder("{{lib.ident}}").finalize()
+        wasi_imports = env.generate_imports(self._store, version)
+        imports.update(wasi_imports)
+        {%- endif %}
+
+        return {{lib.class_name}}(self._store, imports, module)
+    {% endfor %}

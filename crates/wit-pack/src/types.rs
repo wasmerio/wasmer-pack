@@ -35,8 +35,8 @@ impl Package {
         &self.metadata
     }
 
-    pub fn libraries(&self) -> impl Iterator<Item = &'_ Library> + '_ {
-        self.libraries.iter()
+    pub fn libraries(&self) -> &[Library] {
+        &self.libraries
     }
 
     pub fn requires_wasi(&self) -> bool {
