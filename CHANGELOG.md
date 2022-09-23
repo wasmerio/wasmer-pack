@@ -24,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detect all available WASI executables in a Pirita file
   ([#28](https://github.com/wasmerio/wit-pack/pull/28))
 
+## Fixed
+
+- Inspect each atom's kind when discovering the commands in a Pirita file instead
+  of blindly assuming everything is a command
+  ([#31](https://github.com/wasmerio/wit-pack/issues/31))
+
 # [0.2.3] - 2022-09-15
 
 ## Fixed
