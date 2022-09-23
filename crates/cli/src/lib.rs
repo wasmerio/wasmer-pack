@@ -5,6 +5,8 @@ use clap::Parser;
 use webc::{Manifest, ParseOptions, WebC, WebCOwned};
 use wit_pack::{Command, Interface, Library, Metadata, Module, Package};
 
+const WASI_EXECUTABLE_KIND: &str = "https://webc.org/kind/wasm";
+
 #[derive(Debug, Parser)]
 pub struct Codegen {
     /// Where to save the generated bindings.
@@ -55,19 +57,27 @@ fn load_pirita_file(path: &Path) -> Result<Package, Error> {
     let fully_qualified_package_name = webc.get_package_name();
     let metadata = metadata(&fully_qualified_package_name)?;
     let libraries = libraries(&webc, &fully_qualified_package_name)?;
-    let commands = commands(&webc);
+    let commands = commands(&webc, &fully_qualified_package_name);
 
     Ok(Package::new(metadata, libraries, commands))
 }
 
-fn commands(webc: &WebC<'_>) -> Vec<Command> {
-    webc.get_all_atoms()
-        .into_iter()
-        .map(|(name, wasm)| Command {
-            name,
+fn commands(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Vec<Command> {
+    let mut commands = Vec::new();
+
+    for (name, atom) in &webc.manifest.atoms {
+        if atom.kind.as_str() != WASI_EXECUTABLE_KIND {
+            continue;
+        }
+
+        let wasm = webc.get_atom(fully_qualified_package_name, &name).unwrap();
+        commands.push(Command {
+            name: name.clone(),
             wasm: wasm.to_vec(),
-        })
-        .collect()
+        });
+    }
+
+    commands
 }
 
 fn libraries(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Vec<Library>, Error> {
