@@ -22,6 +22,6 @@ webc = { git = "ssh://git@github.com/wasmerio/pirita.git", version = "0.1.0" }
 wit-pack = { version = "0.3.0-alpha", path = "../wit-pack" }
 
 [dev-dependencies]
-tempfile = "1"
+tempfile = "3"
 ureq = "2.5.0"
 url = "2.3.1"

@@ -14,13 +14,13 @@ macro_rules! codegen_test {
     ) => {
         #[test]
         fn $name() {
-            let temp = tempfile::tempdir();
+            let temp = tempfile::tempdir().unwrap();
             let local_path = cached_url($url);
 
             generate_bindings(&local_path, temp.path());
 
             // TODO: check the libraries and commands were generated
-        };
+        }
     };
 }
 
@@ -48,20 +48,20 @@ codegen_test! {
 fn generate_bindings(webc_file: &Path, out_dir: &Path) {
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_wit-pack"));
     cmd.arg("js")
-        .arg(&local_path)
+        .arg(&webc_file)
         .arg("--out-dir")
-        .arg(temp.path())
+        .arg(out_dir)
         .stdin(Stdio::null())
         .stderr(Stdio::piped())
         .stdout(Stdio::piped());
 
-    let output = cmd.output().expect("Unable to ");
+    let output = cmd.output().expect("Unable to invoke wit-pack");
 
     if !output.status.success() {
         eprintln!("----- STDOUT -----");
-        eprintln!("{}", String::from_utf8_lossy(&output.stdout));
+        eprintln!("{}", String::from_utf8_lossy(&output.stdout).trim());
         eprintln!("----- STDERR -----");
-        eprintln!("{}", String::from_utf8_lossy(&output.stderr));
+        eprintln!("{}", String::from_utf8_lossy(&output.stderr).trim());
         panic!("Command failed: {cmd:?}");
     }
 }
@@ -69,9 +69,10 @@ fn generate_bindings(webc_file: &Path, out_dir: &Path) {
 fn cached_url(url: &str) -> PathBuf {
     let url: Url = url.parse().unwrap();
     let filename = url.path_segments().unwrap().last().unwrap();
-    let dest = Path::new(env!("CARGO_TARGET_TMPDIR"))
-        .join("cli-fixtures")
-        .join(filename);
+    let fixtures_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("cli-fixtures");
+    let dest = fixtures_dir.join(filename);
+
+    std::fs::create_dir_all(&fixtures_dir).unwrap();
 
     if !dest.exists() {
         let response = ureq::get(url.as_str()).call().unwrap();
