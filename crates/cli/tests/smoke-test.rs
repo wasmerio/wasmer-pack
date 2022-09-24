@@ -7,12 +7,14 @@ use url::Url;
 
 macro_rules! codegen_test {
     (
+        $( #[$meta:meta] )*
         name: $name:ident,
         url: $url:expr,
         libraries: [$($lib:literal),* $(,)?],
         commands: [$($cmd:literal),* $(,)?],
     ) => {
         #[test]
+        $( #[$meta] )*
         fn $name() {
             let temp = tempfile::tempdir().unwrap();
             let local_path = cached_url($url);
@@ -25,6 +27,7 @@ macro_rules! codegen_test {
 }
 
 codegen_test! {
+    #[ignore]
     name: wabt,
     url: "https://registry-cdn.wapm.dev/packages/wasmer/wabt/wabt-1.0.33.webc",
     libraries: ["wabt"],
