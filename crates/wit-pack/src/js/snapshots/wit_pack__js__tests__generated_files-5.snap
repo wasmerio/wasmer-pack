@@ -14,9 +14,7 @@ async function getModule() {
         const path = url.fileURLToPath(new URL("./second-with-dashes.wasm", import.meta.url));
         const wasm = await fs.readFile(path);
 
-        module = WebAssembly.compileStreaming
-            ? WebAssembly.compileStreaming(wasm)
-            : WebAssembly.compile(wasm);
+        module = WebAssembly.compile(wasm);
     }
 
     return await module;
