@@ -1,0 +1,47 @@
+import fs from "fs/promises";
+import * as url from "url";
+import { init as initWasi, WASI } from "@wasmer/wasi";
+{%- for lib in libraries %}
+import { {{lib.class_name}} } from "./{{lib.interface_name}}/{{lib.interface_name}}.js";
+{%- endfor %}
+
+export default class Bindings {
+    constructor() {
+        this._cache = {}
+    }
+
+    /** Lazily fetch and compile the WebAssembly module */
+    async _getModule(filename) {
+        if (filename in this._cache) {
+            return this._cache[filename];
+        }
+
+        const path = url.fileURLToPath(new URL(filename, import.meta.url));
+        const wasm = await fs.readFile(path);
+        this._cache[filename] = await WebAssembly.compile(wasm);
+        return this._cache[filename];
+    }
+
+    {%- for lib in libraries %}
+    async {{lib.ident}}(options) {
+        const wrapper = new {{lib.class_name}}();
+
+        {%- if lib.wasi %}
+        const [module, _] = await Promise.all([this._getModule("{{lib.interface_name}}/{{lib.module_filename}}"), initWasi()]);
+        const wasi = options?.wasi || new WASI({}, module);
+        const imports = Object.assign({}, options?.imports, wasi.getImports(module));
+        {%- else %}
+        const module = await this._getModule("{{lib.interface_name}}/{{lib.module_filename}}");
+        const imports = options?.imports || {};
+        {%- endif %}
+
+        await wrapper.instantiate(module, imports);
+
+        {%- if lib.wasi %}
+        wasi.instantiate(wrapper.instance);
+        {%- endif %}
+
+        return wrapper;
+    }
+    {%- endfor %}
+}

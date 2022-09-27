@@ -19,10 +19,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Rewrote the `README.md` walkthrough
 - Added a *"Time Reporter"* task to CI so we can keep an eye on CI times ([#25](https://github.com/wasmerio/wit-pack/pull/25))
 - Generate wrappers for calling WASI executables from JavaScript
-  ([#26](https://github.com/wasmerio/wit-pack/pull/26)) and Python
+  ([#26](https://github.com/wasmerio/wit-pack/pull/26))
+- Generate wrappers for calling WASI executables from Python
   ([#27](https://github.com/wasmerio/wit-pack/pull/27))
 - Detect all available WASI executables in a Pirita file
   ([#28](https://github.com/wasmerio/wit-pack/pull/28))
+- Add a top-level facade to the generated Python bindings so libraries and
+  commands can be accessed through one common object
+  ([#30](https://github.com/wasmerio/wit-pack/pull/30))
+- Add a top-level facade to the generated JavaScript bindings so libraries and
+  commands can be accessed through one common object
+  ([#34](https://github.com/wasmerio/wit-pack/pull/34))
+
+## Fixed
+
+- Inspect each atom's kind when discovering the commands in a Pirita file instead
+  of blindly assuming everything is a command
+  ([#31](https://github.com/wasmerio/wit-pack/issues/31))
 
 ## Fixed
 

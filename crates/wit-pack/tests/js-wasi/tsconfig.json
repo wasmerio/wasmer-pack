@@ -1,18 +1,15 @@
 {
-  "compilerOptions": {
-    "target": "ES2015",
-    "module": "ESNext",
-    "lib": [
-      "es2015",
-      "dom"
-    ],
-    "allowJs": true,
-    "sourceMap": true,
-    "rootDir": "./src",
-    "moduleResolution": "Node",
-    "strict": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true
-  }
+    "compilerOptions": {
+        "target": "ES2015",
+        "module": "ESNext",
+        "lib": ["es2015", "dom"],
+        "allowJs": true,
+        "sourceMap": true,
+        "rootDir": ".",
+        "moduleResolution": "Node",
+        "strict": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true
+    }
 }

@@ -1,33 +1,35 @@
 ---
 source: crates/wit-pack/src/js/mod.rs
-expression: "files[\"src/wit-pack/index.js\"].utf8_contents().unwrap()"
+expression: "files[\"src/bindings/index.js\"].utf8_contents().unwrap()"
 ---
 import fs from "fs/promises";
 import * as url from "url";
-import { WitPack } from "./wit-pack.js";
+import { init as initWasi, WASI } from "@wasmer/wasi";
+import { WitPack } from "./wit-pack/wit-pack.js";
 
-let module = undefined;
-
-/** Lazily fetch and compile the WebAssembly module */
-async function getModule() {
-    if (!module) {
-        const path = url.fileURLToPath(new URL("./wit_pack_wasm.wasm", import.meta.url));
-        const wasm = await fs.readFile(path);
-
-        module = WebAssembly.compileStreaming
-            ? WebAssembly.compileStreaming(wasm)
-            : WebAssembly.compile(wasm);
+export default class Bindings {
+    constructor() {
+        this._cache = {}
     }
 
-    return await module;
-}
+    /** Lazily fetch and compile the WebAssembly module */
+    async _getModule(filename) {
+        if (filename in this._cache) {
+            return this._cache[filename];
+        }
 
-export default async function(options) {
-    const wrapper = new WitPack();
-    const module = await getModule();
-    const imports = options?.imports || {};
+        const path = url.fileURLToPath(new URL(filename, import.meta.url));
+        const wasm = await fs.readFile(path);
+        this._cache[filename] = await WebAssembly.compile(wasm);
+        return this._cache[filename];
+    }
+    async wit_pack(options) {
+        const wrapper = new WitPack();
+        const module = await this._getModule("wit-pack/wit_pack_wasm.wasm");
+        const imports = options?.imports || {};
 
-    await wrapper.instantiate(module, imports);
+        await wrapper.instantiate(module, imports);
 
-    return wrapper;
+        return wrapper;
+    }
 }
