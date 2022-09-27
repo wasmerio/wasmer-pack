@@ -1,0 +1,19 @@
+---
+source: crates/cli/tests/smoke-test.rs
+expression: "format!(\"{meta:#}\")"
+---
+{
+  "bindings": [
+    {
+      "interface_name": "wit-pack"
+    }
+  ],
+  "commands": [
+    {
+      "name": "wit-pack-wasm"
+    }
+  ],
+  "description": null,
+  "name": "wasmer/wit-pack",
+  "version": "0.3.0-beta"
+}

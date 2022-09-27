@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+Changelog entries will contain a link to the pull request implementing that
+change, where applicable.
+
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
@@ -35,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Inspect each atom's kind when discovering the commands in a Pirita file instead
   of blindly assuming everything is a command
-  ([#31](https://github.com/wasmerio/wit-pack/issues/31))
+  ([#32](https://github.com/wasmerio/wit-pack/issues/32))
 
 ## Fixed
 
