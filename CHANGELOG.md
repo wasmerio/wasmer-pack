@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a top-level facade to the generated Python bindings so libraries and
   commands can be accessed through one common object
   ([#30](https://github.com/wasmerio/wit-pack/pull/30))
+- Add a top-level facade to the generated JavaScript bindings so libraries and
+  commands can be accessed through one common object
+  ([#34](https://github.com/wasmerio/wit-pack/pull/34))
 
 ## Fixed
 
