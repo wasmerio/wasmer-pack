@@ -88,7 +88,7 @@ fn metadata(webc_file: &Path) -> serde_json::Value {
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_wit-pack"));
     cmd.arg("show")
         .arg("--format=json")
-        .arg(&webc_file)
+        .arg(webc_file)
         .stdin(Stdio::null())
         .stderr(Stdio::piped())
         .stdout(Stdio::piped());
@@ -102,7 +102,7 @@ fn metadata(webc_file: &Path) -> serde_json::Value {
 fn generate_bindings(webc_file: &Path, out_dir: &Path) {
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_wit-pack"));
     cmd.arg("js")
-        .arg(&webc_file)
+        .arg(webc_file)
         .arg("--out-dir")
         .arg(out_dir)
         .stdin(Stdio::null())

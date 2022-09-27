@@ -24,7 +24,7 @@ fn commands(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Vec<Command>
     let mut commands = Vec::new();
 
     for name in webc.list_commands() {
-        let wasm = webc.get_atom(fully_qualified_package_name, &name).unwrap();
+        let wasm = webc.get_atom(fully_qualified_package_name, name).unwrap();
         commands.push(Command {
             name: name.to_string(),
             wasm: wasm.to_vec(),
