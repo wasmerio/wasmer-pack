@@ -12,6 +12,12 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- **Raised the MSRV** from `1.59.0` to `1.61.0` after `minijinja`
+  [bumped](https://github.com/mitsuhiko/minijinja/blob/c5a09ebd/CHANGELOG.md#0210)
+  their MSRV
+
 ### Fixed
 
 - Make the current directory available to the CLI when run by wasmer
