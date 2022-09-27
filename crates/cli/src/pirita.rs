@@ -4,8 +4,6 @@ use anyhow::{Context, Error};
 use webc::{Manifest, ParseOptions, WebC, WebCOwned};
 use wit_pack::{Command, Interface, Library, Metadata, Module, Package};
 
-const WASI_EXECUTABLE_KIND: &str = "https://webc.org/kind/wasm";
-
 pub(crate) fn load_pirita_file(path: &Path) -> Result<Package, Error> {
     let options = ParseOptions::default();
 
@@ -25,14 +23,10 @@ pub(crate) fn load_pirita_file(path: &Path) -> Result<Package, Error> {
 fn commands(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Vec<Command> {
     let mut commands = Vec::new();
 
-    for (name, atom) in &webc.manifest.atoms {
-        if atom.kind.as_str() != WASI_EXECUTABLE_KIND {
-            continue;
-        }
-
+    for name in webc.list_commands() {
         let wasm = webc.get_atom(fully_qualified_package_name, &name).unwrap();
         commands.push(Command {
-            name: name.clone(),
+            name: name.to_string(),
             wasm: wasm.to_vec(),
         });
     }

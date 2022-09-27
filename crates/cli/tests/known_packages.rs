@@ -6,6 +6,10 @@ use std::{
 
 use url::Url;
 
+/// Download a WEBC package and make sure it would contain the expected
+/// libraries and commands.
+///
+/// We'll also try to generate the JavaScript bindings for good measure.
 macro_rules! codegen_test {
     (
         $( #[$meta:meta] )*
@@ -33,7 +37,7 @@ macro_rules! codegen_test {
 }
 
 codegen_test! {
-    #[ignore]
+    #[ignore = "The webc file isn't being generated properly"]
     name: wabt,
     url: "https://registry-cdn.wapm.dev/packages/wasmer/wabt/wabt-1.0.33.webc",
     libraries: ["wabt"],
@@ -51,7 +55,7 @@ codegen_test! {
     name: wit_pack,
     url: "https://registry-cdn.wapm.dev/packages/wasmer/wit-pack/wit-pack-0.3.0-beta.webc",
     libraries: ["wit-pack"],
-    commands: ["wit-pack-wasm"],
+    commands: [],
 }
 
 fn assert_contains_libraries_and_commands(
@@ -90,14 +94,7 @@ fn metadata(webc_file: &Path) -> serde_json::Value {
         .stdout(Stdio::piped());
 
     let output = cmd.output().expect("Unable to invoke wit-pack");
-
-    if !output.status.success() {
-        eprintln!("----- STDOUT -----");
-        eprintln!("{}", String::from_utf8_lossy(&output.stdout).trim());
-        eprintln!("----- STDERR -----");
-        eprintln!("{}", String::from_utf8_lossy(&output.stderr).trim());
-        panic!("Command failed: {cmd:?}");
-    }
+    assert_success(&output, &cmd);
 
     serde_json::from_slice(&output.stdout).expect("Unable to deserialize the metadata")
 }
@@ -113,12 +110,17 @@ fn generate_bindings(webc_file: &Path, out_dir: &Path) {
         .stdout(Stdio::piped());
 
     let output = cmd.output().expect("Unable to invoke wit-pack");
+    assert_success(&output, &cmd);
+}
 
+fn assert_success(output: &std::process::Output, cmd: &Command) {
     if !output.status.success() {
         eprintln!("----- STDOUT -----");
         eprintln!("{}", String::from_utf8_lossy(&output.stdout).trim());
+
         eprintln!("----- STDERR -----");
         eprintln!("{}", String::from_utf8_lossy(&output.stderr).trim());
+
         panic!("Command failed: {cmd:?}");
     }
 }

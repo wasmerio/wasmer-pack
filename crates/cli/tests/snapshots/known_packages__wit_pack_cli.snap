@@ -1,5 +1,5 @@
 ---
-source: crates/cli/tests/smoke-test.rs
+source: crates/cli/tests/known_packages.rs
 expression: "format!(\"{meta:#}\")"
 ---
 {
