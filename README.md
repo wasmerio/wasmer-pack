@@ -33,13 +33,19 @@ $ tree ./py
 ├── MANIFEST.in
 ├── pyproject.toml
 └── wit_pack
+    ├── bindings
+    │   ├── __init__.py
+    │   └── wit_pack
+    │       ├── bindings.py
+    │       ├── __init__.py
+    │       └── wit-pack-wasm
+    ├── commands
+    │   ├── __init__.py
+    │   └── wit-pack-wasm.wasm
     ├── __init__.py
-    └── wit_pack
-        ├── bindings.py
-        ├── __init__.py
-        └── wit-pack-wasm
+    └── py.typed
 
-2 directories, 6 files
+4 directories, 10 files
 ```
 
 We can generate JavaScript bindings with a similar command

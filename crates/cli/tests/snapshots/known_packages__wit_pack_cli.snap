@@ -1,0 +1,15 @@
+---
+source: crates/cli/tests/known_packages.rs
+expression: "format!(\"{meta:#}\")"
+---
+{
+  "bindings": [],
+  "commands": [
+    {
+      "name": "wit-pack"
+    }
+  ],
+  "description": null,
+  "name": "wasmer/wit-pack-cli",
+  "version": "0.3.0-beta"
+}
