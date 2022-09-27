@@ -45,12 +45,6 @@ change, where applicable.
   of blindly assuming everything is a command
   ([#32](https://github.com/wasmerio/wit-pack/issues/32))
 
-## Fixed
-
-- Inspect each atom's kind when discovering the commands in a Pirita file instead
-  of blindly assuming everything is a command
-  ([#31](https://github.com/wasmerio/wit-pack/issues/31))
-
 # [0.2.3] - 2022-09-15
 
 ## Fixed
