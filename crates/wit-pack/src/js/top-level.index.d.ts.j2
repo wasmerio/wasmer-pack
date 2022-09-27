@@ -1,4 +1,5 @@
 {%- if commands %}
+// @ts-ignore
 import { Wasi } from "@wasmer/wasi";
 
 export type RunOptions = {
@@ -11,8 +12,14 @@ export type ExitStatus = {
     code: number,
 };
 {%- endif%}
+{%- if libraries %}
+import Bindings from "./bindings";
+{%- endif %}
 
 export type Package = {
+    {%- if libraries %}
+    bindings: Bindings,
+    {%- endif %}
     {%- if commands %}
     commands: {
         {%- for cmd in commands %}

@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use anyhow::Error;
+use heck::ToSnakeCase;
 use minijinja::Environment;
 use once_cell::sync::Lazy;
 use wit_bindgen_gen_core::Generator;
@@ -14,10 +15,13 @@ const WASMER_WASI_VERSION: &str = "^1.1.2";
 
 static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
     let mut env = Environment::new();
-    env.add_template("library.index.js", include_str!("library.index.js.j2"))
+    env.add_template("bindings.index.js", include_str!("bindings.index.js.j2"))
         .unwrap();
-    env.add_template("library.index.d.ts", include_str!("library.index.d.ts.j2"))
-        .unwrap();
+    env.add_template(
+        "bindings.index.d.ts",
+        include_str!("bindings.index.d.ts.j2"),
+    )
+    .unwrap();
     env.add_template("command.d.ts", include_str!("command.d.ts.j2"))
         .unwrap();
     env.add_template("command.js", include_str!("command.js.j2"))
@@ -37,10 +41,11 @@ static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
 pub fn generate_javascript(package: &Package) -> Result<Files, Error> {
     let mut files = Files::new();
 
-    for lib in package.libraries() {
+    let libraries = package.libraries();
+    if !libraries.is_empty() {
         files.insert_child_directory(
-            Path::new("src").join(lib.interface_name()),
-            library_bindings(lib)?,
+            Path::new("src").join("bindings"),
+            library_bindings(libraries)?,
         );
     }
 
@@ -48,7 +53,7 @@ pub fn generate_javascript(package: &Package) -> Result<Files, Error> {
         files.insert_child_directory(Path::new("src").join("commands"), command_bindings(cmd)?);
     }
 
-    files.insert_child_directory("src", top_level(package.commands())?);
+    files.insert_child_directory("src", top_level(package.libraries(), package.commands())?);
 
     let package_json = generate_package_json(package.requires_wasi(), package.metadata());
     files.insert("package.json", package_json);
@@ -86,7 +91,7 @@ fn command_bindings(cmd: &Command) -> Result<Files, Error> {
     Ok(files)
 }
 
-fn top_level(commands: &[Command]) -> Result<Files, Error> {
+fn top_level(libraries: &[Library], commands: &[Command]) -> Result<Files, Error> {
     let commands = commands
         .iter()
         .map(|cmd| {
@@ -96,7 +101,10 @@ fn top_level(commands: &[Command]) -> Result<Files, Error> {
             }
         })
         .collect::<Vec<_>>();
-    let ctx = minijinja::context! { commands };
+    let ctx = minijinja::context! {
+       commands,
+       libraries => !libraries.is_empty(),
+    };
     let mut files = Files::new();
 
     files.insert(
@@ -120,39 +128,61 @@ fn top_level(commands: &[Command]) -> Result<Files, Error> {
     Ok(files)
 }
 
-fn library_bindings(library: &Library) -> Result<Files, Error> {
-    let mut files = generate_bindings(&library.interface.0);
-    let ctx = library.js_context();
+fn library_bindings(libraries: &[Library]) -> Result<Files, Error> {
+    let mut files = Files::new();
+    let mut ctx = LibrariesContext::default();
+
+    for lib in libraries {
+        let module_filename = lib.module_filename();
+        let interface_name = lib.interface_name();
+        let ident = interface_name.to_snake_case();
+        let class_name = lib.class_name();
+
+        let mut bindings = generate_bindings(&lib.interface.0);
+        bindings.insert(module_filename, lib.module.wasm.clone().into());
+        files.insert_child_directory(interface_name, bindings);
+
+        ctx.libraries.push(LibraryContext {
+            ident,
+            interface_name: interface_name.to_string(),
+            class_name,
+            module_filename: module_filename.to_string(),
+            wasi: lib.requires_wasi(),
+        });
+    }
 
     let index_js = TEMPLATES
-        .get_template("library.index.js")
+        .get_template("bindings.index.js")
         .unwrap()
         .render(&ctx)?;
     files.insert("index.js", index_js.into());
 
     let typings_file = TEMPLATES
-        .get_template("library.index.d.ts")
+        .get_template("bindings.index.d.ts")
         .unwrap()
         .render(&ctx)?;
     files.insert("index.d.ts", typings_file.into());
 
-    files.insert(
-        library.module_filename(),
-        SourceFile::from(&library.module.wasm),
-    );
-
     Ok(files)
 }
 
-impl Library {
-    fn js_context(&self) -> impl serde::Serialize {
-        minijinja::context! {
-            wasi => self.requires_wasi(),
-            class_name => self.class_name(),
-            interface_name => self.interface_name(),
-            module_filename => self.module_filename(),
-        }
-    }
+#[derive(Debug, Default, serde::Serialize)]
+struct LibrariesContext {
+    libraries: Vec<LibraryContext>,
+}
+
+#[derive(Debug, Default, serde::Serialize)]
+struct LibraryContext {
+    /// The identifier that should be used when accessing this library.
+    ident: String,
+    /// The name of the interface (i.e. the `wit-pack` in
+    /// `wit-pack.exports.wit`).
+    interface_name: String,
+    /// The name of the class generated by `wit-bindgen` (i.e. `WitPack`).
+    class_name: String,
+    /// The filename of the WebAssembly module (e.g. `wit-pack.wasm`).
+    module_filename: String,
+    wasi: bool,
 }
 
 fn generate_package_json(needs_wasi: bool, metadata: &Metadata) -> SourceFile {
@@ -224,12 +254,12 @@ mod tests {
             "src/commands/second-with-dashes.wasm",
             "src/index.d.ts",
             "src/index.js",
-            "src/wit-pack/index.d.ts",
-            "src/wit-pack/index.js",
-            "src/wit-pack/intrinsics.js",
-            "src/wit-pack/wit_pack_wasm.wasm",
-            "src/wit-pack/wit-pack.d.ts",
-            "src/wit-pack/wit-pack.js",
+            "src/bindings/index.d.ts",
+            "src/bindings/index.js",
+            "src/bindings/wit-pack/intrinsics.js",
+            "src/bindings/wit-pack/wit_pack_wasm.wasm",
+            "src/bindings/wit-pack/wit-pack.d.ts",
+            "src/bindings/wit-pack/wit-pack.js",
         ]
         .iter()
         .map(Path::new)
@@ -258,9 +288,13 @@ mod tests {
                 wasm: Vec::new(),
             },
         ];
-        let pkg = Package::new(metadata, vec![Library { module, interface }], commands);
+        let libraries = vec![Library { module, interface }];
+        let pkg = Package::new(metadata, libraries, commands);
 
         let files = generate_javascript(&pkg).unwrap();
+
+        let actual_files: BTreeSet<_> = files.iter().map(|(p, _)| p).collect();
+        assert_eq!(actual_files, expected);
 
         insta::assert_display_snapshot!(files["package.json"].utf8_contents().unwrap());
         insta::assert_display_snapshot!(files["src/commands/first.d.ts"].utf8_contents().unwrap());
@@ -273,10 +307,7 @@ mod tests {
             .unwrap());
         insta::assert_display_snapshot!(files["src/index.d.ts"].utf8_contents().unwrap());
         insta::assert_display_snapshot!(files["src/index.js"].utf8_contents().unwrap());
-        insta::assert_display_snapshot!(files["src/wit-pack/index.d.ts"].utf8_contents().unwrap());
-        insta::assert_display_snapshot!(files["src/wit-pack/index.js"].utf8_contents().unwrap());
-
-        let actual_files: BTreeSet<_> = files.iter().map(|(p, _)| p).collect();
-        assert_eq!(actual_files, expected);
+        insta::assert_display_snapshot!(files["src/bindings/index.d.ts"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["src/bindings/index.js"].utf8_contents().unwrap());
     }
 }

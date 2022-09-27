@@ -22,6 +22,7 @@ fn use_javascript_bindings() {
     let _ = std::fs::remove_dir_all(js_dir.join("node_modules"));
 
     execute("yarn", &js_dir);
+    execute("yarn tsc --noEmit", &js_dir);
     execute("yarn test", &js_dir);
 }
 
@@ -41,6 +42,7 @@ fn use_wasi_javascript_bindings() {
     let _ = std::fs::remove_dir_all(js_dir.join("node_modules"));
 
     execute("yarn", &js_dir);
+    execute("yarn tsc --noEmit", &js_dir);
     execute("yarn test", &js_dir);
 }
 

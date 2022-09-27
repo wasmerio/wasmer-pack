@@ -112,7 +112,7 @@ fn load_library(
         .get_volume(fully_qualified_package_name, "metadata")
         .context("The container doesn't have a \"metadata\" volume")?
         .get_file(exports)
-        .with_context(|| format!("Unable to find the \"{}\" volume", bindings.exports))?;
+        .with_context(|| format!("Unable to find \"{}\"", bindings.exports))?;
     let exports = std::str::from_utf8(exports).context("The WIT file should be a UTF-8 string")?;
     let interface =
         Interface::from_wit(&bindings.exports, exports).context("Unable to parse the WIT file")?;

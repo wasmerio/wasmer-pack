@@ -7,7 +7,5 @@
             }
         }
     ],
-    "spec_files": [
-        "**/*.test.ts"
-    ]
+    "spec_files": ["**/*.test.ts"]
 }

@@ -1,4 +1,4 @@
-import load from "@wasmer/wit-pack/src/wit-pack/index.js";
+import load from "@wasmer/wit-pack";
 import {
     Interface,
     Metadata,
@@ -6,13 +6,14 @@ import {
     Error as WitPackError,
     File,
     Package,
-} from "@wasmer/wit-pack/src/wit-pack/wit-pack.js";
+} from "@wasmer/wit-pack/src/bindings/wit-pack/wit-pack.js";
 import fs from "fs/promises";
 import path from "path";
 
 describe("wit-pack bindings", () => {
     it("is self-hosting", async () => {
-        const witPack = await load() ;
+        const witPackPackage = load();
+        const witPack = await witPackPackage.bindings.wit_pack();
         // If we want to use wit-pack to generate some bindings for itself (how
         // meta!) we need to load the corresponding *.wasm and *.wit files.
         const projectRoot = path.resolve(".", "../../../..");
@@ -34,7 +35,7 @@ describe("wit-pack bindings", () => {
                     abi: "none",
                 },
             ],
-            commands: [{name: "dummy", wasm: new Uint8Array()}],
+            commands: [{ name: "dummy_cmd", wasm: new Uint8Array() }],
         };
 
         // Now we can generate the JavaScript bindings
@@ -43,19 +44,19 @@ describe("wit-pack bindings", () => {
 
         const generatedFiles = files.map((f) => f.filename).sort();
         expect(generatedFiles).toEqual([
-            'package.json',
-            'src/commands/dummy.d.ts',
-            'src/commands/dummy.js',
-            'src/commands/dummy.wasm',
-            'src/index.d.ts',
-            'src/index.js',
-            'src/wit-pack/index.d.ts',
-            'src/wit-pack/index.js',
-            'src/wit-pack/intrinsics.js',
-            'src/wit-pack/wit-pack.d.ts',
-            'src/wit-pack/wit-pack.js',
-            'src/wit-pack/wit-pack.wasm'
-            ]);
+            "package.json",
+            "src/bindings/index.d.ts",
+            "src/bindings/index.js",
+            "src/bindings/wit-pack/intrinsics.js",
+            "src/bindings/wit-pack/wit-pack.d.ts",
+            "src/bindings/wit-pack/wit-pack.js",
+            "src/bindings/wit-pack/wit-pack.wasm",
+            "src/commands/dummy_cmd.d.ts",
+            "src/commands/dummy_cmd.js",
+            "src/commands/dummy_cmd.wasm",
+            "src/index.d.ts",
+            "src/index.js",
+        ]);
         const packageJsonFile = files.find(
             (f) => f.filename == "package.json"
         )!;
