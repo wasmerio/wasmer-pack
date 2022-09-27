@@ -33,6 +33,9 @@ change, where applicable.
 - Add a top-level facade to the generated JavaScript bindings so libraries and
   commands can be accessed through one common object
   ([#34](https://github.com/wasmerio/wit-pack/pull/34))
+- Added a `wit-pack show` sub-command to show which libraries and commands would
+  be generated from a Pirita file
+  ([#35](https://github.com/wasmerio/wit-pack/pull/35))
 
 ## Fixed
 
