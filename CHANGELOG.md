@@ -12,11 +12,10 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
-### Changed
+### ⚠️ Breaking Changes ⚠️
 
-- **Raised the MSRV** from `1.59.0` to `1.61.0` after `minijinja`
-  [bumped](https://github.com/mitsuhiko/minijinja/blob/c5a09ebd/CHANGELOG.md#0210)
-  their MSRV
+- Raised the MSRV from `1.59.0` to `1.61.0` to
+  [match `minijinja`](https://github.com/mitsuhiko/minijinja/blob/c5a09ebd/CHANGELOG.md#0210)
 
 ### Fixed
 
