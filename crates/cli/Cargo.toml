@@ -2,7 +2,7 @@
 name = "wit-pack-cli"
 version = "0.3.0"
 edition = "2021"
-rust-version = "1.59.0"
+rust-version = "1.61.0" # Required by wit-pack
 description = "A code generator that lets you treat WebAssembly modules like native dependencies."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -14,6 +14,8 @@ doc = false
 [package.metadata.wapm]
 namespace = "wasmer"
 abi = "wasi"
+[package.metadata.wapm.fs]
+"." = "."
 
 [dependencies]
 anyhow = "1.0.62"

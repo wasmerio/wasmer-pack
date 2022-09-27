@@ -12,6 +12,16 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### ⚠️ Breaking Changes ⚠️
+
+- Raised the MSRV from `1.59.0` to `1.61.0` to
+  [match `minijinja`](https://github.com/mitsuhiko/minijinja/blob/c5a09ebd/CHANGELOG.md#0210)
+
+### Fixed
+
+- Make the current directory available to the CLI when run by wasmer
+  ([#37](https://github.com/wasmerio/wit-pack/pull/37))
+
 ## [0.3.0] - 2022-09-27
 
 ### Added

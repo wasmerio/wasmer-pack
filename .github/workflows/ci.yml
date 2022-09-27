@@ -38,7 +38,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: "1.59.0" # Required by wit-bindgen-gen-rust
+          toolchain: "1.61.0" # Required by minijinja 0.23.0
           override: true
           target: wasm32-unknown-unknown
       - name: Install Node
