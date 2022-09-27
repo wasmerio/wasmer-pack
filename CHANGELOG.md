@@ -12,6 +12,11 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- Make the current directory available to the CLI when run by wasmer
+  ([#37](https://github.com/wasmerio/wit-pack/pull/37))
+
 ## [0.3.0] - 2022-09-27
 
 ### Added
