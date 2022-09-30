@@ -5,17 +5,13 @@ import {{cmd.ident}} from "./commands/{{cmd.module}}.js";
 import Bindings from "./bindings/index.js";
 {%- endif %}
 
-export default function() {
-    return {
-        {%- if libraries %}
-        bindings: new Bindings(),
-        {%- endif %}
-        {%- if commands %}
-        commands: {
-            {%- for cmd in commands %}
-            {{cmd.ident}},
-            {%- endfor %}
-        }
-        {%- endif %}
-    };
-}
+{%- if libraries %}
+export const bindings = new Bindings();
+{%- endif %}
+{%- if commands %}
+export const commands = {
+    {%- for cmd in commands %}
+    {{cmd.ident}},
+    {%- endfor %}
+};
+{%- endif %}

@@ -1,4 +1,4 @@
-import loadPackage from "wabt";
+import {bindings, commands} from "wabt";
 import {
     WASM_FEATURE_SIMD,
     WASM_FEATURE_BULK_MEMORY,
@@ -11,8 +11,7 @@ describe("Generated WASI bindings", () => {
     beforeAll(() => initWasi());
 
     it("can use the wabt library", async () => {
-        const wabtPackage = loadPackage();
-        const wabt = await wabtPackage.bindings.wabt();
+        const wabt = await bindings.wabt();
 
         const result = wabt.wat2wasm(
             "(module)",
@@ -23,13 +22,12 @@ describe("Generated WASI bindings", () => {
     });
 
     it("can invoke the wat2wasm executable", async () => {
-        const pkg = loadPackage();
         const wasi = new WASI({
             args: ["wat2wasm", "--help"],
         });
 
         try {
-            const exitStatus = await pkg.commands.wat2wasm({ wasi });
+            const exitStatus = await commands.wat2wasm({ wasi });
 
             expect(exitStatus).toEqual({ code: 123 });
         } catch {

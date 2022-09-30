@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from typing import Union
-from wit_pack import WitPack as WitPackPackage
+from wit_pack import bindings
 from wit_pack.bindings.wit_pack import (
     Abi,
     Command,
@@ -22,9 +22,7 @@ project_root = Path(__file__).parents[4]
 
 
 def test_load_library():
-    pkg = WitPackPackage()
-
-    wit_pack = pkg.bindings.wit_pack()
+    wit_pack = bindings.wit_pack()
 
     assert callable(wit_pack.generate_javascript)
     assert callable(wit_pack.generate_python)
@@ -58,9 +56,7 @@ def load_bindings(wit_pack: WitPack) -> Package:
 
 
 def test_generate_bindings_for_wit_pack():
-    pkg = WitPackPackage()
-
-    wit_pack = pkg.bindings.wit_pack()
+    wit_pack = bindings.wit_pack()
     pkg = load_bindings(wit_pack)
 
     try:
