@@ -12,10 +12,13 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
-### ⚠️ Breaking Changes ⚠️
+### Changed
 
 - Raised the MSRV from `1.59.0` to `1.61.0` to
   [match `minijinja`](https://github.com/mitsuhiko/minijinja/blob/c5a09ebd/CHANGELOG.md#0210)
+- Removed the top-level class from the generated bindings, so now you just need
+  to do something like `from wit_pack import bindings, commands` to use the
+  package's libraries or commands ([#40](https://github.com/wasmerio/wit-pack/pull/40))
 
 ### Fixed
 
