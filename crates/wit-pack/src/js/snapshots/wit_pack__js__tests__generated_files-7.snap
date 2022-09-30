@@ -6,13 +6,8 @@ expression: "files[\"src/index.js\"].utf8_contents().unwrap()"
 import first from "./commands/first.js";
 import second_with_dashes from "./commands/second-with-dashes.js";
 import Bindings from "./bindings/index.js";
-
-export default function() {
-    return {
-        bindings: new Bindings(),
-        commands: {
-            first,
-            second_with_dashes,
-        }
-    };
-}
+export const bindings = new Bindings();
+export const commands = {
+    first,
+    second_with_dashes,
+};

@@ -61,11 +61,11 @@ fn load_library(
         .get_wit_bindings()
         .with_context(|| format!("Expected WIT bindings, but found \"{}\"", bindings.kind))?;
 
-    let exports = bindings.exports.trim_start_matches("metadata://");
+    let (volume, exports_path) = bindings.exports.split_once("://").unwrap();
     let exports = webc
-        .get_volume(fully_qualified_package_name, "metadata")
-        .context("The container doesn't have a \"metadata\" volume")?
-        .get_file(exports)
+        .get_volume(fully_qualified_package_name, volume)
+        .with_context(|| format!("The container doesn't have a \"{volume}\" volume"))?
+        .get_file(exports_path)
         .with_context(|| format!("Unable to find \"{}\"", bindings.exports))?;
     let exports = std::str::from_utf8(exports).context("The WIT file should be a UTF-8 string")?;
     let interface =

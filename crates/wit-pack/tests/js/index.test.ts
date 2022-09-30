@@ -1,4 +1,4 @@
-import load from "@wasmer/wit-pack";
+import {bindings} from "@wasmer/wit-pack";
 import {
     Interface,
     Metadata,
@@ -12,8 +12,7 @@ import path from "path";
 
 describe("wit-pack bindings", () => {
     it("is self-hosting", async () => {
-        const witPackPackage = load();
-        const witPack = await witPackPackage.bindings.wit_pack();
+        const witPack = await bindings.wit_pack();
         // If we want to use wit-pack to generate some bindings for itself (how
         // meta!) we need to load the corresponding *.wasm and *.wit files.
         const projectRoot = path.resolve(".", "../../../..");

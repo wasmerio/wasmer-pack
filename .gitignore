@@ -1,6 +1,7 @@
 target/
 node_modules/
 *.webc
+*.tar.gz
 yarn-error.log
 .mypy_cache
 .pytest_cache

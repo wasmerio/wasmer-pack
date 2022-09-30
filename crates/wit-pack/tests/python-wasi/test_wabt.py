@@ -3,20 +3,17 @@
 from pathlib import Path
 from wasmer import wasi
 import pytest
-from wabt import Wabt
+from wabt import bindings, commands
 from wabt.bindings.wabt import WasmFeature, Ok
 
 
 def test_two_modules_were_generated():
-    wabt = Wabt()
-
-    assert callable(wabt.bindings.wabt)
-    assert callable(wabt.bindings.wabt2)
+    assert callable(bindings.wabt)
+    assert callable(bindings.wabt2)
 
 
 def test_generated_library():
-    wabt = Wabt()
-    instance = wabt.bindings.wabt()
+    instance = bindings.wabt()
 
     wasm_result = instance.wat2wasm("(module)", WasmFeature.MUTABLE_GLOBALS)
     assert isinstance(wasm_result, Ok)
@@ -26,18 +23,15 @@ def test_generated_library():
 
 
 def test_generated_commands_exist():
-    wabt = Wabt()
-
-    assert callable(wabt.commands.wasm_interp)
-    assert callable(wabt.commands.wasm_strip)
-    assert callable(wabt.commands.wasm_validate)
-    assert callable(wabt.commands.wasm2wat)
-    assert callable(wabt.commands.wast2json)
-    assert callable(wabt.commands.wat2wasm)
+    assert callable(commands.wasm_interp)
+    assert callable(commands.wasm_strip)
+    assert callable(commands.wasm_validate)
+    assert callable(commands.wasm2wat)
+    assert callable(commands.wast2json)
+    assert callable(commands.wat2wasm)
 
 
 def test_invoke_wat2wasm_executable(tmp_path: Path):
-    wabt = Wabt()
     env = (
         wasi.StateBuilder("wat2wasm")
         .argument("./input.wat")
@@ -47,7 +41,7 @@ def test_invoke_wat2wasm_executable(tmp_path: Path):
     )
     tmp_path.joinpath("input.wat").write_text("(module)")
 
-    exit_status = wabt.commands.wat2wasm(env)
+    exit_status = commands.wat2wasm(env)
 
     assert exit_status.code == 0
     generated = tmp_path.joinpath("output.wasm")

@@ -6,30 +6,12 @@ expression: "files[\"wit_pack/__init__.py\"].utf8_contents().unwrap()"
 Bindings to wasmer/wit-pack v1.2.3.
 '''
 
-from wasmer import Store # type: ignore
-from .commands import Commands
-from .bindings import Bindings
+from wasmer import Store as _Store # type: ignore
+from .commands import Commands as _Commands
+from .bindings import Bindings as _Bindings
 
 __version__ = "1.2.3"
 
-class WitPack:
-    """
-    The "wasmer/wit-pack" package.
-    """
-
-    def __init__(self):
-        self.store = Store()
-        self._bindings = Bindings(self.store)
-        self._commands = Commands(self.store)
-    @property
-    def commands(self):
-        """
-        The WASI executables in this package.
-        """
-        return self._commands
-    @property
-    def bindings(self):
-        """
-        Bindings to the libraries in this package.
-        """
-        return self._bindings
+_store = _Store()
+bindings = _Bindings(_store)
+commands = _Commands(_store)

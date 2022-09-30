@@ -1,7 +1,15 @@
 {%- if commands %}
 // @ts-ignore
 import { Wasi } from "@wasmer/wasi";
+{%- endif%}
 
+{%- if libraries %}
+import Bindings from "./bindings";
+
+export const bindings: Bindings;
+{%- endif %}
+
+{%- if commands %}
 export type RunOptions = {
     /** An initialized `@wasmer/wasi` object. */
     wasi: Wasi,
@@ -11,22 +19,11 @@ export type RunOptions = {
 export type ExitStatus = {
     code: number,
 };
-{%- endif%}
-{%- if libraries %}
-import Bindings from "./bindings";
+
+export const commands: {
+    {%- for cmd in commands %}
+    {{cmd.ident}}: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
+    {%- endfor%}
+};
 {%- endif %}
 
-export type Package = {
-    {%- if libraries %}
-    bindings: Bindings,
-    {%- endif %}
-    {%- if commands %}
-    commands: {
-        {%- for cmd in commands %}
-        {{cmd.ident}}: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
-        {%- endfor%}
-    }
-    {%- endif %}
-};
-
-export default function(): Package;

@@ -6,46 +6,22 @@ Bindings to {{package_name}} v{{version}}.
 {%- endif %}
 '''
 
-from wasmer import Store # type: ignore
+from wasmer import Store as _Store # type: ignore
 
 {%- if commands %}
-from .commands import Commands
+from .commands import Commands as _Commands
 {%- endif %}
 {%- if libraries %}
-from .bindings import Bindings
+from .bindings import Bindings as _Bindings
 {%- endif %}
 
 __version__ = "{{version}}"
 
-class {{ident}}:
-    """
-    The "{{package_name}}" package.
-    """
+_store = _Store()
 
-    def __init__(self):
-        self.store = Store()
-
-        {%- if libraries %}
-        self._bindings = Bindings(self.store)
-        {%- endif %}
-        {%- if commands %}
-        self._commands = Commands(self.store)
-        {%- endif %}
-
-    {%- if commands %}
-    @property
-    def commands(self):
-        """
-        The WASI executables in this package.
-        """
-        return self._commands
-    {%- endif %}
-
-    {%- if libraries %}
-    @property
-    def bindings(self):
-        """
-        Bindings to the libraries in this package.
-        """
-        return self._bindings
-    {%- endif %}
+{%- if libraries %}
+bindings = _Bindings(_store)
+{%- endif %}
+{%- if commands %}
+commands = _Commands(_store)
+{%- endif %}

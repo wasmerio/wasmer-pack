@@ -5,7 +5,9 @@ expression: "files[\"src/index.d.ts\"].utf8_contents().unwrap()"
 
 // @ts-ignore
 import { Wasi } from "@wasmer/wasi";
+import Bindings from "./bindings";
 
+export const bindings: Bindings;
 export type RunOptions = {
     /** An initialized `@wasmer/wasi` object. */
     wasi: Wasi,
@@ -15,14 +17,9 @@ export type RunOptions = {
 export type ExitStatus = {
     code: number,
 };
-import Bindings from "./bindings";
 
-export type Package = {
-    bindings: Bindings,
-    commands: {
-        first: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
-        second_with_dashes: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
-    }
+export const commands: {
+    first: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
+    second_with_dashes: (options?: Partial<RunOptions>) => Promise<ExitStatus>,
 };
 
-export default function(): Package;
