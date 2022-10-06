@@ -12,8 +12,16 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- To facilitate caching or different means of distribution, users are now able
+  to provide their own pre-compiled WebAssembly module when initialising
+  libraries or running commands ([#45](https://github.com/wasmerio/wit-pack/pull/45))
+
 ### Changed
 
+- Removed the `LoadArgs` type from the Python bindings in favour of named
+  arguments ([#45](https://github.com/wasmerio/wit-pack/pull/45))
 - Raised the MSRV from `1.59.0` to `1.61.0` to
   [match `minijinja`](https://github.com/mitsuhiko/minijinja/blob/c5a09ebd/CHANGELOG.md#0210)
 - Removed the top-level class from the generated bindings, so now you just need

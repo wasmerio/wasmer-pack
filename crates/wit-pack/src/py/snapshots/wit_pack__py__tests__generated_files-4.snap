@@ -8,15 +8,9 @@ Bindings to the  library.
 
 from pathlib import Path
 from typing import Optional, Any
-from dataclasses import dataclass
 
 from wasmer import Store, Module, wasi # type: ignore
 from .wit_pack.bindings import WitPack
-
-@dataclass
-class LoadArgs:
-    wasi: Optional[wasi.Environment]
-    imports: Optional[dict[str, Any]]
 
 class Bindings:
     """
@@ -36,11 +30,25 @@ class Bindings:
         self._cache[filename] = module
         return module
 
-    def wit_pack(self, args: Optional[LoadArgs] = None) -> WitPack:
-        filename = "wit_pack/wit_pack_wasm.wasm"
-        module = self._get_module(filename)
+    def wit_pack(
+        self,
+        imports: Optional[dict[str, Any]] = None,
+        module: Optional[Module] = None,
+    ) -> WitPack:
+        """
+        Instantiate the "wit_pack" library.
+        :param imports: Additional imports to be provided to the WebAssembly
+                        module.
+        :param module: A user-specified WebAssembly module to use instead of the
+                       one bundled with this package.
+        """
 
-        imports = {**args.imports} if (args and args.imports) else {}
+        filename = "wit_pack/wit_pack_wasm.wasm"
+        if not module:
+            module = self._get_module(filename)
+
+        if not imports:
+            imports = {}
 
         return WitPack(self._store, imports, module)
     

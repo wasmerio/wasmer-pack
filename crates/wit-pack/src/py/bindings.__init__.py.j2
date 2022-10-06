@@ -4,7 +4,6 @@ Bindings to the {{interface_name}} library.
 
 from pathlib import Path
 from typing import Optional, Any
-from dataclasses import dataclass
 
 from wasmer import Store, Module, wasi # type: ignore
 
@@ -12,11 +11,6 @@ from wasmer import Store, Module, wasi # type: ignore
 from .{{lib.ident}}.bindings import {{lib.class_name}}
 
 {%- endfor %}
-
-@dataclass
-class LoadArgs:
-    wasi: Optional[wasi.Environment]
-    imports: Optional[dict[str, Any]]
 
 class Bindings:
     """
@@ -37,16 +31,39 @@ class Bindings:
         return module
 
     {% for lib in libraries -%}
-    def {{lib.ident}}(self, args: Optional[LoadArgs] = None) -> {{lib.class_name}}:
-        filename = "{{lib.ident}}/{{lib.module_filename}}"
-        module = self._get_module(filename)
+    def {{lib.ident}}(
+        self,
+        {%- if lib.wasi %}
+        env: Optional[wasi.Environment] = None,
+        {%- endif %}
+        imports: Optional[dict[str, Any]] = None,
+        module: Optional[Module] = None,
+    ) -> {{lib.class_name}}:
+        """
+        Instantiate the "{{lib.ident}}" library.
 
-        imports = {**args.imports} if (args and args.imports) else {}
+        {%- if lib.wasi %}
+        :param env: A pre-initialized WASI environment. If not specified, a
+                     default value will be used.
+        {%- endif %}
+        :param imports: Additional imports to be provided to the WebAssembly
+                        module.
+        :param module: A user-specified WebAssembly module to use instead of the
+                       one bundled with this package.
+        """
+
+        filename = "{{lib.ident}}/{{lib.module_filename}}"
+        if not module:
+            module = self._get_module(filename)
+
+        if not imports:
+            imports = {}
 
         {%- if lib.wasi %}
         version = wasi.get_version(module, strict=True)
         assert version is not None, f'"{filename}" is not a valid WASI executable'
-        env = args.wasi if (args and args.wasi) else wasi.StateBuilder("{{lib.ident}}").finalize()
+        if not env:
+            env = wasi.StateBuilder("{{lib.ident}}").finalize()
         wasi_imports = env.generate_imports(self._store, version)
         imports.update(wasi_imports)
         {%- endif %}

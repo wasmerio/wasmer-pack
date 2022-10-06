@@ -13,7 +13,16 @@ export const bindings: Bindings;
 export type RunOptions = {
     /** An initialized `@wasmer/wasi` object. */
     wasi: Wasi,
+    /**
+     * A user-specified WebAssembly module to use instead of the one bundled
+     * with this package.
+     */
     imports: Record<string, WebAssembly.ModuleImports>,
+    /**
+     * A user-specified WebAssembly module to use instead of the one bundled
+     * with this package.
+     */
+    module: WebAssembly.Module,
 };
 
 export type ExitStatus = {

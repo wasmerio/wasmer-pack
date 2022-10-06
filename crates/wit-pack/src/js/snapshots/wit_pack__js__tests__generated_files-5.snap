@@ -21,7 +21,8 @@ async function getModule() {
 }
 
 export default async function(options) {
-    const [module, _] = await Promise.all([getModule(), initWasi()]);
+    await initWasi();
+    const module = options?.module || await getModule();
     const wasi = options?.wasi || new WASI({}, module);
     const imports = options?.imports || {};
 

@@ -27,7 +27,8 @@ export default class Bindings {
         const wrapper = new {{lib.class_name}}();
 
         {%- if lib.wasi %}
-        const [module, _] = await Promise.all([this._getModule("{{lib.interface_name}}/{{lib.module_filename}}"), initWasi()]);
+        await initWasi();
+        const module = options?.module || await this._getModule("{{lib.interface_name}}/{{lib.module_filename}}");
         const wasi = options?.wasi || new WASI({}, module);
         const imports = Object.assign({}, options?.imports, wasi.getImports(module));
         {%- else %}
