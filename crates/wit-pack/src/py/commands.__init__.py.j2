@@ -31,13 +31,31 @@ class Commands:
         return module
 
     {% for cmd in commands %}
-    def {{cmd.ident}}(self, env: wasi.Environment, imports: Optional[dict[str, Any]] = None) -> ExitStatus:
-        module = self._get_module("{{cmd.module_filename}}")
+    def {{cmd.ident}}(
+        self,
+        env: wasi.Environment,
+        imports: Optional[dict[str, Any]] = None,
+        module: Optional[Module] = None,
+    ) -> ExitStatus:
+        """
+        Run the "{{cmd.ident}}" command.
+
+        :param wasi: A pre-initialized WASI environment. If not specified, a
+                     default value will be used.
+        :param imports: Additional imports to be provided to the WebAssembly
+                        module.
+        :param module: A user-specified WebAssembly module to use instead of the
+                       one bundled with this package.
+        """
+
+        if not module:
+            module = self._get_module("{{cmd.module_filename}}")
         version = wasi.get_version(module, strict=True)
 
-        assert version is not None, '"{{cmd.module_filename}}" is not a valid WASI executable'
+        assert version is not None, 'The WebAssembly module is not a valid WASI executable'
 
-        imports = {**imports} if imports else {}
+        if not imports:
+            imports = {}
         wasi_imports = env.generate_import_object(self._store, version)
         imports.update(wasi_imports.to_dict())
 
