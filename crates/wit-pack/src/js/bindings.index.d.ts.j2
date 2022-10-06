@@ -9,7 +9,13 @@ import { {{lib.class_name}} } from "./{{lib.interface_name}}/{{lib.interface_nam
  * Options used when initializing the bindings.
  */
 export type LoadOptions = {
-    imports: Record<string, WebAssembly.ModuleImports>,
+    /** Additional imports to be provided to the WebAssembly module */
+    imports: WebAssembly.Imports,
+    /**
+     * A user-specified WebAssembly module to use instead of the one bundled
+     * with this package.
+     */
+    module: WebAssembly.Module,
 };
 
 /**
