@@ -1,6 +1,6 @@
 [package]
 name = "wit-pack-cli"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 rust-version = "1.61.0" # Required by wit-pack
 description = "A code generator that lets you treat WebAssembly modules like native dependencies."
@@ -23,7 +23,7 @@ clap = { version = "3.2.17", features = ["derive"] }
 serde = { version = "1.0.145", features = ["derive"] }
 serde_json = "1.0.85"
 webc = { git = "ssh://git@github.com/wasmerio/pirita.git", version = "0.1.0" }
-wit-pack = { version = "0.3.0-alpha", path = "../wit-pack" }
+wit-pack = { version = "0.4.0", path = "../wit-pack" }
 
 [dev-dependencies]
 insta = "1.18.2"
