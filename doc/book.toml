@@ -1,0 +1,17 @@
+[book]
+authors = ["Michael-F-Bryan"]
+language = "en"
+src = "."
+title = "WIT Pack User Guide"
+
+[output.html]
+default-theme = "rust"
+edit-url-template = "https://github.com/wasmerio/wit-pack/edit/master/{path}"
+no-section-label = true
+
+[output.html.fold]
+enable = true
+level = 1
+
+[output.linkcheck]
+optional = true # Only run the linkchecker when mdbook-linkcheck is installed

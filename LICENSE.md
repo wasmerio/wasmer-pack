@@ -1,4 +1,4 @@
-Copyright (c) 2022 Michael-F-Bryan <michaelfbryan@gmail.com>
+Copyright (c) 2022 Wasmer Engineering Team <engineering@wasmer.io>
 
 Permission is hereby granted, free of charge, to any
 person obtaining a copy of this software and associated

@@ -31,13 +31,12 @@ The rationale behind this is simple - [**a short edit-compile-test cycle is a
 force multiplier**][fast-rust-builds]. If you have fast compile times then
 developers can recompile and re-run the test suite after every change.
 
-On the other hand, if CI takes 30 minutes to complete, developers will want to
-avoid your project like the plague because getting even the most trivial changes
+On the other hand, if CI takes 30 minutes to complete, developers will avoid
+your project like the plague because getting even the most trivial changes
 merged becomes a multi-hour chore.
 
-To help this, we have [a GitHub Action][workflow-timer] which will post
-passive-aggressive comments on each PR to let you know how much your changes
-have affected CI times.
+To help this, we have [a GitHub Action][workflow-timer] which will post comments
+on each PR to let you know how much your changes have affected CI times.
 
 ### Goal 2: It Just Works
 
@@ -54,29 +53,12 @@ To achieve this,
 - Be opinionated - don't give the end user unnecessary flags or options unless
   it's part of the core functionality
 
-## Project Architecture
-
-The `wit-pack` project is split across several crates depending on the various
-ways it might be used.
-
-The main crates are:
-
-- [`crates/wit-pack`][wit-pack] - this is the meat and potatoes of `wit-pack`.
-  It contains all the code for generating bindings to WebAssembly modules, plus
-  templates for any glue code that will be needed along the way
-- [`crates/cli`][cli] - this is a CLI tool that lets `wit-pack` generate
-  bindings using the commands and libraries inside a [Pirita][pirita] file
-- [`crates/wasm`][wasm] - this is a wrapper that makes `wit-pack` available as a
-  WebAssembly module. The functions and data types that are exposed are defined
-  in [`crates/wasm/wit-pack.exports.wit`][exports] (see [`WIT.md`][wit] for the
-  syntax)
-
 ## Release Process
 
 The checklist:
 
 - [ ] Create a new PR named something like *"Release v1.2.3"*
-- [ ] Update [`CHANGELOG.md`](./CHANGELOG.md) to include any user-facing changes
+- [ ] Update [`CHANGELOG.md`][changelog] to include any user-facing changes
       since the last release (the `[Unreleased]` link at the bottom is
       particularly helpful here)
 - [ ] Run [`cargo release`][cargo-release] to bump version numbers, tag commits,
@@ -87,12 +69,7 @@ The checklist:
 
 
 [cargo-release]: https://github.com/crate-ci/cargo-release
-[cli]: ./crates/cli/
-[exports]: ./crates/wasm//wit-pack.exports.wit
+[changelog]: https://github.com/wasmerio/wit-pack/blob/master/CHANGELOG.md
 [fast-rust-builds]: https://matklad.github.io/2021/09/04/fast-rust-builds.html
-[pirita]: https://github.com/wasmerio/pirita
 [releases]: https://github.com/wasmerio/wit-pack/actions/workflows/releases.yml
-[wasm]: ./crates/wasm/
-[wit-pack]: ./crates/wit-pack/
-[wit]: https://github.com/wasmerio/wit-bindgen/blob/c04723063c7a5a7389660ca97f85ffd9bc9ef0b8/WIT.md
 [workflow-timer]: https://github.com/Michael-F-Bryan/workflow-timer
