@@ -23,7 +23,9 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: "1.59.0" # Required by wit-bindgen-gen-rust
+          toolchain: "1.64.0" # Required for [workspace.package]
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
       - name: Install WebAssembly targets
         run: rustup target add wasm32-unknown-unknown wasm32-wasi
       - name: Setup Wasmer

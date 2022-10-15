@@ -14,22 +14,9 @@ env:
 jobs:
   check:
     name: Compile and Test
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Rust Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/
-            target/
-          key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
       - name: Give GitHub Actions access to wasmerio/pirita
         uses: webfactory/ssh-agent@v0.5.4
         with:
@@ -38,9 +25,11 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: "1.61.0" # Required by minijinja 0.23.0
+          toolchain: "1.64.0" # Required for [workspace.package]
           override: true
           target: wasm32-unknown-unknown
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
       - name: Install Node
         uses: actions/setup-node@v3
         with:
@@ -77,18 +66,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Rust Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
       - name: Give GitHub Actions access to wasmerio/pirita
         uses: webfactory/ssh-agent@v0.5.4
         with:
@@ -96,9 +73,11 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: stable
           override: true
           components: rustfmt, clippy
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
       - name: Check Formatting
         uses: actions-rs/cargo@v1
         with:
@@ -115,18 +94,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Rust Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ github.job }}-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
       - name: Give GitHub Actions access to wasmerio/pirita
         uses: webfactory/ssh-agent@v0.5.4
         with:
@@ -136,6 +103,8 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
       - uses: actions-rs/cargo@v1
         with:
           command: doc
