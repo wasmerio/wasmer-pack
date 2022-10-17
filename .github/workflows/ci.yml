@@ -105,17 +105,31 @@ jobs:
           override: true
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
-      - uses: actions-rs/cargo@v1
+      - name: Install mdbook
+        run: |
+          mkdir bin
+          curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.21/mdbook-v0.4.21-x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
+          echo "PATH=$(pwd)/bin:$PATH" >> $GITHUB_ENV
+      - name: User Docs
+        run: mdbook build
+        working-directory: doc
+      - name: API Docs
+        uses: actions-rs/cargo@v1
         with:
           command: doc
           args: --workspace --verbose --locked
       - name: Redirect top-level GitHub Pages
         run: 'echo ''<meta http-equiv="refresh" content="0; url=${{ env.DEFAULT_CRATE_NAME }}/index.html" />'' > target/doc/index.html'
         shell: bash
+      - name: Rearrange Docs Directory
+        run: |
+          mkdir public
+          mv target/doc public/api-docs
+          mv doc/book/html public/user-docs
       - name: Upload API Docs
         uses: JamesIves/github-pages-deploy-action@v4.4.0
         if: github.ref == 'refs/heads/master'
         with:
           branch: gh-pages
-          folder: target/doc
+          folder: public
           single-commit: true
