@@ -1,9 +1,13 @@
 [package]
 name = "wit-pack-cli"
-version = "0.4.0"
-edition = "2021"
-rust-version = "1.61.0" # Required by wit-pack
 description = "A code generator that lets you treat WebAssembly modules like native dependencies."
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

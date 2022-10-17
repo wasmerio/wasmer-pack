@@ -1,12 +1,13 @@
 [package]
 name = "wit-pack"
-version = "0.4.0"
-authors = ["Wasmer Engineering Team <engineering@wasmer.io>"]
-repository = "https://github.com/wasmerio/wit-pack"
-edition = "2021"
-license = "MIT"
-rust-version = "1.61.0" # Required by minijinja 0.23.0
 description = "A code generator that lets you treat WebAssembly modules like native dependencies."
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -2,7 +2,7 @@
 
 [![Continuous integration](https://github.com/wasmerio/wit-pack/workflows/Continuous%20Integration/badge.svg?branch=master)](https://github.com/wasmerio/wit-pack/actions)
 
-([API Docs][api-docs])
+([API Docs][api-docs] | [User Docs][user-docs])
 
 Import your WebAssembly code just like any other dependency.
 
@@ -77,6 +77,7 @@ or <http://opensource.org/licenses/MIT>).
 It is recommended to always use [`cargo crev`][crev] to verify the
 trustworthiness of each of your dependencies, including this one.
 
-[api-docs]: https://wasmerio.github.io/wit-pack
+[api-docs]: https://wasmerio.github.io/wit-pack/api-docs
+[user-docs]: https://wasmerio.github.io/wit-pack/user-docs
 [crev]: https://github.com/crev-dev/cargo-crev
 [pirita]: https://github.com/wasmerio/pirita

@@ -12,6 +12,11 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- User-facing documentation and a tutorial series are now available under the
+  `doc/` folder ([#47](https://github.com/wasmerio/wit-pack/pull/47))
+
 ## [0.4.0] - 2022-10-12
 
 ### Added
