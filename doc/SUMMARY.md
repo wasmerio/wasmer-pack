@@ -1,7 +1,6 @@
 # Summary
 
 [What is WIT Pack?](README.md)
-[The Guest and the Host](guest-and-host.md)
 
 - [Tutorial](tutorial/README.md)
   - [Hello, World!](tutorial/hello-world.md)

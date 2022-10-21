@@ -15,3 +15,6 @@ level = 1
 
 [output.linkcheck]
 optional = true # Only run the linkchecker when mdbook-linkcheck is installed
+
+[output.literate]
+optional = true
