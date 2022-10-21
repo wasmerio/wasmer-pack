@@ -18,3 +18,4 @@ optional = true # Only run the linkchecker when mdbook-linkcheck is installed
 
 [output.literate]
 optional = true
+include = ["tutorial/*"]
