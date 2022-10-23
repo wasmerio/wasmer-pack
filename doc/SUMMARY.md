@@ -1,8 +1,9 @@
 # Summary
 
-[What is WIT Pack?](README.md)
+[Ecosystem Overview](README.md)
 
-- [Tutorial](tutorial/README.md)
+# Tutorial
+
   - [Hello, World!](tutorial/01-hello-world.md)
   - [Strings and Lists](tutorial/02-strings-and-lists.md)
   - [Records](tutorial/03-records.md)

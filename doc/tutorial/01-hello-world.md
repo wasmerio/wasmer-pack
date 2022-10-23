@@ -24,8 +24,11 @@ You will need to install several CLI tools.
 - [the `cargo wapm` sub-command][cargo-wapm] for publishing to WAPM
   (`cargo install cargo-wapm`)
 
-> Note: The last two will probably be included with the Wasmer runtime in the
-> future, but we'll install them manually for now.
+Once you've installed those tools, you'll want to create a new account on
+[wapm.io][wapm-io-signup] so we have somewhere to publish our code to.
+
+Running the `wasmer login` command will let you authenticate your computer with
+WAPM.
 
 ## The WIT File
 
@@ -38,23 +41,201 @@ The syntax for a WIT file is quite similar to Rust.
 // hello-world.wit
 
 /// Add two numbers
-add: func(a: i32, b: i32) -> i32
+add: func(a: u32, b: u32) -> u32
 ```
 
-This defines a function called `add` which takes two `i32` parameters (32-bit
-signed integers) called `a` and `b`, and returns a `i32`.
+This defines a function called `add` which takes two `u32` parameters (32-bit
+unsigned integers) called `a` and `b`, and returns a `u32`.
 
 You can see that normal comments start with a `//` and doc-comments use `///`.
 Here, we're using `// hello-world.wit` to indicate the text should be saved to
 `hello-world.wit`.
 
-One interesting quirk of WIT is that *all* names must be written in kebab-case.
-This lets `wit-bindgen` convert the name into the casing that is idiomatic for a
-particular language in a particular context.
+One interesting constraint from the WIT format is that *all* names must be
+written in kebab-case. This lets `wit-bindgen` convert the name into the casing
+that is idiomatic for a particular language in a particular context.
 
 For example, if our WIT file defined a `hello-world` function, it would be
 accessible as `hello_world` in Python and Rust because they use snake_case for
 function names, whereas in JavaScript it would be `helloWorld`.
+
+## Writing Some Rust
+
+Now we've got a WIT file, let's create a WebAssembly library implementing the
+`hello-world.wit` interface.
+
+First, we'll create a new Rust crate.
+
+```console
+$ cargo new --lib hello-world
+```
+
+You can remove all the code in `src/lib.rs` because we don't need the example
+boilerplate.
+
+```console
+$ rm src/lib.rs
+```
+
+Now, we'll add `wit-bindgen` as a dependency. This will give us access to the
+macros it uses for generating code.
+
+```console
+$ cd hello-world
+$ cargo add --git https://github.com/wasmerio/wit-bindgen wit-bindgen-rust
+```
+
+Towards the top of your `src/lib.rs`, we want to tell `wit-bindgen` that this
+crate *exports* our `hello-world.wit` file.
+
+```rust
+// src/lib.rs
+
+wit_bindgen_rust::export!("hello-world.wit");
+```
+
+Under the hood, this will generate a bunch of glue code which the WebAssembly
+host will call. We can see this generated code using
+[`cargo expand`][cargo-expand].
+
+(You don't normally need to do this, but sometimes it's nice to understand what
+is going on)
+
+```console,should_fail
+$ cargo expand
+mod hello_world {
+    #[export_name = "add"]
+    unsafe extern "C" fn __wit_bindgen_hello_world_add(arg0: i32, arg1: i32) -> i32 {
+        let result = <super::HelloWorld as HelloWorld>::add(arg0 as u32, arg1 as u32);
+        wit_bindgen_rust::rt::as_i32(result)
+    }
+    pub trait HelloWorld {
+        /// Add two numbers
+        fn add(a: u32, b: u32) -> u32;
+    }
+}
+```
+
+There's a lot going on in that code, and most of it isn't relevant to you, but
+there are a couple of things I'd like to point out:
+
+1. A `hello_world` module was generated (the name comes from
+   `hello-world.wit`)
+2. A `HelloWorld` trait was defined with an `add()` method that matches `add()`
+  from `hello-world.wit` (note: `HelloWorld` is `hello-world` in PascalCase)
+3. The `__wit_bindgen_hello_world_add()` shim expects a `HelloWorld` type to
+  be defined in the parent module (that's the `super::` bit), and that
+  `super::HelloWorld` type must implement the `HelloWorld` trait
+
+From assumption 3, we know that the generated code expects us to define a
+`HelloWorld` type. We've only got 1 line of code at the moment, so it shouldn't
+be surprising to see our code doesn't compile (yet).
+
+```console,should_fail
+$ cargo check
+error[E0412]: cannot find type `HelloWorld` in module `super`
+ --> src/lib.rs:1:1
+  |
+1 | wit_bindgen_rust::export!("hello-world.wit");
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in `super`
+  |
+```
+
+We can fix that by defining a `HelloWorld` type in `lib.rs`. Adding two numbers
+doesn't require any state, so we'll just use a unit struct.
+
+```rust
+pub struct HelloWorld;
+```
+
+Looking back at assumption 3, our code *still* shouldn't compile because we
+haven't implemented the `HelloWorld` trait for our `HelloWorld` struct yet.
+
+```console
+$ cargo check
+error[E0277]: the trait bound `HelloWorld: hello_world::HelloWorld` is not satisfied
+ --> src/lib.rs:1:1
+  |
+1 | wit_bindgen_rust::export!("hello-world.wit");
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `hello_world::HelloWorld` is not implemented for `HelloWorld`
+```
+
+The fix is pretty trivial.
+
+```rust
+impl hello_world::HelloWorld for HelloWorld {
+    fn add(a: u32, b: u32) -> u32 { a + b }
+}
+```
+
+If the naming gets a bit confusing (that's a lot of variations on
+`hello-world`!) try to think back to that output from `cargo expand`. The key
+thing to remember is the `HelloWorld` type is defined at the root of our crate,
+but the `HelloWorld` trait is inside a `hello_world` module.
+
+Believe it or not, but we're done writing code for now. Your crate should now
+compile 🙂
+
+## Compiling To WebAssembly
+
+At the moment, running `cargo build` will just compile our crate to a Rust
+library that will work on your current machine (e.g. x86-64 Linux), so we'll
+need to [*cross-compile*][cross-compile] our code to WebAssembly.
+
+Rust makes this cross-compilation process fairly painless.
+
+First, we need to install a version of the standard library that has already
+been compiled to WebAssembly.
+
+```console,ignore
+$ rustup target add wasm32-unknown-unknown
+```
+
+We'll go into target triples a bit more when [discussing WASI][wasi], but
+`wasm32-unknown-unknown` basically means we want generic 32-bit WebAssembly
+where the OS is unknown (i.e. we know nothing about the underlying OS, so we
+can't use it).
+
+Next, we need to tell `rustc` that we want it to generate a `*.wasm` file.
+
+By default, it will only generate a `rlib` (a (Rust library"), so we need to
+update `Cargo.toml` so our crate's [`crate-type`][crate-type] includes a
+`cdylib` (a "C-compatible dynamic library").
+
+```toml
+# Cargo.toml
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+```
+
+Now, we should be able to compile our crate for `wasm32-unknown-unknown` and
+see a `*.wasm` file.
+
+```console
+$ cargo build --target wasm32-unknown-unknown
+$ file target/wasm32-unknown-unknown/debug/*.wasm
+target/wasm32-unknown-unknown/debug/hello_world.wasm: WebAssembly (wasm) binary module version 0x1 (MVP)
+```
+
+The `wasmer` CLI also has an `inspect` command which can be useful for looking
+at our `*.wasm` file.
+
+```console
+$ wasmer inspect target/wasm32-unknown-unknown/debug/hello_world.wasm
+Exports:
+  Functions:
+    "add": [I32, I32] -> [I32]
+```
+
+You'll notice that, besides a bunch of other stuff, we're exporting an `add`
+function that takes two `i32`s and returns an `i32`.
+
+This matches the `__wit_bindgen_hello_world_add()` signature we saw earlier.
+
+## Publishing to WAPM
+
+Now we've got a WebAssembly binary that works, let's publish it to WAPM!
 
 ---
 
@@ -129,8 +310,13 @@ Use the bindings:
 - [ ] Preview the text
 - [ ] Publish or schedule the post
 
+[cargo-expand]: https://github.com/dtolnay/cargo-expand
 [cargo-wapm]: https://lib.rs/cargo-wapm
+[cross-compile]: https://rust-lang.github.io/rustup/cross-compilation.html
+[published]: https://wapm.dev/Michael-F-Bryan/hello-world
+[wapm-io-signup]: https://wapm.io/signup
 [wit-bindgen]: https://github.com/wasmerio/wit-bindgen
 [wit-pack]: https://github.com/wasmerio/wit-pack
 [wit]: https://github.com/WebAssembly/component-model/blob/5754989219db51ba24def50c3ac28bb9775ead33/design/mvp/WIT.md
-[published]: https://wapm.dev/Michael-F-Bryan/hello-world
+[crate-type]: https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-crate-type-field
+[wasi]: 07-wasi.md

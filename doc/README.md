@@ -1,7 +1,7 @@
-# WebAssembly, WIT Bindgen, WAPM, and WIT Pack
+# Ecosystem Overview
 
 The WebAssembly ecosystem has quite a few moving parts, so let's touch on some
-of them briefly.
+of them briefly before diving into WIT Pack.
 
 ## WebAssembly
 
@@ -68,9 +68,9 @@ A WAPM package can contain as many WASI executables and libraries as you wish.
 
 ## WIT Bindgen
 
-The WebAssembly that was first released in 2017 was only a minimum viable
-product. It deliberately left several features incomplete to be iterated on
-by the ecosystem.
+The WebAssembly spec that was first released in 2017 was only a minimum viable
+product. It deliberately left several features incomplete to be iterated on by
+the ecosystem.
 
 Arguably the most important functionality gap is the fact that only WebAssembly
 primitives can be passed between the host guest. That means imports and exports
@@ -97,7 +97,7 @@ the full definition for the WIT file format is available [on GitHub][wit].
 WIT Pack is a tool that integrates `wit-bindgen` with the WAPM ecosystem.
 
 Each library in a package has the option of declaring `*.wit` files containing
-functionality it imports and exports
+functionality it imports and exports.
 
 - A tool that integrates WIT Bindgen with WAPM
 - You can create a package that is associated with a `*.wit` file
