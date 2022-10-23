@@ -237,6 +237,88 @@ This matches the `__wit_bindgen_hello_world_add()` signature we saw earlier.
 
 Now we've got a WebAssembly binary that works, let's publish it to WAPM!
 
+The core component in a WAPM package is the `wapm.toml` file. This acts as a
+"manifest" which tells WAPM which modules are included in the package, and
+important metadata like the project name, version number, and repository URL.
+
+You can check out [the docs][publishing-docs] for a walkthrough of the full
+process for packaging an arbitrary WebAssembly module.
+
+However, while we *could* create this file ourselves, most of the information is
+already available as part of our project's `Cargo.toml` file. The
+[`cargo wapm`][cargo-wapm] sub-command lets us automate a lot of the fiddly
+tasks like compiling the project to `wasm32-unknown-unknown`, collecting
+metadata, copying binaries around, and so on.
+
+To enable `cargo wapm`, we need to add some metadata to our `Cargo.toml`.
+
+```toml
+# Cargo.toml
+
+[package]
+...
+description = "Add two numbers"
+
+[package.metadata.wapm]
+namespace = "Michael-F-Bryan"  # Replace this with your WAPM username
+abi = "none"
+bindings = { wit-bindgen = "0.1.0", exports = "hello-world.wit" }
+```
+
+Something to note is that all packages on WAPM must have a `description` field.
+
+Other than that, we use the [`[package.metadata]`][cargo-pkg-metadata] section
+to tell `cargo wapm` a couple of things:
+
+- which namespace we are publishing to (all WAPM packages are namespaced)
+- The ABI being used (`none` corresponds to Rust's `wasm32-unknown-unknown`, and
+  we'd write `wasi` if we were compiling to `wasm32-wasi`), and
+- The location of our `hello-world.wit` exports, plus the version of
+  `wit-bindgen` we used
+
+Now we've updated our `Cargo.toml`, let's do a dry-run to make sure the package
+builds.
+
+```console
+$ cargo wapm --dry-run
+Successfully published package `Michael-F-Bryan/hello-world@0.1.0`
+[INFO] Publish succeeded, but package was not published because it was run in dry-run mode
+```
+
+If we dig around the `target/wapm/` directory, we can see what `cargo wapm`
+generated for us.
+
+```console
+$ tree target/wapm/hello-world
+target/wapm/hello-world
+├── hello_world.wasm
+├── hello-world.wit
+└── wapm.toml
+
+0 directories, 3 files
+
+$ cat target/wapm/hello-world/wapm.toml
+[package]
+name = "Michael-F-Bryan/hello-world"
+version = "0.1.0"
+description = "Add two numbers"
+
+[[module]]
+name = "hello-world"
+source = "hello_world.wasm"
+abi = "none"
+
+[module.bindings]
+wit-exports = "hello-world.wit"
+wit-bindgen = "0.1.0"
+```
+
+This all looks correct, so let's actually publish the package.
+
+```console
+$ cargo wapm
+```
+
 ---
 
 ## Intro
@@ -314,9 +396,11 @@ Use the bindings:
 [cargo-wapm]: https://lib.rs/cargo-wapm
 [cross-compile]: https://rust-lang.github.io/rustup/cross-compilation.html
 [published]: https://wapm.dev/Michael-F-Bryan/hello-world
+[publishing-docs]: https://docs.wasmer.io/ecosystem/wapm/publishing-your-package
 [wapm-io-signup]: https://wapm.io/signup
 [wit-bindgen]: https://github.com/wasmerio/wit-bindgen
 [wit-pack]: https://github.com/wasmerio/wit-pack
 [wit]: https://github.com/WebAssembly/component-model/blob/5754989219db51ba24def50c3ac28bb9775ead33/design/mvp/WIT.md
 [crate-type]: https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-crate-type-field
 [wasi]: 07-wasi.md
+[cargo-pkg-metadata]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-metadata-table
