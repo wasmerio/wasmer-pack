@@ -12,6 +12,13 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- Some JavaScript bindings wouldn't run because the bindings always import
+  `@wasmer/wasi`, while the dependency was only added when one or more
+  libraries/commands was compiled to wasi
+  ([#58](https://github.com/wasmerio/wit-pack/pull/58))
+
 ## [0.4.1] - 2022-10-24
 
 ### Added
