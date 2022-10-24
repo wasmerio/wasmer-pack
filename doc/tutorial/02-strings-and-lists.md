@@ -4,7 +4,7 @@ Now we know how to write a WebAssembly library and add two numbers, let's work
 with something slightly more interesting - strings and lists!
 
 First, we need to create a new project to hold our code. We'll also remove the
-existing code so we start from blank slate.
+existing code, so we start from blank slate.
 
 ```console
 $ cargo new --lib tutorial-02
@@ -113,81 +113,101 @@ WebAssembly doesn't have any concept of ownership and borrowing, so it'd be easy
 for the host to run into use-after-free issues and dangling pointers if we were
 allowed to return non-`'static` values.
 
----
+## Publishing
 
-## Intro
+Similar to last time, if we want to publish our package to WAPM, we'll need to
+update our `Cargo.toml` file.
 
-- A promise statement:
-  - We're going to start using
-- A preview of what's to come:
-  - Show console output with `Hello, $name!`
+```toml
+# Cargo.toml
+[package]
+...
+description = "Greet one or more people"
 
-## Body
+[lib]
+crate-type = ["cdylib", "rlib"]
 
-Defining our WIT file:
-
-```rust
-// greetings.wit
-
-/// Say hello to multiple people.
-greet: func(people: list<string>) -> string
+[package.metadata.wapm]
+namespace = "wasmer"
+abi = "none"
+bindings = { wit-bindgen = "0.1.0", exports = "strings-and-lists.wit" }
 ```
 
-Create the guest:
-- Pretty much the same as hello world
+Now, we can publish it to WAPM.
 
-```rust
-impl crate::greetings::Greetings for Greetings {
-    fn greet(people: Vec<String>) -> String {
-        match people.as_slice() {
-            [] => "Oh, nobody's there...".to_string(),
-            [person] => format!("Hello, {person}!"),
-            [people @ .., last] => {
-                let people = people.join(", ");
-                format!("Hello, {people}, and {last}!")
-            }
-        }
-    }
+```console
+$ cargo wapm
+Successfully published package `wasmer/tutorial-02@0.1.0`
+```
+
+## Using The Bindings From TypeScript
+
+For a change, let's use our bindings from TypeScript. First, we need to create
+a basic `package.json` file.
+
+```console
+$ yarn init --yes
+success Saved package.json
+```
+
+We'll need to install TypeScript and `ts-node`.
+
+```console
+$ yarn add --dev ts-node typescript @types/node
+```
+
+The TypeScript compiler will need a basic `tsconfig.json` file.
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "skipLibCheck": true
+  }
 }
 ```
 
-Publish to WAPM:
-- Similar to before
-- Probably shortened to 1 paragraph, a link, and some example output
+Now, we can use `wapm install` to add our `tutorial-02` package as a dependency.
 
-Use the bindings:
-- Create a Python project
-- Use `wapm install --pip tutorial/strings-and-lists` to install the package
-- Write the script
-- Run it using "names" from `sys.argv`
+```console
+$ wapm install --yarn wasmer/tutorial-02
+```
+
+Finally, we're able to start writing some code.
+
+```ts
+// index.ts
+
+import { bindings } from "@wasmer/tutorial-02";
+
+async function main() {
+    const strings = await bindings.strings_and_lists();
+    console.log(strings.greet("World"));
+    console.log(strings.greetMany(["a", "b", "c"]));
+}
+
+main();
+```
+
+If we run it using the `ts-node` loader, we'll see exactly the output we expect.
+
+```console
+$ node --loader ts-node/esm index.ts
+Hello, World!
+Hello, a, b, and c!
+```
 
 ## Conclusion
 
-- Reminder of how helpful the guide is
-- Reiterate how important your topic is
-  - Strings and lists are the what applications are made of
-- Call-to-action
-  - Read [`WIT.md`](https://github.com/wasmerio/wit-bindgen/blob/wasmer/WIT.md)
-    to learn more about the syntax
+Strings and lists are the building blocks of all meaningful applications, so
+it's important to know how to use them.
 
-## Checklist
-
-### Inspiration 💡
-
-- [ ] Read articles and watch videos that inspire me
-- [ ] Brainstorm the topics that I want to write about in bullet points
-- [ ] Reorder those bullet points to create a line of thought
-
-### Draft ✏
-
-- [ ] Expand those bullet points into sentences/text
-- [ ] Go over the document
-
-### Ready to Publish 🗞
-
-- [ ] Draft 5 titles and pick one
-- [ ] Revise the complete text for typos
-- [ ] Preview the text
-- [ ] Publish or schedule the post
+Our first foray into non-primitive types has also introduced us to the
+repercussions of running your code inside a fully sandboxed virtual machine -
+any data received from the outside world must be copied into linear memory.
 
 [slice-patterns]: https://adventures.michaelfbryan.com/posts/daily/slice-patterns/
