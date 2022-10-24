@@ -25,7 +25,7 @@ You will need to install several CLI tools.
 Once you've installed those tools, you'll want to create a new account on
 [wapm.io][wapm-io-signup] so we have somewhere to publish our code to.
 
-Running the `wasmer login` command will let you authenticate your computer with
+Running the `wapm login` command will let you authenticate your computer with
 WAPM.
 
 ## The WIT File
@@ -33,7 +33,18 @@ WAPM.
 We want to start off simple for now, so let's create a library that just adds
 two 32-bit integers.
 
-The syntax for a WIT file is quite similar to Rust.
+First, let's create a new Rust project and `cd` into it.
+
+```console
+$ cargo new --lib tutorial-01
+$ cd tutorial-01
+```
+
+(you can remove all the code in `src/lib.rs` - we don't need the example
+boilerplate)
+
+Now we can add a `hello-world.wit` file to the project. The syntax for a WIT
+file is quite similar to Rust.
 
 ```
 // hello-world.wit
@@ -62,24 +73,10 @@ function names, whereas in JavaScript it would be `helloWorld`.
 Now we've got a WIT file, let's create a WebAssembly library implementing the
 `hello-world.wit` interface.
 
-First, we'll create a new Rust crate.
+The `wit-bindgen` library uses some macros to generate some glue code for our
+WIT file, so add it as a dependency.
 
 ```console
-$ cargo new --lib tutorial-01
-```
-
-You can remove all the code in `src/lib.rs` because we don't need the example
-boilerplate.
-
-```console
-$ rm src/lib.rs
-```
-
-Now, we'll add `wit-bindgen` as a dependency. This will give us access to the
-macros it uses for generating code.
-
-```console
-$ cd tutorial-01
 $ cargo add --git https://github.com/wasmerio/wit-bindgen wit-bindgen-rust
 ```
 
@@ -95,12 +92,27 @@ wit_bindgen_rust::export!("hello-world.wit");
 (note: `hello-world.wit` is relative to the crate's root - the folder
 containing your `Cargo.toml` file)
 
-Under the hood, this will generate a bunch of glue code which the WebAssembly
-host will call. We can see this generated code using
-[`cargo expand`][cargo-expand].
+Now let's run `cargo check` to see what compile errors it shows.
 
-(You don't normally need to do this, but sometimes it's nice to understand what
-is going on)
+```console,should_fail
+$ cargo check
+error[E0412]: cannot find type `HelloWorld` in module `super`
+ --> src/lib.rs:1:1
+  |
+1 | wit_bindgen_rust::export!("hello-world.wit");
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in `super`
+  |
+```
+
+This seems to fail because of *something* inside the
+`wit_bindgen_rust::export!()` macro, but we can't see what it is.
+
+The [`cargo expand`][cargo-expand] tool can be really useful in situations like
+these because it will expand all macros and print out the generated code.
+
+To use `cargo expand`, you'll need to make sure it's installed
+(`cargo install cargo-expand`) and that you have the nightly toolchain
+available (`rustup toolchain install nightly`).
 
 ```console,should_fail
 $ cargo expand
@@ -131,16 +143,6 @@ there are a couple of things I'd like to point out:
 From assumption 3, we know that the generated code expects us to define a
 `HelloWorld` type. We've only got 1 line of code at the moment, so it shouldn't
 be surprising to see our code doesn't compile (yet).
-
-```console,should_fail
-$ cargo check
-error[E0412]: cannot find type `HelloWorld` in module `super`
- --> src/lib.rs:1:1
-  |
-1 | wit_bindgen_rust::export!("hello-world.wit");
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in `super`
-  |
-```
 
 We can fix that by defining a `HelloWorld` type in `lib.rs`. Adding two numbers
 doesn't require any state, so we'll just use a unit struct.
@@ -199,7 +201,7 @@ can't use it).
 
 Next, we need to tell `rustc` that we want it to generate a `*.wasm` file.
 
-By default, it will only generate a `rlib` (a (Rust library"), so we need to
+By default, it will only generate a `rlib` (a "Rust library"), so we need to
 update `Cargo.toml` so our crate's [`crate-type`][crate-type] includes a
 `cdylib` (a "C-compatible dynamic library").
 
@@ -259,7 +261,6 @@ To enable `cargo wapm`, we need to add some metadata to our `Cargo.toml`.
 [package]
 ...
 description = "Add two numbers"
-repository = "https://github.com/wasmerio/wit-pack"
 
 [package.metadata.wapm]
 namespace = "Michael-F-Bryan"  # Replace this with your WAPM username
