@@ -94,6 +94,9 @@ crate *exports* our `hello-world.wit` file.
 wit_bindgen_rust::export!("hello-world.wit");
 ```
 
+(note: `hello-world.wit` is relative to the crate's root - the folder
+containing your `Cargo.toml` file)
+
 Under the hood, this will generate a bunch of glue code which the WebAssembly
 host will call. We can see this generated code using
 [`cargo expand`][cargo-expand].
@@ -321,90 +324,87 @@ This all looks correct, so let's actually publish the package!
 $ cargo wapm
 ```
 
-## Using the Package
+If you open up WAPM in your browser, you should see a new package has been
+published. It'll look something like [`Michael-F-Bryan/tutorial-01`][pkg].
 
----
+## Using the Package from Python
 
-## Intro
+Let's create a Python project that uses the bindings to double-check that `1+1`
+does indeed equal `2`.
 
-- A promise statement:
-  - Let's publish your first library to WAPM and use it
-- A preview of what's to come:
-  - Link to an existing "Hello World" package on WAPM
-  - Show that `1+1 = 2`?
+First, create a new [virtual environment][venv] and activate it.
 
-## Body
-
-Install everything:
-- Wasmer toolchain
-- The `cargo wapm` tool
-- Authenticate with WAPM
-
-Define our WIT file:
-
-```rust
-// hello-world.wit
-
-/// Add two numbers
-add: func(a: i32, b: i32) -> i32
+```console
+$ python -m venv env
+$ source env/bin/activate
 ```
 
-Create the guest:
-- Use `cargo add --git https://github.com/wasmerio/wit-bindgen --branch wasmer wit-bindgen-rust`
-- Define the `crate::HelloWorld` struct
-- Implement the `crate::hello_world::HelloWorld` on `crate::HelloWorld`
+Now we can ask the `wapm` CLI to `pip install` our `tutorial-01` package's
+Python bindings.
 
-Publish to WAPM:
-- Update `Cargo.toml`
-- Use `cargo wapm` to publish
-- View the package on <https://wapm.io/>
+```console
+$ wapm install --pip Michael-F-Bryan/tutorial-01
+...
+Successfully installed tutorial-01-0.1.0 wasmer-1.1.0 wasmer-compiler-cranelift-1.1.0
+```
 
-Use the bindings:
-- Create a Python project
-- Use `wapm install --pip tutorial/hello-world` to install the package
-- Write the script
-- Explain why we need to explicitly instantiate the library
-  - The global state for each module is wrapped up in an object
-  - Lets us have nice things like sandboxing
-  - Enables instantiating with different configurations (imports, WASI, etc.)
-- Run it, showing that 1+1 does indeed equal 2
+Whenever a package is published to WAPM with the `bindings` field set, WIT Pack
+will automatically generate bindings for various languages in the background.
+All the `wapm` CLI is doing here is asking the WAPM backend for these bindings -
+[you can run the query yourself][query] if you want.
 
-## Conclusion
+The `tutorial_01` package exposes a `bindings` variable which we can use to
+create new instances of our WebAssembly module. As you would expect, the object
+we get back has our `add()` method.
 
-- Reminder of how helpful the guide is
-- Reiterate how important your topic is
-- Call-to-action
-  - Modify the `add()` function to take more arguments or use different types
+```py
+# main.py
 
-## Checklist
+from tutorial_01 import bindings
 
-### Inspiration 💡
+instance = bindings.hello_world()
+print("1 + 1 =", instance.add(1, 1))
+```
 
-- [ ] Read articles and watch videos that inspire me
-- [ ] Brainstorm the topics that I want to write about in bullet points
-- [ ] Reorder those bullet points to create a line of thought
+Let's run our script.
 
-### Draft ✏
+```console
+$ python ./main.py
+1 + 1 = 2
+```
 
-- [ ] Expand those bullet points into sentences/text
-- [ ] Go over the document
+## Conclusions
 
-### Ready to Publish 🗞
+Hopefully you've got a better idea for how to create a WebAssembly library and
+use it from different languages, now.
 
-- [ ] Draft 5 titles and pick one
-- [ ] Revise the complete text for typos
-- [ ] Preview the text
-- [ ] Publish or schedule the post
+We took a bit longer than normal to get here, but that's mainly because there
+were plenty of detours to explain the "magic" that tools like `wit-bingen` and
+`cargo wapm` are doing for us.
+
+This explanation gives you a better intuition for how the tools work, but we'll
+probably skip over them in the future.
+
+Some exercises for the reader:
+
+- If your editor has some form of intellisense or code completion, hover over
+  things like `bindings.hello_world` and `instance.add` to see their signatures
+- Add an `add_floats` function to `hello-world.wit` which will add 32-bit
+  floating point numbers (`f32`)
+
 
 [cargo-expand]: https://github.com/dtolnay/cargo-expand
+[cargo-pkg-metadata]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-metadata-table
 [cargo-wapm]: https://lib.rs/cargo-wapm
+[crate-type]: https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-crate-type-field
 [cross-compile]: https://rust-lang.github.io/rustup/cross-compilation.html
+[pkg]: https://wapm.dev/Michael-F-Bryan/tutorial-01
 [published]: https://wapm.dev/Michael-F-Bryan/hello-world
 [publishing-docs]: https://docs.wasmer.io/ecosystem/wapm/publishing-your-package
+[query]: https://registry.wapm.dev/graphql?query=%7B%0A%20%20getPackageVersion(name%3A%20%22Michael-F-Bryan%2Ftutorial-01%22)%20%7B%0A%20%20%20%20version%0A%20%20%20%20bindings%20%7B%0A%20%20%20%20%20%20language%0A%20%20%20%20%20%20url%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A
+[venv]: https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment
 [wapm-io-signup]: https://wapm.io/signup
+[wasi]: 07-wasi.md
 [wit-bindgen]: https://github.com/wasmerio/wit-bindgen
 [wit-pack]: https://github.com/wasmerio/wit-pack
 [wit]: https://github.com/WebAssembly/component-model/blob/5754989219db51ba24def50c3ac28bb9775ead33/design/mvp/WIT.md
-[crate-type]: https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-crate-type-field
-[wasi]: 07-wasi.md
-[cargo-pkg-metadata]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-metadata-table
