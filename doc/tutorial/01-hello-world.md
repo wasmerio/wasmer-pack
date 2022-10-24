@@ -25,7 +25,7 @@ You will need to install several CLI tools.
 Once you've installed those tools, you'll want to create a new account on
 [wapm.io][wapm-io-signup] so we have somewhere to publish our code to.
 
-Running the `wasmer login` command will let you authenticate your computer with
+Running the `wapm login` command will let you authenticate your computer with
 WAPM.
 
 ## The WIT File
@@ -33,7 +33,18 @@ WAPM.
 We want to start off simple for now, so let's create a library that just adds
 two 32-bit integers.
 
-The syntax for a WIT file is quite similar to Rust.
+First, let's create a new Rust project and `cd` into it.
+
+```console
+$ cargo new --lib tutorial-01
+$ cd tutorial-01
+```
+
+(you can remove all the code in `src/lib.rs` - we don't need the example
+boilerplate)
+
+Now we can add a `hello-world.wit` file to the project. The syntax for a WIT
+file is quite similar to Rust.
 
 ```
 // hello-world.wit
@@ -62,24 +73,10 @@ function names, whereas in JavaScript it would be `helloWorld`.
 Now we've got a WIT file, let's create a WebAssembly library implementing the
 `hello-world.wit` interface.
 
-First, we'll create a new Rust crate.
+The `wit-bindgen` library uses some macros to generate some glue code for our
+WIT file, so add it as a dependency.
 
 ```console
-$ cargo new --lib tutorial-01
-```
-
-You can remove all the code in `src/lib.rs` because we don't need the example
-boilerplate.
-
-```console
-$ rm src/lib.rs
-```
-
-Now, we'll add `wit-bindgen` as a dependency. This will give us access to the
-macros it uses for generating code.
-
-```console
-$ cd tutorial-01
 $ cargo add --git https://github.com/wasmerio/wit-bindgen wit-bindgen-rust
 ```
 
@@ -97,7 +94,8 @@ containing your `Cargo.toml` file)
 
 Under the hood, this will generate a bunch of glue code which the WebAssembly
 host will call. We can see this generated code using
-[`cargo expand`][cargo-expand].
+[`cargo expand`][cargo-expand] (you might need to install it with
+`cargo install cargo-expand`).
 
 (You don't normally need to do this, but sometimes it's nice to understand what
 is going on)
@@ -199,7 +197,7 @@ can't use it).
 
 Next, we need to tell `rustc` that we want it to generate a `*.wasm` file.
 
-By default, it will only generate a `rlib` (a (Rust library"), so we need to
+By default, it will only generate a `rlib` (a "Rust library"), so we need to
 update `Cargo.toml` so our crate's [`crate-type`][crate-type] includes a
 `cdylib` (a "C-compatible dynamic library").
 
@@ -259,7 +257,6 @@ To enable `cargo wapm`, we need to add some metadata to our `Cargo.toml`.
 [package]
 ...
 description = "Add two numbers"
-repository = "https://github.com/wasmerio/wit-pack"
 
 [package.metadata.wapm]
 namespace = "Michael-F-Bryan"  # Replace this with your WAPM username
