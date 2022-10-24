@@ -1121,7 +1121,7 @@ dependencies = [
 
 [[package]]
 name = "wit-pack"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -1141,7 +1141,7 @@ dependencies = [
 
 [[package]]
 name = "wit-pack-cli"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -1157,7 +1157,7 @@ dependencies = [
 
 [[package]]
 name = "wit-pack-wasm"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "anyhow",
  "wit-bindgen-rust",
