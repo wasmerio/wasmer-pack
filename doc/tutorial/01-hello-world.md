@@ -19,8 +19,6 @@ You will need to install several CLI tools.
   WebAssembly (`rustup target add wasm32-unknown-unknown`)
 - [The Wasmer runtime](https://docs.wasmer.io/ecosystem/wasmer/getting-started)
   so we can interact with WAPM (`curl https://get.wasmer.io -sSfL | sh`)
-- [the `wit-pack` CLI][wit-pack] for generating bindings to our package
-  (`cargo install --git https://github.com/wasmerio/wit-pack wit-pack-cli`)
 - [the `cargo wapm` sub-command][cargo-wapm] for publishing to WAPM
   (`cargo install cargo-wapm`)
 
@@ -412,5 +410,4 @@ Some exercises for the reader:
 [wapm-io-signup]: https://wapm.io/signup
 [wasi]: 07-wasi.md
 [wit-bindgen]: https://github.com/wasmerio/wit-bindgen
-[wit-pack]: https://github.com/wasmerio/wit-pack
 [wit]: https://github.com/WebAssembly/component-model/blob/5754989219db51ba24def50c3ac28bb9775ead33/design/mvp/WIT.md
