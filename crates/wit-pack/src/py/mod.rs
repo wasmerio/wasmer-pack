@@ -218,6 +218,7 @@ fn top_level_dunder_init(package: &Package) -> Result<SourceFile, Error> {
     let ctx = minijinja::context! {
         version,
         description,
+        generator => crate::GENERATOR,
         package_name => package_name.to_string(),
         ident => package_name.name().to_pascal_case(),
         commands => !package.commands().is_empty(),

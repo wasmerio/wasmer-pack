@@ -47,3 +47,7 @@ pub use crate::{
     types::{Abi, Command, Interface, Library, Metadata, Module, Package, PackageName},
     wit_version::WIT_PARSER_VERSION,
 };
+
+/// The generator name that will be mentioned at the top level of each generated
+/// package.
+pub const GENERATOR: &str = concat!(env!("CARGO_PKG_NAME"), " v", env!("CARGO_PKG_VERSION"));

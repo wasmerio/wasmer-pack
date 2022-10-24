@@ -103,6 +103,7 @@ fn top_level(libraries: &[Library], commands: &[Command]) -> Result<Files, Error
         .collect::<Vec<_>>();
     let ctx = minijinja::context! {
        commands,
+       generator => crate::GENERATOR,
        libraries => !libraries.is_empty(),
     };
     let mut files = Files::new();
