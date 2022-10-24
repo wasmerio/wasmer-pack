@@ -12,10 +12,19 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+## [0.4.1] - 2022-10-24
+
 ### Added
 
 - User-facing documentation and a tutorial series are now available under the
   `doc/` folder ([#47](https://github.com/wasmerio/wit-pack/pull/47))
+- Mention the `wit-pack` version in each generated package
+  ([#54](https://github.com/wasmerio/wit-pack/pull/54))
+
+### Fixed
+
+- Fixed a bug where `*.wasm` files weren't being installed with the Python
+  bindings from WAPM ([#52](https://github.com/wasmerio/wit-pack/pull/52))
 
 ## [0.4.0] - 2022-10-12
 
@@ -131,7 +140,8 @@ change, where applicable.
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/wasmerio/wit-pack/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/wasmerio/wit-pack/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/wasmerio/wit-pack/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/wasmerio/wit-pack/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/wasmerio/wit-pack/compare/v0.2.3...v0.3.0
 [0.2.3]: https://github.com/wasmerio/wit-pack/compare/v0.2.2...v0.2.3
