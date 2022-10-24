@@ -67,7 +67,7 @@ Now we've got a WIT file, let's create a WebAssembly library implementing the
 First, we'll create a new Rust crate.
 
 ```console
-$ cargo new --lib hello-world
+$ cargo new --lib tutorial-01
 ```
 
 You can remove all the code in `src/lib.rs` because we don't need the example
@@ -81,7 +81,7 @@ Now, we'll add `wit-bindgen` as a dependency. This will give us access to the
 macros it uses for generating code.
 
 ```console
-$ cd hello-world
+$ cd tutorial-01
 $ cargo add --git https://github.com/wasmerio/wit-bindgen wit-bindgen-rust
 ```
 
@@ -215,14 +215,14 @@ see a `*.wasm` file.
 ```console
 $ cargo build --target wasm32-unknown-unknown
 $ file target/wasm32-unknown-unknown/debug/*.wasm
-target/wasm32-unknown-unknown/debug/hello_world.wasm: WebAssembly (wasm) binary module version 0x1 (MVP)
+target/wasm32-unknown-unknown/debug/tutorial_01.wasm: WebAssembly (wasm) binary module version 0x1 (MVP)
 ```
 
 The `wasmer` CLI also has an `inspect` command which can be useful for looking
 at our `*.wasm` file.
 
 ```console
-$ wasmer inspect target/wasm32-unknown-unknown/debug/hello_world.wasm
+$ wasmer inspect target/wasm32-unknown-unknown/debug/tutorial_01.wasm
 Exports:
   Functions:
     "add": [I32, I32] -> [I32]
@@ -258,6 +258,7 @@ To enable `cargo wapm`, we need to add some metadata to our `Cargo.toml`.
 [package]
 ...
 description = "Add two numbers"
+repository = "https://github.com/wasmerio/wit-pack"
 
 [package.metadata.wapm]
 namespace = "Michael-F-Bryan"  # Replace this with your WAPM username
@@ -289,23 +290,24 @@ If we dig around the `target/wapm/` directory, we can see what `cargo wapm`
 generated for us.
 
 ```console
-$ tree target/wapm/hello-world
-target/wapm/hello-world
-├── hello_world.wasm
+$ tree target/wapm/tutorial-01
+target/wapm/tutorial-01
+├── tutorial_01.wasm
 ├── hello-world.wit
 └── wapm.toml
 
 0 directories, 3 files
 
-$ cat target/wapm/hello-world/wapm.toml
+$ cat target/wapm/tutorial-01/wapm.toml
 [package]
-name = "Michael-F-Bryan/hello-world"
+name = "Michael-F-Bryan/tutorial-01"
 version = "0.1.0"
 description = "Add two numbers"
+repository = "https://github.com/wasmerio/wit-pack"
 
 [[module]]
-name = "hello-world"
-source = "hello_world.wasm"
+name = "tutorial-01"
+source = "tutorial_01.wasm"
 abi = "none"
 
 [module.bindings]
@@ -313,11 +315,13 @@ wit-exports = "hello-world.wit"
 wit-bindgen = "0.1.0"
 ```
 
-This all looks correct, so let's actually publish the package.
+This all looks correct, so let's actually publish the package!
 
 ```console
 $ cargo wapm
 ```
+
+## Using the Package
 
 ---
 
