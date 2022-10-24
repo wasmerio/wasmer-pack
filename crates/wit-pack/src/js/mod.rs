@@ -63,7 +63,7 @@ pub fn generate_javascript(package: &Package) -> Result<Files, Error> {
 
 fn command_bindings(cmd: &Command) -> Result<Files, Error> {
     let mut files = Files::new();
-    let module_filename = format!("{}.wasm", cmd.name);
+    let module_filename = Path::new(&cmd.name).with_extension("wasm");
     let ctx = minijinja::context! {
         name => cmd.name.replace('-', "_"),
         module_filename,
@@ -86,7 +86,7 @@ fn command_bindings(cmd: &Command) -> Result<Files, Error> {
             .render(&ctx)?
             .into(),
     );
-    files.insert(&module_filename, SourceFile::from(&cmd.wasm));
+    files.insert(module_filename, SourceFile::from(&cmd.wasm));
 
     Ok(files)
 }
@@ -133,20 +133,20 @@ fn library_bindings(libraries: &[Library]) -> Result<Files, Error> {
     let mut ctx = LibrariesContext::default();
 
     for lib in libraries {
-        let module_filename = lib.module_filename();
+        let module_filename = Path::new(lib.module_filename()).with_extension("wasm");
         let interface_name = lib.interface_name();
         let ident = interface_name.to_snake_case();
         let class_name = lib.class_name();
 
         let mut bindings = generate_bindings(&lib.interface.0);
-        bindings.insert(module_filename, lib.module.wasm.clone().into());
+        bindings.insert(&module_filename, lib.module.wasm.clone().into());
         files.insert_child_directory(interface_name, bindings);
 
         ctx.libraries.push(LibraryContext {
             ident,
             interface_name: interface_name.to_string(),
             class_name,
-            module_filename: module_filename.to_string(),
+            module_filename: module_filename.display().to_string(),
             wasi: lib.requires_wasi(),
         });
     }
