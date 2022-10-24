@@ -4,9 +4,9 @@ expression: "files[\"wit_pack/__init__.py\"].utf8_contents().unwrap()"
 ---
 '''
 Bindings to wasmer/wit-pack v1.2.3.
-
-Generated with wit-pack v0.4.0.
 '''
+
+# Generated with wit-pack v0.4.0.
 
 from wasmer import Store as _Store # type: ignore
 from .commands import Commands as _Commands
