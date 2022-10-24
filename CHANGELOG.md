@@ -16,6 +16,13 @@ change, where applicable.
 
 - User-facing documentation and a tutorial series are now available under the
   `doc/` folder ([#47](https://github.com/wasmerio/wit-pack/pull/47))
+- Mention the `wit-pack` version in each generated package
+  ([#54](https://github.com/wasmerio/wit-pack/pull/54))
+
+### Fixed
+
+- Fixed a bug where `*.wasm` files weren't being installed with the Python
+  bindings from WAPM ([#52](https://github.com/wasmerio/wit-pack/pull/52))
 
 ## [0.4.0] - 2022-10-12
 
