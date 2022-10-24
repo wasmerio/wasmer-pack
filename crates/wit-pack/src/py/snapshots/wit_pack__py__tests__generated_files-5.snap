@@ -86,7 +86,7 @@ class Commands:
         """
 
         if not module:
-            module = self._get_module("second-with-dashes.wasm")
+            module = self._get_module("second_with_dashes.wasm")
         version = wasi.get_version(module, strict=True)
 
         assert version is not None, 'The WebAssembly module is not a valid WASI executable'

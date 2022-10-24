@@ -260,7 +260,7 @@ mod tests {
             "wit_pack/py.typed",
             "wit_pack/commands/__init__.py",
             "wit_pack/commands/first.wasm",
-            "wit_pack/commands/second-with-dashes.wasm",
+            "wit_pack/commands/second_with_dashes.wasm",
             "wit_pack/bindings/__init__.py",
             "wit_pack/bindings/wit_pack/__init__.py",
             "wit_pack/bindings/wit_pack/bindings.py",
