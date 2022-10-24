@@ -1,6 +1,8 @@
 import fs from "fs/promises";
 import * as url from "url";
+{%- if wasi %}
 import { init as initWasi, WASI } from "@wasmer/wasi";
+{%- endif %}
 {%- for lib in libraries %}
 import { {{lib.class_name}} } from "./{{lib.interface_name}}/{{lib.interface_name}}.js";
 {%- endfor %}

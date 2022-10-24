@@ -131,7 +131,7 @@ fn top_level(libraries: &[Library], commands: &[Command]) -> Result<Files, Error
 
 fn library_bindings(libraries: &[Library]) -> Result<Files, Error> {
     let mut files = Files::new();
-    let mut ctx = LibrariesContext::default();
+    let mut lib_ctx = Vec::new();
 
     for lib in libraries {
         let module_filename = Path::new(lib.module_filename()).with_extension("wasm");
@@ -143,7 +143,7 @@ fn library_bindings(libraries: &[Library]) -> Result<Files, Error> {
         bindings.insert(&module_filename, lib.module.wasm.clone().into());
         files.insert_child_directory(interface_name, bindings);
 
-        ctx.libraries.push(LibraryContext {
+        lib_ctx.push(LibraryContext {
             ident,
             interface_name: interface_name.to_string(),
             class_name,
@@ -151,6 +151,11 @@ fn library_bindings(libraries: &[Library]) -> Result<Files, Error> {
             wasi: lib.requires_wasi(),
         });
     }
+
+    let ctx = LibrariesContext {
+        libraries: lib_ctx,
+        wasi: libraries.iter().any(|lib| lib.requires_wasi()),
+    };
 
     let index_js = TEMPLATES
         .get_template("bindings.index.js")
@@ -170,6 +175,7 @@ fn library_bindings(libraries: &[Library]) -> Result<Files, Error> {
 #[derive(Debug, Default, serde::Serialize)]
 struct LibrariesContext {
     libraries: Vec<LibraryContext>,
+    wasi: bool,
 }
 
 #[derive(Debug, Default, serde::Serialize)]
