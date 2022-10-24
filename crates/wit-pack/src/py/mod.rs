@@ -85,7 +85,7 @@ fn command_bindings(commands: &[Command]) -> Result<Files, Error> {
 
     for cmd in commands {
         let ident = cmd.name.replace('-', "_");
-        let module_filename = format!("{}.wasm", cmd.name);
+        let module_filename = Path::new(&ident).with_extension("wasm");
 
         files.insert(&module_filename, SourceFile::from(&cmd.wasm));
         cmds.push(minijinja::context! {ident, module_filename});
@@ -112,18 +112,18 @@ fn library_bindings(libraries: &[Library]) -> Result<Files, Error> {
     let mut ctx = LibrariesContext::default();
 
     for lib in libraries {
-        let module_filename = lib.module_filename();
+        let module_filename = Path::new(lib.module_filename()).with_extension("wasm");
         let ident = lib.interface_name().to_snake_case();
         let class_name = lib.class_name();
 
         let mut bindings = generate_bindings(&lib.interface.0);
-        bindings.insert(module_filename, lib.module.wasm.clone().into());
+        bindings.insert(&module_filename, lib.module.wasm.clone().into());
         files.insert_child_directory(&ident, bindings);
 
         ctx.libraries.push(LibraryContext {
             ident,
             class_name,
-            module_filename: module_filename.to_string(),
+            module_filename: module_filename.display().to_string(),
             wasi: lib.requires_wasi(),
         });
     }
@@ -260,7 +260,7 @@ mod tests {
             "wit_pack/py.typed",
             "wit_pack/commands/__init__.py",
             "wit_pack/commands/first.wasm",
-            "wit_pack/commands/second-with-dashes.wasm",
+            "wit_pack/commands/second_with_dashes.wasm",
             "wit_pack/bindings/__init__.py",
             "wit_pack/bindings/wit_pack/__init__.py",
             "wit_pack/bindings/wit_pack/bindings.py",
