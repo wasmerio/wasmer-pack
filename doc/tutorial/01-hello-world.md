@@ -378,12 +378,18 @@ $ python ./main.py
 Hopefully you've got a better idea for how to create a WebAssembly library and
 use it from different languages, now.
 
+To recap, the process for publishing a library to WAPM is:
+
+1. Define a `*.wit` file with your interface
+2. Create a new Rust crate and add `wit-bindgen` as a dependency
+3. Implement the trait defined by `wit_bindgen_rust::export!("hello-world.wit")`
+4. Add `[package.metadata.wapm]` table to your `Cargo.toml`
+5. Publish to WAPM
+
 We took a bit longer than normal to get here, but that's mainly because there
 were plenty of detours to explain the "magic" that tools like `wit-bingen` and
-`cargo wapm` are doing for us.
-
-This explanation gives you a better intuition for how the tools work, but we'll
-probably skip over them in the future.
+`cargo wapm` are doing for us.  This explanation gives you a better intuition
+for how the tools work, but we'll probably skip over them in the future.
 
 Some exercises for the reader:
 
