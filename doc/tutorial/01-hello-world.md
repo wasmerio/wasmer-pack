@@ -92,13 +92,27 @@ wit_bindgen_rust::export!("hello-world.wit");
 (note: `hello-world.wit` is relative to the crate's root - the folder
 containing your `Cargo.toml` file)
 
-Under the hood, this will generate a bunch of glue code which the WebAssembly
-host will call. We can see this generated code using
-[`cargo expand`][cargo-expand] (you might need to install it with
-`cargo install cargo-expand`).
+Now let's run `cargo check` to see what compile errors it shows.
 
-(You don't normally need to do this, but sometimes it's nice to understand what
-is going on)
+```console,should_fail
+$ cargo check
+error[E0412]: cannot find type `HelloWorld` in module `super`
+ --> src/lib.rs:1:1
+  |
+1 | wit_bindgen_rust::export!("hello-world.wit");
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in `super`
+  |
+```
+
+This seems to fail because of *something* inside the
+`wit_bindgen_rust::export!()` macro, but we can't see what it is.
+
+The [`cargo expand`][cargo-expand] tool can be really useful in situations like
+these because it will expand all macros and print out the generated code.
+
+To use `cargo expand`, you'll need to make sure it's installed
+(`cargo install cargo-expand`) and that you have the nightly toolchain
+available (`rustup toolchain install nightly`).
 
 ```console,should_fail
 $ cargo expand
@@ -129,16 +143,6 @@ there are a couple of things I'd like to point out:
 From assumption 3, we know that the generated code expects us to define a
 `HelloWorld` type. We've only got 1 line of code at the moment, so it shouldn't
 be surprising to see our code doesn't compile (yet).
-
-```console,should_fail
-$ cargo check
-error[E0412]: cannot find type `HelloWorld` in module `super`
- --> src/lib.rs:1:1
-  |
-1 | wit_bindgen_rust::export!("hello-world.wit");
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in `super`
-  |
-```
 
 We can fix that by defining a `HelloWorld` type in `lib.rs`. Adding two numbers
 doesn't require any state, so we'll just use a unit struct.
