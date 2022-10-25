@@ -1,5 +1,7 @@
 // @ts-ignore
+{%- if wasi %}
 import { Wasi } from "@wasmer/wasi";
+{%- endif %}
 
 {%- for lib in libraries %}
 import { {{lib.class_name}} } from "./{{lib.interface_name}}/{{lib.interface_name}}";
@@ -18,6 +20,7 @@ export type LoadOptions = {
     module: WebAssembly.Module,
 };
 
+{%- if wasi %}
 /**
 * Extended options used when loading a WASI library.
  */
@@ -25,6 +28,7 @@ export type WasiLoadOptions = LoadOptions & {
     /** An initialized `@wasmer/wasi` object. */
     wasi: Wasi,
 };
+{%- endif %}
 
 export default class Bindings {
     {%- for lib in libraries %}
