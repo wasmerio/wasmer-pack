@@ -7,7 +7,7 @@ By the end, you should know how to define a simple WIT interface and implement
 it in Rust. We will also publish the package to WAPM and use it from JavaScript.
 
 You can check WAPM for the package we'll be building - it's called
-[`Michael-F-Bryan/hello-world`][published].
+[`wasmer/hello-world`][published].
 
 ## Installation
 
@@ -263,7 +263,7 @@ To enable `cargo wapm`, we need to add some metadata to our `Cargo.toml`.
 description = "Add two numbers"
 
 [package.metadata.wapm]
-namespace = "Michael-F-Bryan"  # Replace this with your WAPM username
+namespace = "wasmer"  # Replace this with your WAPM username
 abi = "none"
 bindings = { wit-bindgen = "0.1.0", exports = "hello-world.wit" }
 ```
@@ -284,7 +284,7 @@ builds.
 
 ```console
 $ cargo wapm --dry-run
-Successfully published package `Michael-F-Bryan/hello-world@0.1.0`
+Successfully published package `wasmer/hello-world@0.1.0`
 [INFO] Publish succeeded, but package was not published because it was run in dry-run mode
 ```
 
@@ -302,7 +302,7 @@ target/wapm/tutorial-01
 
 $ cat target/wapm/tutorial-01/wapm.toml
 [package]
-name = "Michael-F-Bryan/tutorial-01"
+name = "wasmer/tutorial-01"
 version = "0.1.0"
 description = "Add two numbers"
 repository = "https://github.com/wasmerio/wit-pack"
@@ -324,7 +324,7 @@ $ cargo wapm
 ```
 
 If you open up WAPM in your browser, you should see a new package has been
-published. It'll look something like [`Michael-F-Bryan/tutorial-01`][pkg].
+published. It'll look something like [`wasmer/tutorial-01`][published].
 
 ## Using the Package from Python
 
@@ -342,7 +342,7 @@ Now we can ask the `wapm` CLI to `pip install` our `tutorial-01` package's
 Python bindings.
 
 ```console
-$ wapm install --pip Michael-F-Bryan/tutorial-01
+$ wapm install --pip wasmer/tutorial-01
 ...
 Successfully installed tutorial-01-0.1.0 wasmer-1.1.0 wasmer-compiler-cranelift-1.1.0
 ```
@@ -403,10 +403,9 @@ Some exercises for the reader:
 [cargo-wapm]: https://lib.rs/cargo-wapm
 [crate-type]: https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-crate-type-field
 [cross-compile]: https://rust-lang.github.io/rustup/cross-compilation.html
-[pkg]: https://wapm.dev/Michael-F-Bryan/tutorial-01
-[published]: https://wapm.dev/Michael-F-Bryan/hello-world
+[published]: https://wapm.dev/wasmer/tutorial-01
 [publishing-docs]: https://docs.wasmer.io/ecosystem/wapm/publishing-your-package
-[query]: https://registry.wapm.dev/graphql?query=%7B%0A%20%20getPackageVersion(name%3A%20%22Michael-F-Bryan%2Ftutorial-01%22)%20%7B%0A%20%20%20%20version%0A%20%20%20%20bindings%20%7B%0A%20%20%20%20%20%20language%0A%20%20%20%20%20%20url%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A
+[query]: https://registry.wapm.dev/graphql?query=%7B%0A%20%20getPackageVersion(name%3A%20%22wasmer%2Ftutorial-01%22)%20%7B%0A%20%20%20%20version%0A%20%20%20%20bindings%20%7B%0A%20%20%20%20%20%20language%0A%20%20%20%20%20%20url%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A
 [venv]: https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment
 [wapm-io-signup]: https://wapm.io/signup
 [wasi]: 07-wasi.md
