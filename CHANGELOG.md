@@ -14,6 +14,8 @@ change, where applicable.
 
 ### Fixed
 
+- Don't assume atoms will have the same name as their commands
+  ([#64](https://github.com/wasmerio/wit-pack/pull/64))
 - Some JavaScript bindings wouldn't run because the bindings always import
   `@wasmer/wasi`, while the dependency was only added when one or more
   libraries/commands was compiled to WASI
