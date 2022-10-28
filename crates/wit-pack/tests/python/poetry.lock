@@ -166,12 +166,12 @@ wasmer_compiler_cranelift = "*"
 
 [package.source]
 type = "directory"
-url = "../../../../target/tmp/wit-pack/python/wasmer/wit_pack"
+url = "../../../../target/tmp/wit-pack/python/wit_pack"
 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "0d98ad90718d4f762047eb21e91e83e14a05eda35a319987f765a59610394d24"
+content-hash = "9128fbc4f3b38fe1ad55775c950823403b44d517c62824daeb2e740816b9aaa2"
 
 [metadata.files]
 attrs = [
