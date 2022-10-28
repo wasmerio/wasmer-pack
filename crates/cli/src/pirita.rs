@@ -15,23 +15,27 @@ pub(crate) fn load_pirita_file(path: &Path) -> Result<Package, Error> {
     let fully_qualified_package_name = webc.get_package_name();
     let metadata = metadata(&fully_qualified_package_name)?;
     let libraries = libraries(&webc, &fully_qualified_package_name)?;
-    let commands = commands(&webc, &fully_qualified_package_name);
+    let commands = commands(&webc, &fully_qualified_package_name)?;
 
     Ok(Package::new(metadata, libraries, commands))
 }
 
-fn commands(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Vec<Command> {
+fn commands(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Vec<Command>, Error> {
     let mut commands = Vec::new();
 
     for name in webc.list_commands() {
-        let wasm = webc.get_atom(fully_qualified_package_name, name).unwrap();
+        let atom_name = webc
+            .get_atom_name_for_command("wasi", name)
+            .map_err(Error::msg)?;
+        let wasm = webc.get_atom(fully_qualified_package_name, &atom_name)?;
+
         commands.push(Command {
             name: name.to_string(),
             wasm: wasm.to_vec(),
         });
     }
 
-    commands
+    Ok(commands)
 }
 
 fn libraries(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Vec<Library>, Error> {
