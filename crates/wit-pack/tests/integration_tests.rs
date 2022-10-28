@@ -5,7 +5,7 @@ mod fixtures;
 #[test]
 fn js() {
     TestCase::new("js", Target::JavaScript, fixtures::wit_pack())
-        .execute("yarn")
+        .execute("yarn --skip-integrity-check")
         .callback(|ctx| format!("yarn add {}", ctx.tarball()))
         .execute("yarn tsc --noEmit")
         .execute("yarn test")
@@ -15,7 +15,7 @@ fn js() {
 #[test]
 fn js_wasi() {
     TestCase::new("js-wasi", Target::JavaScript, fixtures::wabt())
-        .execute("yarn")
+        .execute("yarn --skip-integrity-check")
         .callback(|ctx| format!("yarn add {}", ctx.tarball()))
         .execute("yarn tsc --noEmit")
         .execute("yarn test")

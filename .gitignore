@@ -6,3 +6,4 @@ yarn-error.log
 .mypy_cache
 .pytest_cache
 __pycache__/
+poetry.lock
