@@ -14,6 +14,8 @@ change, where applicable.
 
 ### Fixed
 
+- Unable to install the generated JavaScript Bindings when packaged as a tarball
+  by WAPM ([#59](https://github.com/wasmerio/wit-pack/issues/59))
 - Don't assume atoms will have the same name as their commands
   ([#64](https://github.com/wasmerio/wit-pack/pull/64))
 - Some JavaScript bindings wouldn't run because the bindings always import
