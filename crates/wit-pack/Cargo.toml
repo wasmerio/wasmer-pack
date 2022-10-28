@@ -26,5 +26,8 @@ wit-parser = { git = "https://github.com/wasmerio/wit-bindgen", branch = "wasmer
 
 [dev-dependencies]
 cargo_metadata = "0.15.0"
+flate2 = "1.0.24"
 insta = { version = "1.18.2", features = ["filters"] }
+pathdiff = { version = "0.2.1", default-features = false }
 pretty_assertions = "1.3.0"
+tar = "0.4.38"
