@@ -62,7 +62,7 @@ impl TestCase {
     pub fn run(self) {
         let bindings = self.target.generate(&self.package).unwrap();
 
-        let tarball = self.save_tarball(bindings).unwrap();
+        let tarball = self.save_tarball(&bindings).unwrap();
 
         let test_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("tests")
@@ -74,9 +74,17 @@ impl TestCase {
             test_dir.display()
         );
 
+        let unpacked = tarball
+            .parent()
+            .unwrap()
+            .join(self.target.package_name(&self.package));
+        bindings.save_to_disk(&unpacked).unwrap();
+
         let ctx = Ctx {
             tarball: pathdiff::diff_paths(&tarball, &test_dir)
                 .expect("Unable to get the tarball path relative to the test directory"),
+            unpacked: pathdiff::diff_paths(&unpacked, &test_dir)
+                .expect("Unable to get the unpacked path relative to the test directory"),
             name: self.target.package_name(&self.package),
         };
 
@@ -90,7 +98,7 @@ impl TestCase {
         }
     }
 
-    fn save_tarball(&self, bindings: Files) -> Result<PathBuf, Error> {
+    fn save_tarball(&self, bindings: &Files) -> Result<PathBuf, Error> {
         let out_dir = self.out_dir();
 
         let dest = out_dir.join(self.tarball_filename());
@@ -108,6 +116,7 @@ impl TestCase {
         for (path, file) in bindings.iter() {
             let mut header = Header::new_gnu();
             header.set_size(file.contents().len() as u64);
+            header.set_mode(0o777);
             builder
                 .append_data(&mut header, path, file.contents())
                 .with_context(|| format!("Unable to add \"{}\" to the tarball", path.display()))?;
@@ -268,6 +277,7 @@ impl Target {
 
 pub struct Ctx {
     tarball: PathBuf,
+    unpacked: PathBuf,
     name: String,
 }
 
@@ -278,5 +288,9 @@ impl Ctx {
 
     pub fn tarball(&self) -> impl Display + '_ {
         self.tarball.display()
+    }
+
+    pub fn unpacked(&self) -> &Path {
+        &self.unpacked
     }
 }

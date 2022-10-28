@@ -3,6 +3,7 @@ use crate::fixtures::{Target, TestCase};
 mod fixtures;
 
 #[test]
+#[ignore]
 fn js() {
     TestCase::new("js", Target::JavaScript, fixtures::wit_pack())
         .execute("yarn")
@@ -13,6 +14,7 @@ fn js() {
 }
 
 #[test]
+#[ignore]
 fn js_wasi() {
     TestCase::new("js-wasi", Target::JavaScript, fixtures::wabt())
         .execute("yarn")
@@ -25,19 +27,31 @@ fn js_wasi() {
 #[test]
 fn python() {
     TestCase::new("python", Target::Python, fixtures::wit_pack())
-        .execute("pipenv install")
-        .callback(|ctx| format!("pipenv install {}", ctx.tarball()))
-        .execute("pipenv run pytest")
-        .callback(|ctx| format!("pipenv run mypy -m {}", ctx.name()))
+        .execute("poetry install")
+        .callback(|ctx| format!("poetry add {}", ctx.unpacked().display()))
+        .execute("poetry run pytest")
+        .callback(|ctx| {
+            format!(
+                "poetry run mypy {}",
+                ctx.unpacked().join(ctx.name()).display()
+            )
+        })
+        .execute("poetry run mypy .")
         .run();
 }
 
 #[test]
 fn python_wasi() {
     TestCase::new("python-wasi", Target::Python, fixtures::wabt())
-        .execute("pipenv install")
-        .callback(|ctx| format!("pipenv install {}", ctx.tarball()))
-        .execute("pipenv run pytest")
-        .callback(|ctx| format!("pipenv run mypy -m {}", ctx.name()))
+        .execute("poetry install")
+        .callback(|ctx| format!("poetry add {}", ctx.unpacked().display()))
+        .execute("poetry run pytest")
+        .callback(|ctx| {
+            format!(
+                "poetry run mypy {}",
+                ctx.unpacked().join(ctx.name()).display()
+            )
+        })
+        .execute("poetry run mypy .")
         .run();
 }

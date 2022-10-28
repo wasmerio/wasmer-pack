@@ -5,3 +5,4 @@ node_modules/
 yarn-error.log
 .mypy_cache
 .pytest_cache
+__pycache__/

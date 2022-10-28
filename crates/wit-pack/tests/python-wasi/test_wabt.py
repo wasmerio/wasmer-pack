@@ -1,8 +1,7 @@
 #!/bin/env python3
 
 from pathlib import Path
-from wasmer import wasi
-import pytest
+from wasmer import wasi # type: ignore
 from wabt import bindings, commands
 from wabt.bindings.wabt import WasmFeature, Ok
 
