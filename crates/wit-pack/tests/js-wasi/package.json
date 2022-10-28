@@ -7,7 +7,9 @@
         "test": "cross-env NODE_OPTIONS='--loader=ts-node/esm --no-warnings' jasmine --config=jasmine.json"
     },
     "dependencies": {
-        "@wasmer/wasi": "^1.1.2"
+        "@wasmer/wabt": "../../../../target/tmp/wit-pack/js-wasi/wasmer/wabt-0.0.0.tar.gz",
+        "@wasmer/wasi": "^1.1.2",
+        "wabt": "../../../../target/tmp/wit-pack/js-wasi/wasmer/wabt-0.0.0.tar.gz"
     },
     "devDependencies": {
         "@types/jasmine": "^4.3.0",

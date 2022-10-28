@@ -3,24 +3,22 @@ use crate::fixtures::{Target, TestCase};
 mod fixtures;
 
 #[test]
-#[ignore]
 fn js() {
     TestCase::new("js", Target::JavaScript, fixtures::wit_pack())
         .execute("yarn")
         .callback(|ctx| format!("yarn add {}", ctx.tarball()))
-        .execute("tsc --noEmit")
-        .execute("tsc test")
+        .execute("yarn tsc --noEmit")
+        .execute("yarn tsc test")
         .run();
 }
 
 #[test]
-#[ignore]
 fn js_wasi() {
     TestCase::new("js-wasi", Target::JavaScript, fixtures::wabt())
         .execute("yarn")
         .callback(|ctx| format!("yarn add {}", ctx.tarball()))
-        .execute("tsc --noEmit")
-        .execute("tsc test")
+        .execute("yarn tsc --noEmit")
+        .execute("yarn tsc test")
         .run();
 }
 

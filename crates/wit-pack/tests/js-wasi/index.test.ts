@@ -1,8 +1,8 @@
-import {bindings, commands} from "wabt";
+import {bindings, commands} from "@wasmer/wabt";
 import {
     WASM_FEATURE_SIMD,
     WASM_FEATURE_BULK_MEMORY,
-} from "wabt/src/bindings/wabt/wabt.js";
+} from "@wasmer/wabt/src/bindings/wabt/wabt.js";
 // @ts-ignore
 import { WASI, init as initWasi } from "@wasmer/wasi";
 import {} from "jasmine";
