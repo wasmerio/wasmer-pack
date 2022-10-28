@@ -35,6 +35,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+      - name: Clear the Cache
+        run: git clean -x -f -d
       - name: Install Python
         uses: actions/setup-python@v4
         with:
