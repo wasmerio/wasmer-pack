@@ -57,9 +57,11 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.17.tgz#52438111ea98f77475470fc62d79b9eb96bb2c92"
   integrity sha512-0UyfUnt02zIuqp7yC8RYtDkp/vo8bFaQ13KkSEvUAohPOAlnVNbj5Fi3fgPSuwzakS+EvvnnZ4x9y7i6ASaSPQ==
 
-"@wasmer/wabt@../../../../target/tmp/wit-pack/js-wasi/wasmer/wabt-0.0.0.tar.gz", wabt@../../../../target/tmp/wit-pack/js-wasi/wasmer/wabt-0.0.0.tar.gz:
+"@wasmer/wabt@../../../../target/tmp/wit-pack/js-wasi/wabt-0.0.0.tar.gz":
   version "0.0.0"
-  resolved "../../../../target/tmp/wit-pack/js-wasi/wasmer/wabt-0.0.0.tar.gz#10821aec96cff5a1772e2f2e5e7d436999b369de"
+  resolved "../../../../target/tmp/wit-pack/js-wasi/wabt-0.0.0.tar.gz#3c82d7b386d55d7313418e63d95c3aaa05eb676c"
+  dependencies:
+    "@wasmer/wasi" "^1.1.2"
 
 "@wasmer/wasi@^1.1.2":
   version "1.1.2"

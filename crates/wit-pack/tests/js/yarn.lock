@@ -62,9 +62,9 @@
   resolved "https://registry.yarnpkg.com/@wasmer/wasi/-/wasi-1.1.2.tgz#c99faf45bfc7ff464dfd4bec661320c4073c268b"
   integrity sha512-c1h7L2qPviV6n+ny2fYboFPFL4RbvCqYckDPfpWMUOqX+QIt83EnMnYfeWNwWbUAIku087qj3cBJzcqY+HbHxw==
 
-"@wasmer/wit-pack@../../../../target/tmp/wit-pack/js/wasmer/wit-pack-0.0.0.tar.gz", wit-pack@../../../../target/tmp/wit-pack/js/wasmer/wit-pack-0.0.0.tar.gz:
+"@wasmer/wit-pack@../../../../target/tmp/wit-pack/js/wit-pack-0.0.0.tar.gz":
   version "0.0.0"
-  resolved "../../../../target/tmp/wit-pack/js/wasmer/wit-pack-0.0.0.tar.gz#6359d18eda036f422ae60c959a69c56e86d45e70"
+  resolved "../../../../target/tmp/wit-pack/js/wit-pack-0.0.0.tar.gz#593cb8f2e01e21bc1e231dd4f46babe3cf586ca5"
 
 acorn-walk@^8.1.1:
   version "8.2.0"

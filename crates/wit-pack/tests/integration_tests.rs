@@ -8,7 +8,7 @@ fn js() {
         .execute("yarn")
         .callback(|ctx| format!("yarn add {}", ctx.tarball()))
         .execute("yarn tsc --noEmit")
-        .execute("yarn tsc test")
+        .execute("yarn test")
         .run();
 }
 
@@ -18,7 +18,7 @@ fn js_wasi() {
         .execute("yarn")
         .callback(|ctx| format!("yarn add {}", ctx.tarball()))
         .execute("yarn tsc --noEmit")
-        .execute("yarn tsc test")
+        .execute("yarn test")
         .run();
 }
 

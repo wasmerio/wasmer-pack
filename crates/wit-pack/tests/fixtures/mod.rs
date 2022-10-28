@@ -56,7 +56,7 @@ impl TestCase {
             ..
         } = self.package.metadata();
 
-        format!("{package_name}-{version}.tar.gz")
+        format!("{}-{version}.tar.gz", package_name.name())
     }
 
     pub fn run(self) {
