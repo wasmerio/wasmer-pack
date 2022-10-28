@@ -25,7 +25,7 @@ fn js_wasi() {
 #[test]
 fn python() {
     TestCase::new("python", Target::Python, fixtures::wit_pack())
-        .execute("poetry install")
+        .execute("poetry install --no-cache")
         .callback(|ctx| format!("poetry add {}", ctx.unpacked().display()))
         .execute("poetry run pytest")
         .callback(|ctx| {
@@ -41,7 +41,7 @@ fn python() {
 #[test]
 fn python_wasi() {
     TestCase::new("python-wasi", Target::Python, fixtures::wabt())
-        .execute("poetry install")
+        .execute("poetry install --no-cache")
         .callback(|ctx| format!("poetry add {}", ctx.unpacked().display()))
         .execute("poetry run pytest")
         .callback(|ctx| {
