@@ -12,6 +12,8 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+## [0.4.2] - 2022-10-30
+
 ### Fixed
 
 - Put all generated JavaScript inside a `package/` folder to match the logic
@@ -155,7 +157,8 @@ change, where applicable.
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/wasmerio/wit-pack/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/wasmerio/wit-pack/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/wasmerio/wit-pack/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/wasmerio/wit-pack/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/wasmerio/wit-pack/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/wasmerio/wit-pack/compare/v0.2.3...v0.3.0

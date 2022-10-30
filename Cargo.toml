@@ -2,11 +2,11 @@
 members = ["crates/*"]
 
 [workspace.package]
-version = "0.4.1"
 authors = ["Wasmer Engineering Team <engineering@wasmer.io>"]
-repository = "https://github.com/wasmerio/wit-pack"
-homepage = "https://wasmer.io/"
 edition = "2021"
+homepage = "https://wasmer.io/"
 license = "MIT"
-rust-version = "1.64.0" # Required for [workspace.package]
-
+readme = "README.md"
+repository = "https://github.com/wasmerio/wit-pack"
+rust-version = "1.64.0"                                       # Required for [workspace.package]
+version = "0.4.2"

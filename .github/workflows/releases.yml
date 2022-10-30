@@ -47,3 +47,6 @@ jobs:
           wapm login ${{ secrets.WAPM_IO_TOKEN }}
       - name: Publish to wapm.io
         run: cargo wapm --workspace
+        # Note: wapm.io currently times out even on success
+        # See https://github.com/wasmerio/wapm.io-backend/issues/199 for more
+        continue-on-error: true
