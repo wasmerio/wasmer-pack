@@ -8,7 +8,7 @@
     },
     "dependencies": {
         "@wasmer/wasi": "^1.1.2",
-        "@wasmer/wit-pack": "file:../../../../target/tmp/javascript"
+        "@wasmer/wit-pack": "file:../../../../target/tmp/wit-pack/javascript/package"
     },
     "devDependencies": {
         "@types/jasmine": "^4.3.0",

@@ -43,21 +43,21 @@ describe("wit-pack bindings", () => {
 
         const generatedFiles = files.map((f) => f.filename).sort();
         expect(generatedFiles).toEqual([
-            "package.json",
-            "src/bindings/index.d.ts",
-            "src/bindings/index.js",
-            "src/bindings/wit-pack/intrinsics.js",
-            "src/bindings/wit-pack/wit-pack.d.ts",
-            "src/bindings/wit-pack/wit-pack.js",
-            "src/bindings/wit-pack/wit-pack.wasm",
-            "src/commands/dummy_cmd.d.ts",
-            "src/commands/dummy_cmd.js",
-            "src/commands/dummy_cmd.wasm",
-            "src/index.d.ts",
-            "src/index.js",
+            "package/package.json",
+            "package/src/bindings/index.d.ts",
+            "package/src/bindings/index.js",
+            "package/src/bindings/wit-pack/intrinsics.js",
+            "package/src/bindings/wit-pack/wit-pack.d.ts",
+            "package/src/bindings/wit-pack/wit-pack.js",
+            "package/src/bindings/wit-pack/wit-pack.wasm",
+            "package/src/commands/dummy_cmd.d.ts",
+            "package/src/commands/dummy_cmd.js",
+            "package/src/commands/dummy_cmd.wasm",
+            "package/src/index.d.ts",
+            "package/src/index.js",
         ]);
         const packageJsonFile = files.find(
-            (f) => f.filename == "package.json"
+            (f) => f.filename == "package/package.json"
         )!;
 
         const packageJson = new TextDecoder("utf8").decode(

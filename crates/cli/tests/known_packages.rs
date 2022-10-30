@@ -37,11 +37,12 @@ macro_rules! codegen_test {
 }
 
 codegen_test! {
-    #[ignore = "The webc file isn't being generated properly"]
     name: wabt,
     url: "https://registry-cdn.wapm.dev/packages/wasmer/wabt/wabt-1.0.33.webc",
-    libraries: ["wabt"],
-    commands: ["wasm-validate"],
+    libraries: ["bindings"],
+    commands: [
+        "wat2wasm", "wast2json", "wasm2wat", "wasm-interp", "wasm-validate", "wasm-strip",
+    ],
 }
 
 codegen_test! {

@@ -186,6 +186,10 @@ fn generate_pyproject_toml(metadata: &Metadata, package_name: &str) -> Result<So
             keywords: Vec::new(),
             dependencies: vec!["wasmer", "wasmer_compiler_cranelift"],
         },
+        build_system: BuildSystem {
+            requires: &["setuptools", "setuptools-scm"],
+            build_backend: "setuptools.build_meta",
+        },
     };
 
     let serialized = toml::to_string(&project)?;
@@ -194,8 +198,17 @@ fn generate_pyproject_toml(metadata: &Metadata, package_name: &str) -> Result<So
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
+#[serde(rename_all = "kebab-case")]
 struct PyProject<'a> {
     project: Project<'a>,
+    build_system: BuildSystem<'a>,
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+#[serde(rename_all = "kebab-case")]
+struct BuildSystem<'a> {
+    requires: &'a [&'a str],
+    build_backend: &'a str,
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
@@ -320,6 +333,7 @@ mod tests {
                 .utf8_contents()
                 .unwrap());
         });
+        insta::assert_display_snapshot!(files["wit_pack/py.typed"].utf8_contents().unwrap());
 
         let actual_files: BTreeSet<_> = files.iter().map(|(p, _)| p).collect();
         assert_eq!(actual_files, expected);

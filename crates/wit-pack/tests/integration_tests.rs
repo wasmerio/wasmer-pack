@@ -9,7 +9,9 @@ use wit_pack::{Abi, Interface, Library, Metadata, Module, Package};
 #[test]
 fn use_javascript_bindings() {
     let pkg = wit_pack_fixture();
-    let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("javascript");
+    let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR"))
+        .join("wit-pack")
+        .join("javascript");
     let _ = std::fs::remove_dir_all(&out_dir);
 
     let js = wit_pack::generate_javascript(&pkg).unwrap();
@@ -29,7 +31,9 @@ fn use_javascript_bindings() {
 #[test]
 fn use_wasi_javascript_bindings() {
     let pkg = wabt_fixture();
-    let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("javascript-wasi");
+    let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR"))
+        .join("wit-pack")
+        .join("javascript-wasi");
     let _ = std::fs::remove_dir_all(&out_dir);
 
     let js = wit_pack::generate_javascript(&pkg).unwrap();
@@ -49,7 +53,9 @@ fn use_wasi_javascript_bindings() {
 #[test]
 fn use_python_bindings() {
     let pkg = wit_pack_fixture();
-    let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("python");
+    let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR"))
+        .join("wit-pack")
+        .join("python");
     let _ = std::fs::remove_dir_all(&out_dir);
 
     let py = wit_pack::generate_python(&pkg).unwrap();
@@ -70,7 +76,9 @@ fn use_python_bindings() {
 #[test]
 fn use_wasi_python_bindings() {
     let pkg = wabt_fixture();
-    let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("python-wasi");
+    let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR"))
+        .join("wit-pack")
+        .join("python-wasi");
     let _ = std::fs::remove_dir_all(&out_dir);
 
     let py = wit_pack::generate_python(&pkg).unwrap();

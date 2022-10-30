@@ -1,0 +1,34 @@
+---
+source: crates/cli/tests/known_packages.rs
+expression: "format!(\"{meta:#}\")"
+---
+{
+  "bindings": [
+    {
+      "interface_name": "bindings"
+    }
+  ],
+  "commands": [
+    {
+      "name": "wat2wasm"
+    },
+    {
+      "name": "wast2json"
+    },
+    {
+      "name": "wasm2wat"
+    },
+    {
+      "name": "wasm-interp"
+    },
+    {
+      "name": "wasm-validate"
+    },
+    {
+      "name": "wasm-strip"
+    }
+  ],
+  "description": null,
+  "name": "wasmer/wabt",
+  "version": "1.0.33"
+}

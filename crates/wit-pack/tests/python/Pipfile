@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-wit-pack = {path = "./../../../../target/tmp/python"}
+wit-pack = {path = "./../../../../target/tmp/wit-pack/python"}
 wasmer = "*"
 wasmer-compiler-cranelift = "*"
 pytest = "*"

@@ -62,7 +62,7 @@
   resolved "https://registry.yarnpkg.com/@wasmer/wasi/-/wasi-1.1.2.tgz#c99faf45bfc7ff464dfd4bec661320c4073c268b"
   integrity sha512-c1h7L2qPviV6n+ny2fYboFPFL4RbvCqYckDPfpWMUOqX+QIt83EnMnYfeWNwWbUAIku087qj3cBJzcqY+HbHxw==
 
-"@wasmer/wit-pack@file:../../../../target/tmp/javascript":
+"@wasmer/wit-pack@file:../../../../target/tmp/wit-pack/javascript/package":
   version "0.0.0"
 
 acorn-walk@^8.1.1:

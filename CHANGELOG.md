@@ -14,6 +14,12 @@ change, where applicable.
 
 ### Fixed
 
+- Put all generated JavaScript inside a `package/` folder to match the logic
+  used by `npm pack` when consuming tarballs
+  ([#66](https://github.com/wasmerio/wit-pack/pull/66))
+- Update `MANIFEST.in` to include `py.typed` in the package, meaning MyPy can
+  now typecheck the generated bindings
+  ([#66](https://github.com/wasmerio/wit-pack/pull/66))
 - Don't assume atoms will have the same name as their commands
   ([#64](https://github.com/wasmerio/wit-pack/pull/64))
 - Some JavaScript bindings wouldn't run because the bindings always import
