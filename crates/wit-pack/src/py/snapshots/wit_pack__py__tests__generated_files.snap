@@ -8,3 +8,7 @@ version = "1.2.3"
 keywords = []
 dependencies = ["wasmer", "wasmer_compiler_cranelift"]
 
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
