@@ -25,4 +25,4 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 anyhow = "1.0.62"
 wit-bindgen-rust = { git = "https://github.com/wasmerio/wit-bindgen", version = "0.1.0" }
-wit-pack = { version = "0.4.1", path = "../wit-pack" }
+wit-pack = { version = "0.4.2", path = "../wit-pack" }
