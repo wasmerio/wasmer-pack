@@ -69,7 +69,7 @@ The checklist:
 
 
 [cargo-release]: https://github.com/crate-ci/cargo-release
-[changelog]: https://github.com/wasmerio/wit-pack/blob/master/CHANGELOG.md
+[changelog]: https://github.com/wasmerio/wasmer_pack/blob/master/CHANGELOG.md
 [fast-rust-builds]: https://matklad.github.io/2021/09/04/fast-rust-builds.html
-[releases]: https://github.com/wasmerio/wit-pack/actions/workflows/releases.yml
+[releases]: https://github.com/wasmerio/wasmer_pack/actions/workflows/releases.yml
 [workflow-timer]: https://github.com/Michael-F-Bryan/workflow-timer
