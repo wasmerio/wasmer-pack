@@ -1,5 +1,5 @@
 ---
-source: crates/wit-pack/src/js/mod.rs
+source: crates/wasmer-pack/src/js/mod.rs
 expression: "files[\"package/src/bindings/index.d.ts\"].utf8_contents().unwrap()"
 ---
 // @ts-ignore

@@ -1,5 +1,5 @@
 ---
-source: crates/wit-pack/src/js/mod.rs
+source: crates/wasmer-pack/src/js/mod.rs
 expression: "files[\"package/src/commands/first.d.ts\"].utf8_contents().unwrap()"
 ---
 import type { ExitStatus, RunOptions } from "../index";

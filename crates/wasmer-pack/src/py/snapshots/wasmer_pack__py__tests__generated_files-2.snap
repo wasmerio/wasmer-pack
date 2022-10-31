@@ -1,5 +1,5 @@
 ---
-source: crates/wit-pack/src/py/mod.rs
+source: crates/wasmer-pack/src/py/mod.rs
 expression: "files[\"MANIFEST.in\"].utf8_contents().unwrap()"
 ---
 include wasmer_pack/py.typed
