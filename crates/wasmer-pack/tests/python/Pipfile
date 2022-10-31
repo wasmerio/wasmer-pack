@@ -1,0 +1,11 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+wasmer-pack = {path = "./../../../../target/tmp/wasmer-pack/python"}
+wasmer = "*"
+wasmer-compiler-cranelift = "*"
+pytest = "*"
+mypy = "*"

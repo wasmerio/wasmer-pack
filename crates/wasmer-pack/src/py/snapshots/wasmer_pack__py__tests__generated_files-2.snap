@@ -1,0 +1,7 @@
+---
+source: crates/wit-pack/src/py/mod.rs
+expression: "files[\"MANIFEST.in\"].utf8_contents().unwrap()"
+---
+include wasmer_pack/py.typed
+include wasmer_pack/bindings/wasmer_pack/*.wasm
+include wasmer_pack/commands/*.wasm

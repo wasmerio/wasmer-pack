@@ -20,8 +20,8 @@ impl Codegen {
         let pkg = crate::load_pirita_file(&input)?;
 
         let files = match language {
-            Language::JavaScript => wit_pack::generate_javascript(&pkg)?,
-            Language::Python => wit_pack::generate_python(&pkg)?,
+            Language::JavaScript => wasmer_pack::generate_javascript(&pkg)?,
+            Language::Python => wasmer_pack::generate_python(&pkg)?,
         };
 
         let metadata = pkg.metadata();

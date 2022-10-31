@@ -1,8 +1,8 @@
 use std::path::Path;
 
 use anyhow::{Context, Error};
+use wasmer_pack::{Command, Interface, Library, Metadata, Module, Package};
 use webc::{Manifest, ParseOptions, WebC, WebCOwned};
-use wit_pack::{Command, Interface, Library, Metadata, Module, Package};
 
 pub(crate) fn load_pirita_file(path: &Path) -> Result<Package, Error> {
     let options = ParseOptions::default();
@@ -92,12 +92,12 @@ fn load_library(
     Ok(Library { module, interface })
 }
 
-fn wasm_abi(module: &[u8]) -> wit_pack::Abi {
+fn wasm_abi(module: &[u8]) -> wasmer_pack::Abi {
     // TODO: use a proper method to guess the ABI
     if bytes_contain(module, b"wasi_snapshot_preview") {
-        wit_pack::Abi::Wasi
+        wasmer_pack::Abi::Wasi
     } else {
-        wit_pack::Abi::None
+        wasmer_pack::Abi::None
     }
 }
 

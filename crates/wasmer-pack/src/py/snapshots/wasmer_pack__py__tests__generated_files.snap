@@ -1,0 +1,14 @@
+---
+source: crates/wasmer-pack/src/py/mod.rs
+expression: "files[\"pyproject.toml\"].utf8_contents().unwrap()"
+---
+[project]
+name = "wasmer_pack"
+version = "1.2.3"
+keywords = []
+dependencies = ["wasmer", "wasmer_compiler_cranelift"]
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+

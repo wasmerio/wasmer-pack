@@ -1,0 +1,54 @@
+---
+source: crates/wit-pack/src/py/mod.rs
+expression: "files[\"wasmer_pack/bindings/__init__.py\"].utf8_contents().unwrap()"
+---
+'''
+Bindings to the  library.
+'''
+
+from pathlib import Path
+from typing import Optional, Any
+
+from wasmer import Store, Module, wasi # type: ignore
+from .wasmer_pack.bindings import WasmerPack
+
+class Bindings:
+    """
+    Instantiate bindings to the various libraries in this package.
+    """
+
+    def __init__(self, store: Store):
+        self._store = store
+        self._cache: dict[str, Module] = {}
+
+    def _get_module(self, filename: str) -> Module:
+        if filename in self._cache:
+            return self._cache[filename]
+
+        wasm = Path(__file__).parent.joinpath(filename).read_bytes()
+        module = Module(self._store, wasm)
+        self._cache[filename] = module
+        return module
+
+    def wasmer_pack(
+        self,
+        imports: Optional[dict[str, Any]] = None,
+        module: Optional[Module] = None,
+    ) -> WasmerPack:
+        """
+        Instantiate the "wasmer_pack" library.
+        :param imports: Additional imports to be provided to the WebAssembly
+                        module.
+        :param module: A user-specified WebAssembly module to use instead of the
+                       one bundled with this package.
+        """
+
+        filename = "wasmer_pack/wasmer_pack_wasm.wasm"
+        if not module:
+            module = self._get_module(filename)
+
+        if not imports:
+            imports = {}
+
+        return WasmerPack(self._store, imports, module)
+    

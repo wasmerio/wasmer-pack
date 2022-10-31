@@ -1,0 +1,34 @@
+---
+source: crates/wit-pack/src/js/mod.rs
+expression: "files[\"package/src/bindings/index.js\"].utf8_contents().unwrap()"
+---
+import fs from "fs/promises";
+import * as url from "url";
+import { WasmerPack } from "./wasmer-pack/wasmer-pack.js";
+
+export default class Bindings {
+    constructor() {
+        this._cache = {}
+    }
+
+    /** Lazily fetch and compile the WebAssembly module */
+    async _getModule(filename) {
+        if (filename in this._cache) {
+            return this._cache[filename];
+        }
+
+        const path = url.fileURLToPath(new URL(filename, import.meta.url));
+        const wasm = await fs.readFile(path);
+        this._cache[filename] = await WebAssembly.compile(wasm);
+        return this._cache[filename];
+    }
+    async wasmer_pack(options) {
+        const wrapper = new WasmerPack();
+        const module = await this._getModule("wasmer-pack/wasmer_pack_wasm.wasm");
+        const imports = options?.imports || {};
+
+        await wrapper.instantiate(module, imports);
+
+        return wrapper;
+    }
+}
