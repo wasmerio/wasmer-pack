@@ -25,4 +25,4 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 anyhow = "1.0.62"
 wai-bindgen-rust = "0.2.0-rc.1"
-wasmer-pack = { version = "0.4.2", path = "../wasmer-pack" }
+wasmer-pack = { version = "0.5.0-rc.1", path = "../wasmer-pack" }
