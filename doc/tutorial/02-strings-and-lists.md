@@ -18,8 +18,8 @@ Just like last time, our first step is to define a WIT file for our interface.
 This file has two functions, the first function will create a string that greets
 a person by name (i.e. *"Hello, Michael!"*)...
 
-```wit
-// strings-and-lists.wit
+```wai
+// strings-and-lists.wai
 
 /// Greet a person by name.
 greet: func(name: string) -> string
@@ -28,28 +28,28 @@ greet: func(name: string) -> string
 ... and the other function will take a list of people's names, greeting them
 all at the same time.
 
-```wit
+```wai
 /// Say hello to multiple people.
 greet-many: func(people: list<string>) -> string
 ```
 
 ## Writing Some Rust
 
-Now we've defined our `strings-and-lists.wit` file, let's implement the crate.
+Now we've defined our `strings-and-lists.wai` file, let's implement the crate.
 
-The first thing we need to do is add `wit-bindgen` as a dependency.
+The first thing we need to do is add `wai-bindgen` as a dependency.
 
 ```console
-$ cargo add --git https://github.com/wasmerio/wit-bindgen wit-bindgen-rust
+$ cargo add wai-bindgen-rust
 ```
 
-We also need to tell `wit-bindgen` that we're implementing
-`strings-and-lists.wit`.
+We also need to tell `wai-bindgen` that we're implementing
+`strings-and-lists.wai`.
 
 ```rust
 // src/lib.rs
 
-wit_bindgen_rust::export!("strings-and-lists.wit");
+wai_bindgen_rust::export!("strings-and-lists.wai");
 ```
 
 Next, we need to define a `StringsAndLists` type and implement the
@@ -104,7 +104,7 @@ passed in by
 3. Hand ownership of the buffer to the guest function (i.e. our `greet()`
    method)
 
-Luckily `wit-bindgen` will generate all the code we need for this, but it's
+Luckily `wai-bindgen` will generate all the code we need for this, but it's
 something to be aware of.
 
 Another thing to keep in mind is that all return values must be owned, too.
@@ -130,7 +130,7 @@ crate-type = ["cdylib", "rlib"]
 [package.metadata.wapm]
 namespace = "wasmer"
 abi = "none"
-bindings = { wit-bindgen = "0.1.0", exports = "strings-and-lists.wit" }
+bindings = { wai-bindgen = "0.1.0", exports = "strings-and-lists.wai" }
 ```
 
 Now, we can publish it to WAPM.

@@ -43,11 +43,11 @@ $ cd tutorial-01
 (you can remove all the code in `src/lib.rs` - we don't need the example
 boilerplate)
 
-Now we can add a `hello-world.wit` file to the project. The syntax for a WIT
+Now we can add a `hello-world.wai` file to the project. The syntax for a WIT
 file is quite similar to Rust.
 
 ```
-// hello-world.wit
+// hello-world.wai
 
 /// Add two numbers
 add: func(a: u32, b: u32) -> u32
@@ -57,11 +57,11 @@ This defines a function called `add` which takes two `u32` parameters (32-bit
 unsigned integers) called `a` and `b`, and returns a `u32`.
 
 You can see that normal comments start with a `//` and doc-comments use `///`.
-Here, we're using `// hello-world.wit` to indicate the text should be saved to
-`hello-world.wit`.
+Here, we're using `// hello-world.wai` to indicate the text should be saved to
+`hello-world.wai`.
 
 One interesting constraint from the WIT format is that *all* names must be
-written in kebab-case. This lets `wit-bindgen` convert the name into the casing
+written in kebab-case. This lets `wai-bindgen` convert the name into the casing
 that is idiomatic for a particular language in a particular context.
 
 For example, if our WIT file defined a `hello-world` function, it would be
@@ -71,25 +71,25 @@ function names, whereas in JavaScript it would be `helloWorld`.
 ## Writing Some Rust
 
 Now we've got a WIT file, let's create a WebAssembly library implementing the
-`hello-world.wit` interface.
+`hello-world.wai` interface.
 
-The `wit-bindgen` library uses some macros to generate some glue code for our
+The `wai-bindgen` library uses some macros to generate some glue code for our
 WIT file, so add it as a dependency.
 
 ```console
-$ cargo add --git https://github.com/wasmerio/wit-bindgen wit-bindgen-rust
+$ cargo add wai-bindgen-rust
 ```
 
-Towards the top of your `src/lib.rs`, we want to tell `wit-bindgen` that this
-crate *exports* our `hello-world.wit` file.
+Towards the top of your `src/lib.rs`, we want to tell `wai-bindgen` that this
+crate *exports* our `hello-world.wai` file.
 
 ```rust
 // src/lib.rs
 
-wit_bindgen_rust::export!("hello-world.wit");
+wai_bindgen_rust::export!("hello-world.wai");
 ```
 
-(note: `hello-world.wit` is relative to the crate's root - the folder
+(note: `hello-world.wai` is relative to the crate's root - the folder
 containing your `Cargo.toml` file)
 
 Now let's run `cargo check` to see what compile errors it shows.
@@ -99,13 +99,13 @@ $ cargo check
 error[E0412]: cannot find type `HelloWorld` in module `super`
  --> src/lib.rs:1:1
   |
-1 | wit_bindgen_rust::export!("hello-world.wit");
+1 | wai_bindgen_rust::export!("hello-world.wai");
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in `super`
   |
 ```
 
 This seems to fail because of *something* inside the
-`wit_bindgen_rust::export!()` macro, but we can't see what it is.
+`wai_bindgen_rust::export!()` macro, but we can't see what it is.
 
 The [`cargo expand`][cargo-expand] tool can be really useful in situations like
 these because it will expand all macros and print out the generated code.
@@ -118,9 +118,9 @@ available (`rustup toolchain install nightly`).
 $ cargo expand
 mod hello_world {
     #[export_name = "add"]
-    unsafe extern "C" fn __wit_bindgen_hello_world_add(arg0: i32, arg1: i32) -> i32 {
+    unsafe extern "C" fn __wai_bindgen_hello_world_add(arg0: i32, arg1: i32) -> i32 {
         let result = <super::HelloWorld as HelloWorld>::add(arg0 as u32, arg1 as u32);
-        wit_bindgen_rust::rt::as_i32(result)
+        wai_bindgen_rust::rt::as_i32(result)
     }
     pub trait HelloWorld {
         /// Add two numbers
@@ -133,10 +133,10 @@ There's a lot going on in that code, and most of it isn't relevant to you, but
 there are a couple of things I'd like to point out:
 
 1. A `hello_world` module was generated (the name comes from
-   `hello-world.wit`)
+   `hello-world.wai`)
 2. A `HelloWorld` trait was defined with an `add()` method that matches `add()`
-  from `hello-world.wit` (note: `HelloWorld` is `hello-world` in PascalCase)
-3. The `__wit_bindgen_hello_world_add()` shim expects a `HelloWorld` type to
+  from `hello-world.wai` (note: `HelloWorld` is `hello-world` in PascalCase)
+3. The `__wai_bindgen_hello_world_add()` shim expects a `HelloWorld` type to
   be defined in the parent module (that's the `super::` bit), and that
   `super::HelloWorld` type must implement the `HelloWorld` trait
 
@@ -159,7 +159,7 @@ $ cargo check
 error[E0277]: the trait bound `HelloWorld: hello_world::HelloWorld` is not satisfied
  --> src/lib.rs:1:1
   |
-1 | wit_bindgen_rust::export!("hello-world.wit");
+1 | wai_bindgen_rust::export!("hello-world.wai");
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `hello_world::HelloWorld` is not implemented for `HelloWorld`
 ```
 
@@ -234,7 +234,7 @@ Exports:
 You'll notice that, besides a bunch of other stuff, we're exporting an `add`
 function that takes two `i32`s and returns an `i32`.
 
-This matches the `__wit_bindgen_hello_world_add()` signature we saw earlier.
+This matches the `__wai_bindgen_hello_world_add()` signature we saw earlier.
 
 ## Publishing to WAPM
 
@@ -265,7 +265,7 @@ description = "Add two numbers"
 [package.metadata.wapm]
 namespace = "wasmer"  # Replace this with your WAPM username
 abi = "none"
-bindings = { wit-bindgen = "0.1.0", exports = "hello-world.wit" }
+bindings = { wai-bindgen = "0.1.0", exports = "hello-world.wai" }
 ```
 
 Something to note is that all packages on WAPM must have a `description` field.
@@ -276,8 +276,8 @@ to tell `cargo wapm` a couple of things:
 - which namespace we are publishing to (all WAPM packages are namespaced)
 - The ABI being used (`none` corresponds to Rust's `wasm32-unknown-unknown`, and
   we'd write `wasi` if we were compiling to `wasm32-wasi`), and
-- The location of our `hello-world.wit` exports, plus the version of
-  `wit-bindgen` we used
+- The location of our `hello-world.wai` exports, plus the version of
+  `wai-bindgen` we used
 
 Now we've updated our `Cargo.toml`, let's do a dry-run to make sure the package
 builds.
@@ -295,7 +295,7 @@ generated for us.
 $ tree target/wapm/tutorial-01
 target/wapm/tutorial-01
 ├── tutorial_01.wasm
-├── hello-world.wit
+├── hello-world.wai
 └── wapm.toml
 
 0 directories, 3 files
@@ -305,7 +305,7 @@ $ cat target/wapm/tutorial-01/wapm.toml
 name = "wasmer/tutorial-01"
 version = "0.1.0"
 description = "Add two numbers"
-repository = "https://github.com/wasmerio/wit-pack"
+repository = "https://github.com/wasmerio/wasmer-pack-tutorial"
 
 [[module]]
 name = "tutorial-01"
@@ -313,8 +313,8 @@ source = "tutorial_01.wasm"
 abi = "none"
 
 [module.bindings]
-wit-exports = "hello-world.wit"
-wit-bindgen = "0.1.0"
+wai-exports = "hello-world.wai"
+wai-bindgen = "0.1.0"
 ```
 
 This all looks correct, so let's actually publish the package!
@@ -379,14 +379,14 @@ use it from different languages, now.
 
 To recap, the process for publishing a library to WAPM is:
 
-1. Define a `*.wit` file with your interface
-2. Create a new Rust crate and add `wit-bindgen` as a dependency
-3. Implement the trait defined by `wit_bindgen_rust::export!("hello-world.wit")`
+1. Define a `*.wai` file with your interface
+2. Create a new Rust crate and add `wai-bindgen` as a dependency
+3. Implement the trait defined by `wai_bindgen_rust::export!("hello-world.wai")`
 4. Add `[package.metadata.wapm]` table to your `Cargo.toml`
 5. Publish to WAPM
 
 We took a bit longer than normal to get here, but that's mainly because there
-were plenty of detours to explain the "magic" that tools like `wit-bingen` and
+were plenty of detours to explain the "magic" that tools like `wai-bingen` and
 `cargo wapm` are doing for us.  This explanation gives you a better intuition
 for how the tools work, but we'll probably skip over them in the future.
 
@@ -394,7 +394,7 @@ Some exercises for the reader:
 
 - If your editor has some form of intellisense or code completion, hover over
   things like `bindings.hello_world` and `instance.add` to see their signatures
-- Add an `add_floats` function to `hello-world.wit` which will add 32-bit
+- Add an `add_floats` function to `hello-world.wai` which will add 32-bit
   floating point numbers (`f32`)
 
 
@@ -409,5 +409,5 @@ Some exercises for the reader:
 [venv]: https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment
 [wapm-io-signup]: https://wapm.io/signup
 [wasi]: 07-wasi.md
-[wit-bindgen]: https://github.com/wasmerio/wit-bindgen
+[wai-bindgen]: https://github.com/wasmerio/wai
 [wit]: https://github.com/WebAssembly/component-model/blob/5754989219db51ba24def50c3ac28bb9775ead33/design/mvp/WIT.md

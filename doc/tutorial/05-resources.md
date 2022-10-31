@@ -21,8 +21,8 @@ $ cargo new --lib tutorial-05
 
 The key thing to understand about a `resource` is that it only defines methods.
 
-```wit
-// resources.wit
+```wai
+// resources.wai
 
 resource calculator {
     static new: func(initial-value: float32) -> calculator
@@ -42,19 +42,19 @@ support `async` functions.
 
 ## Writing Some Rust
 
-As always, we need to add `wit-bindgen` as a dependency.
+As always, we need to add `wai-bindgen` as a dependency.
 
 ```console
-$ cargo add --git https://github.com/wasmerio/wit-bindgen wit-bindgen-rust
+$ cargo add wai-bindgen-rust
 ```
 
-We also need to ask `wit-bindgen` to generate exports for our `resources.wit`
+We also need to ask `wai-bindgen` to generate exports for our `resources.wai`
 interface.
 
 ```rust
 // src/lib.rs
 
-wit_bindgen_rust::export!("resources.wit");
+wai_bindgen_rust::export!("resources.wai");
 ```
 
 If we run `cargo check`, we'll see that - besides the missing `Resources` type
@@ -129,7 +129,7 @@ crate-type = ["cdylib", "rlib"]
 [package.metadata.wapm]
 namespace = "wasmer"
 abi = "none"
-bindings = { wit-bindgen = "0.1.0", exports = "resources.wit" }
+bindings = { wai-bindgen = "0.1.0", exports = "resources.wai" }
 ```
 
 Now, we can publish it to WAPM.
@@ -176,7 +176,7 @@ $ python main.py
 ## Conclusion
 
 The resource is a useful tool for exposing stateful objects that have behaviour,
-and should be familiar to 
+and should be familiar to
 
 
 With the addition of resources, we've introduced most of the fundamental

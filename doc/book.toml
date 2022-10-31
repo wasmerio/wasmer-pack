@@ -2,11 +2,11 @@
 authors = ["Michael-F-Bryan"]
 language = "en"
 src = "."
-title = "WIT Pack User Guide"
+title = "Wasmer Pack User Guide"
 
 [output.html]
 default-theme = "rust"
-edit-url-template = "https://github.com/wasmerio/wit-pack/edit/master/{path}"
+edit-url-template = "https://github.com/wasmerio/wasmer-pack/edit/master/{path}"
 no-section-label = true
 
 [output.html.fold]
