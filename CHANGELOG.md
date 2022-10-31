@@ -8,9 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Changelog entries will contain a link to the pull request implementing that
 change, where applicable.
 
+> **Note:** The project was renamed from `wit-pack` to `wasmer-pack` in version
+> 0.5.0. Changelog entries from 0.4.2 and earlier use the old name.
+
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+
+## 💥 Breaking Changed 💥
+
+- The project has been renamed from `wit-pack` to `wasmer-pack`
 
 ## [0.4.2] - 2022-10-30
 

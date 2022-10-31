@@ -4,7 +4,7 @@
 
 This project is developed under several assumptions,
 
-- Most of the time spent using `wit-pack` will actually go into the IO before
+- Most of the time spent using `wasmer-pack` will actually go into the IO before
   and after using it rather than *running* the code generator (i.e. because you
   have to download large inputs from a server), so **performance is a non-goal**
   for this project
@@ -40,8 +40,8 @@ on each PR to let you know how much your changes have affected CI times.
 
 ### Goal 2: It Just Works
 
-Users of `wit-pack` should be able to compile the project from scratch and use
-the generated bindings without needing to mess around with dependencies or
+Users of `wasmer-pack` should be able to compile the project from scratch and
+use the generated bindings without needing to mess around with dependencies or
 configuration.
 
 To achieve this,
