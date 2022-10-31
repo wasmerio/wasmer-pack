@@ -66,7 +66,7 @@ to be used by others.
 
 A WAPM package can contain as many WASI executables and libraries as you wish.
 
-## WIT Bindgen
+## WAI Bindgen
 
 The WebAssembly spec that was first released in 2017 was only a minimum viable
 product. It deliberately left several features incomplete to be iterated on by
@@ -84,9 +84,9 @@ can only use the following data types,
 
 You'll notice this list doesn't even include strings or boolean values!
 
-The [`wit-bindgen`][wit-bindgen] project provides a polyfill for passing
+The [`wai-bindgen`][wai-bindgen] project provides a polyfill for passing
 around higher-level objects. It lets developers define their imports and exports
-in a `*.wit` file, then using `wit-bindgen` to generate glue which automagically
+in a `*.wai` file, then using `wai-bindgen` to generate glue which automagically
 passes things around within the constraints of WebAssembly.
 
 We'll be getting *very* familiar with WIT files through the coming chapters, but
@@ -94,18 +94,18 @@ the full definition for the WIT file format is available [on GitHub][wit].
 
 ## WIT Pack
 
-WIT Pack is a tool that integrates `wit-bindgen` with the WAPM ecosystem.
+WIT Pack is a tool that integrates `wai-bindgen` with the WAPM ecosystem.
 
-Each library in a package has the option of declaring `*.wit` files containing
+Each library in a package has the option of declaring `*.wai` files containing
 functionality it imports and exports.
 
 - A tool that integrates WIT Bindgen with WAPM
-- You can create a package that is associated with a `*.wit` file
+- You can create a package that is associated with a `*.wai` file
 - When that package is published to WAPM, bindings for your favourite language
   are automatically generated
 
 
 [wapm]: https://wapm.io/
 [website]: https://webassembly.org/
-[wit-bindgen]: https://github.com/bytecodealliance/wit-bindgen
+[wai-bindgen]: https://github.com/bytecodealliance/wai-bindgen
 [wit]: https://github.com/WebAssembly/component-model/blob/5754989219db51ba24def50c3ac28bb9775ead33/design/mvp/WIT.md

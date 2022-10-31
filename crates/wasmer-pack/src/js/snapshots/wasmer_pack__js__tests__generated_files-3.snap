@@ -1,0 +1,32 @@
+---
+source: crates/wasmer-pack/src/js/mod.rs
+expression: "files[\"package/src/commands/first.js\"].utf8_contents().unwrap()"
+---
+import fs from "fs/promises";
+import url from "url";
+import { init as initWasi, WASI } from "@wasmer/wasi";
+
+let module = undefined;
+
+/** Lazily fetch and compile the WebAssembly module */
+async function getModule() {
+    if (!module) {
+        const path = url.fileURLToPath(new URL("./first.wasm", import.meta.url));
+        const wasm = await fs.readFile(path);
+
+        module = WebAssembly.compile(wasm);
+    }
+
+    return await module;
+}
+
+export default async function(options) {
+    await initWasi();
+    const module = options?.module || await getModule();
+    const wasi = options?.wasi || new WASI({}, module);
+    const imports = options?.imports || {};
+
+    await wasi.instantiate(module, imports);
+
+    return { code: wasi.start() };
+}

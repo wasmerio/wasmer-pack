@@ -13,7 +13,7 @@
 Defining our WIT file:
 
 ```rust
-// records.wit
+// records.wai
 
 record person {
     name: string,

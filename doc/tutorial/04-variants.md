@@ -14,12 +14,12 @@ existing languages.
 
 Point out two special variants, `option<T>` and `expected<T, E>`
 - Draw parallels with Rust
-- Show examples of what `wit-bindgen` generates for Python and JavaScript
+- Show examples of what `wai-bindgen` generates for Python and JavaScript
 
 Define the WIT file:
 
 ```rust
-// calculator.wit
+// calculator.wai
 
 variant instruction {
     add(i32),

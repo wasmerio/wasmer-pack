@@ -1,5 +1,0 @@
----
-source: crates/wit-pack/src/py/mod.rs
-expression: "files[\"wit_pack/py.typed\"].utf8_contents().unwrap()"
----
-

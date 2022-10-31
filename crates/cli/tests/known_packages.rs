@@ -46,14 +46,14 @@ codegen_test! {
 }
 
 codegen_test! {
-    name: wit_pack_cli,
+    name: wasmer_pack_cli,
     url: "https://registry-cdn.wapm.dev/packages/wasmer/wit-pack-cli/wit-pack-cli-0.3.0-beta.webc",
     libraries: [],
     commands: ["wit-pack"],
 }
 
 codegen_test! {
-    name: wit_pack,
+    name: wasmer_pack,
     url: "https://registry-cdn.wapm.dev/packages/wasmer/wit-pack/wit-pack-0.3.0-beta.webc",
     libraries: ["wit-pack"],
     commands: [],
@@ -86,7 +86,7 @@ fn assert_contains_libraries_and_commands(
 }
 
 fn metadata(webc_file: &Path) -> serde_json::Value {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_wit-pack"));
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_wasmer-pack"));
     cmd.arg("show")
         .arg("--format=json")
         .arg(webc_file)
@@ -94,14 +94,14 @@ fn metadata(webc_file: &Path) -> serde_json::Value {
         .stderr(Stdio::piped())
         .stdout(Stdio::piped());
 
-    let output = cmd.output().expect("Unable to invoke wit-pack");
+    let output = cmd.output().expect("Unable to invoke wasmer-pack");
     assert_success(&output, &cmd);
 
     serde_json::from_slice(&output.stdout).expect("Unable to deserialize the metadata")
 }
 
 fn generate_bindings(webc_file: &Path, out_dir: &Path) {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_wit-pack"));
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_wasmer-pack"));
     cmd.arg("js")
         .arg(webc_file)
         .arg("--out-dir")
@@ -110,7 +110,7 @@ fn generate_bindings(webc_file: &Path, out_dir: &Path) {
         .stderr(Stdio::piped())
         .stdout(Stdio::piped());
 
-    let output = cmd.output().expect("Unable to invoke wit-pack");
+    let output = cmd.output().expect("Unable to invoke wasmer-pack");
     assert_success(&output, &cmd);
 }
 

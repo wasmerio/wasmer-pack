@@ -1,0 +1,12 @@
+---
+source: crates/wasmer-pack/src/js/mod.rs
+expression: got.utf8_contents().unwrap()
+---
+{
+  "dependencies": {},
+  "main": "src/index.js",
+  "name": "@wasmerio/wasmer-pack",
+  "type": "module",
+  "types": "src/index.d.ts",
+  "version": "0.0.0"
+}

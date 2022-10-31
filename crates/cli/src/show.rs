@@ -2,7 +2,7 @@ use std::{io::Write, path::PathBuf, str::FromStr};
 
 use anyhow::{Context, Error};
 use clap::Parser;
-use wit_pack::{Metadata, Package};
+use wasmer_pack::{Metadata, Package};
 
 #[derive(Debug, Parser)]
 pub struct Show {

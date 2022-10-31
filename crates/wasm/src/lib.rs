@@ -1,37 +1,37 @@
-extern crate wit_pack as upstream;
+extern crate wasmer_pack as upstream;
 
 use std::cell::RefCell;
 
 use anyhow::Error;
 use upstream::SourceFile;
-use wit_bindgen_rust::Handle;
+use wai_bindgen_rust::Handle;
 
-wit_bindgen_rust::export!("wit-pack.exports.wit");
+wai_bindgen_rust::export!("wasmer-pack.exports.wit");
 
-pub struct WitPack;
+pub struct WasmerPack;
 
-impl crate::wit_pack::WitPack for WitPack {
+impl crate::wasmer_pack::WasmerPack for WasmerPack {
     fn generate_javascript(
-        pkg: crate::wit_pack::Package,
-    ) -> Result<Vec<wit_pack::File>, wit_pack::Error> {
+        pkg: crate::wasmer_pack::Package,
+    ) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
         let pkg = pkg.into();
         let js = upstream::generate_javascript(&pkg)?;
         Ok(unwrap_files(js))
     }
 
     fn generate_python(
-        pkg: crate::wit_pack::Package,
-    ) -> Result<Vec<wit_pack::File>, wit_pack::Error> {
+        pkg: crate::wasmer_pack::Package,
+    ) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
         let pkg = pkg.into();
         let py = upstream::generate_python(&pkg)?;
         Ok(unwrap_files(py))
     }
 }
 
-fn unwrap_files(files: upstream::Files) -> Vec<wit_pack::File> {
+fn unwrap_files(files: upstream::Files) -> Vec<wasmer_pack::File> {
     files
         .into_iter()
-        .map(|(path, SourceFile(contents))| wit_pack::File {
+        .map(|(path, SourceFile(contents))| wasmer_pack::File {
             filename: path.display().to_string(),
             contents,
         })
@@ -40,25 +40,25 @@ fn unwrap_files(files: upstream::Files) -> Vec<wit_pack::File> {
 
 pub struct Interface(upstream::Interface);
 
-impl crate::wit_pack::Interface for Interface {
-    fn from_wit(name: String, contents: String) -> Result<Handle<Interface>, wit_pack::Error> {
+impl crate::wasmer_pack::Interface for Interface {
+    fn from_wit(name: String, contents: String) -> Result<Handle<Interface>, wasmer_pack::Error> {
         let exports = upstream::Interface::from_wit(&name, &contents)?;
         Ok(Handle::new(Interface(exports)))
     }
 
-    fn from_path(path: String) -> Result<Handle<Interface>, wit_pack::Error> {
-        let exports = upstream::Interface::from_path(&path)?;
+    fn from_path(path: String) -> Result<Handle<Interface>, wasmer_pack::Error> {
+        let exports = upstream::Interface::from_path(path)?;
         Ok(Handle::new(Interface(exports)))
     }
 }
 
 pub struct Metadata(RefCell<upstream::Metadata>);
 
-impl crate::wit_pack::Metadata for Metadata {
+impl crate::wasmer_pack::Metadata for Metadata {
     fn new(
         package_name: String,
         version: String,
-    ) -> Result<wit_bindgen_rust::Handle<crate::Metadata>, wit_pack::Error> {
+    ) -> Result<wai_bindgen_rust::Handle<crate::Metadata>, wasmer_pack::Error> {
         let meta = upstream::Metadata::new(package_name.parse()?, version);
 
         Ok(Handle::new(Metadata(RefCell::new(meta))))
@@ -69,18 +69,18 @@ impl crate::wit_pack::Metadata for Metadata {
     }
 }
 
-impl From<crate::wit_pack::Abi> for ::wit_pack::Abi {
-    fn from(abi: crate::wit_pack::Abi) -> Self {
+impl From<crate::wasmer_pack::Abi> for ::wasmer_pack::Abi {
+    fn from(abi: crate::wasmer_pack::Abi) -> Self {
         match abi {
-            wit_pack::Abi::None => upstream::Abi::None,
-            wit_pack::Abi::Wasi => upstream::Abi::Wasi,
+            wasmer_pack::Abi::None => upstream::Abi::None,
+            wasmer_pack::Abi::Wasi => upstream::Abi::Wasi,
         }
     }
 }
 
-impl From<Error> for crate::wit_pack::Error {
+impl From<Error> for crate::wasmer_pack::Error {
     fn from(e: Error) -> Self {
-        crate::wit_pack::Error {
+        crate::wasmer_pack::Error {
             message: e.to_string(),
             verbose: format!("{e:?}"),
             causes: e.chain().map(|e| e.to_string()).collect(),
@@ -88,9 +88,9 @@ impl From<Error> for crate::wit_pack::Error {
     }
 }
 
-impl From<crate::wit_pack::Package> for upstream::Package {
-    fn from(pkg: crate::wit_pack::Package) -> Self {
-        let crate::wit_pack::Package {
+impl From<crate::wasmer_pack::Package> for upstream::Package {
+    fn from(pkg: crate::wasmer_pack::Package) -> Self {
+        let crate::wasmer_pack::Package {
             metadata,
             libraries,
             commands,
@@ -104,9 +104,9 @@ impl From<crate::wit_pack::Package> for upstream::Package {
     }
 }
 
-impl From<wit_pack::Library> for upstream::Library {
-    fn from(lib: wit_pack::Library) -> Self {
-        let wit_pack::Library {
+impl From<wasmer_pack::Library> for upstream::Library {
+    fn from(lib: wasmer_pack::Library) -> Self {
+        let wasmer_pack::Library {
             interface,
             abi,
             wasm,
@@ -122,9 +122,9 @@ impl From<wit_pack::Library> for upstream::Library {
     }
 }
 
-impl From<wit_pack::Command> for upstream::Command {
-    fn from(cmd: wit_pack::Command) -> Self {
-        let wit_pack::Command { name, wasm } = cmd;
+impl From<wasmer_pack::Command> for upstream::Command {
+    fn from(cmd: wasmer_pack::Command) -> Self {
+        let wasmer_pack::Command { name, wasm } = cmd;
         upstream::Command { name, wasm }
     }
 }
