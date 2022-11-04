@@ -27,7 +27,13 @@ impl Codegen {
         let metadata = pkg.metadata();
 
         let out_dir = out_dir.unwrap_or_else(|| {
-            PathBuf::from(metadata.package_name.namespace()).join(metadata.package_name.name())
+            // If no output directory was specified, let's save to something
+            // like "namespace/name/"
+            let pkg_name = &metadata.package_name;
+            match pkg_name.namespace().as_str() {
+                Some(ns) => PathBuf::from(ns).join(pkg_name.name()),
+                None => PathBuf::from(pkg_name.name()),
+            }
         });
         files
             .save_to_disk(&out_dir)
