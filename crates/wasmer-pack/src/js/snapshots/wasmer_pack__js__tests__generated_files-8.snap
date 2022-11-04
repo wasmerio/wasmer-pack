@@ -3,7 +3,7 @@ source: crates/wasmer-pack/src/js/mod.rs
 expression: "files[\"package/src/bindings/index.d.ts\"].utf8_contents().unwrap()"
 ---
 // @ts-ignore
-import { WasmerPack } from "./wasmer-pack/wasmer-pack";
+import { WasmerPack as _WasmerPack } from "./wasmer-pack/wasmer-pack";
 
 /**
  * Options used when initializing the bindings.
@@ -19,5 +19,5 @@ export type LoadOptions = {
 };
 
 export default class Bindings {
-    wasmer_pack(options?: Partial<LoadOptions>): Promise<WasmerPack>;
+    wasmer_pack(options?: Partial<LoadOptions>): Promise<_WasmerPack>;
 }

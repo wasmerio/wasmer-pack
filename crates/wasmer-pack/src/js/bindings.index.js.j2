@@ -4,7 +4,7 @@ import * as url from "url";
 import { init as initWasi, WASI } from "@wasmer/wasi";
 {%- endif %}
 {%- for lib in libraries %}
-import { {{lib.class_name}} } from "./{{lib.interface_name}}/{{lib.interface_name}}.js";
+import { {{lib.class_name}} as _{{lib.class_name}} } from "./{{lib.interface_name}}/{{lib.interface_name}}.js";
 {%- endfor %}
 
 export default class Bindings {
@@ -26,7 +26,7 @@ export default class Bindings {
 
     {%- for lib in libraries %}
     async {{lib.ident}}(options) {
-        const wrapper = new {{lib.class_name}}();
+        const wrapper = new _{{lib.class_name}}();
 
         {%- if lib.wasi %}
         await initWasi();

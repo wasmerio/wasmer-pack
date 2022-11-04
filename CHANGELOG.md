@@ -19,6 +19,9 @@ change, where applicable.
 
 - Update `PackageName` validation to accept the `_` namespace and global
   packages ([#74](https://github.com/wasmerio/wasmer-pack/pull/74))
+- Package bindings will no longer have naming conflicts when importing a binding
+  type with the same name as one of types we generate
+  ([#75](https://github.com/wasmerio/wasmer-pack/pull/75))
 
 ### 💥 Breaking Changed 💥
 

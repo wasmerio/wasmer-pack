@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Optional, Any
 
 from wasmer import Store, Module, wasi # type: ignore
-from .wasmer_pack.bindings import WasmerPack
+from .wasmer_pack.bindings import WasmerPack as _WasmerPack
 
 class Bindings:
     """
@@ -34,7 +34,7 @@ class Bindings:
         self,
         imports: Optional[dict[str, Any]] = None,
         module: Optional[Module] = None,
-    ) -> WasmerPack:
+    ) -> _WasmerPack:
         """
         Instantiate the "wasmer_pack" library.
         :param imports: Additional imports to be provided to the WebAssembly
@@ -50,5 +50,5 @@ class Bindings:
         if not imports:
             imports = {}
 
-        return WasmerPack(self._store, imports, module)
+        return _WasmerPack(self._store, imports, module)
     
