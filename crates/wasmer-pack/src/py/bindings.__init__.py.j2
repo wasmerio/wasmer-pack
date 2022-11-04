@@ -8,8 +8,7 @@ from typing import Optional, Any
 from wasmer import Store, Module, wasi # type: ignore
 
 {%- for lib in libraries %}
-from .{{lib.ident}}.bindings import {{lib.class_name}}
-
+from .{{lib.ident}}.bindings import {{lib.class_name}} as _{{lib.class_name}}
 {%- endfor %}
 
 class Bindings:
@@ -38,7 +37,7 @@ class Bindings:
         {%- endif %}
         imports: Optional[dict[str, Any]] = None,
         module: Optional[Module] = None,
-    ) -> {{lib.class_name}}:
+    ) -> _{{lib.class_name}}:
         """
         Instantiate the "{{lib.ident}}" library.
 

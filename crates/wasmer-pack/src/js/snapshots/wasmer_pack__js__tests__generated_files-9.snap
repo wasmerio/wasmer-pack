@@ -4,7 +4,7 @@ expression: "files[\"package/src/bindings/index.js\"].utf8_contents().unwrap()"
 ---
 import fs from "fs/promises";
 import * as url from "url";
-import { WasmerPack } from "./wasmer-pack/wasmer-pack.js";
+import { WasmerPack as _WasmerPack } from "./wasmer-pack/wasmer-pack.js";
 
 export default class Bindings {
     constructor() {
@@ -23,7 +23,7 @@ export default class Bindings {
         return this._cache[filename];
     }
     async wasmer_pack(options) {
-        const wrapper = new WasmerPack();
+        const wrapper = new _WasmerPack();
         const module = await this._getModule("wasmer-pack/wasmer_pack_wasm.wasm");
         const imports = options?.imports || {};
 
