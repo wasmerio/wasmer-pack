@@ -50,5 +50,5 @@ class Bindings:
         if not imports:
             imports = {}
 
-        return WasmerPack(self._store, imports, module)
+        return _WasmerPack(self._store, imports, module)
     

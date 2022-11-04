@@ -67,5 +67,5 @@ class Bindings:
         imports.update(wasi_imports)
         {%- endif %}
 
-        return {{lib.class_name}}(self._store, imports, module)
+        return _{{lib.class_name}}(self._store, imports, module)
     {% endfor %}
