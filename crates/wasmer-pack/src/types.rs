@@ -60,9 +60,21 @@ fn assert_unique_names<'a>(kind: &str, names: impl IntoIterator<Item = &'a str>)
 }
 
 /// The name of a package from WAPM (e.g. `wasmer/wasmer-pack`).
+///
+/// Syntax:
+///
+/// - A `PackageName` consists of a “name” and an optional “namespace or
+///   username”
+/// - The “namespace or username” may be an “identifier” or the “_” namespace
+///   (used for backwards compatibility)
+/// - If a "namespace or username” isn’t provided, it is assumed to be a package
+///   alias and will be resolved to a package by the WAPM backend
+/// - “Identifiers” can only contain alphanumeric ascii characters, `_`, and `-`
+/// - “Identifiers” must also start with an ascii character and be at most 100
+///   characters long
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PackageName {
-    namespace: String,
+    namespace: Namespace,
     name: String,
 }
 
@@ -75,7 +87,7 @@ impl PackageName {
         &self.name
     }
 
-    pub fn namespace(&self) -> &str {
+    pub fn namespace(&self) -> &Namespace {
         &self.namespace
     }
 
@@ -99,7 +111,11 @@ impl PackageName {
     /// - package name length cannot exceed 214
     pub fn javascript_package(&self) -> String {
         let PackageName { namespace, name } = self;
-        format!("@{namespace}/{name}")
+
+        match namespace.as_str() {
+            Some(ns) => format!("@{ns}/{name}").to_lowercase(),
+            None => name.to_string().to_lowercase(),
+        }
     }
 
     /// Get the PyPI equivalent of this [`PackageName`].
@@ -120,11 +136,27 @@ impl FromStr for PackageName {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if !s.contains('/') {
+            let name = parse_identifier(s)
+                .with_context(|| format!("\"{s}\" is not a valid package name"))?;
+            return Ok(PackageName {
+                namespace: Namespace::None,
+                name,
+            });
+        }
+
         let (namespace, name) = s.split_once('/').context(
             "All packages must have a namespace (i.e. the \"wasmer\" in \"wasmer/wasmer-pack\")",
         )?;
-        let namespace = parse_identifier(namespace)
-            .with_context(|| format!("\"{namespace}\" is not a valid namespace"))?;
+
+        let namespace = if namespace == "_" {
+            Namespace::Underscore
+        } else {
+            let ns = parse_identifier(namespace)
+                .with_context(|| format!("\"{namespace}\" is not a valid namespace"))?;
+            Namespace::Some(ns)
+        };
+
         let name = parse_identifier(name)
             .with_context(|| format!("\"{name}\" is not a valid package name"))?;
 
@@ -135,7 +167,37 @@ impl FromStr for PackageName {
 impl Display for PackageName {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let PackageName { namespace, name } = self;
-        write!(f, "{namespace}/{name}")
+
+        if let Some(ns) = namespace.as_str() {
+            write!(f, "{ns}/")?;
+        }
+
+        write!(f, "{name}")?;
+
+        Ok(())
+    }
+}
+
+/// The username or organisation a [`Package`] may be associated with.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Namespace {
+    /// The namespace was present.
+    Some(String),
+    /// The `_` namespace - typically used for global packages or backwards
+    /// compatibility with the time before WAPM had namespaces.
+    Underscore,
+    /// No namespace was provided. Typically this means the backend will resolve
+    /// this package to an alias.
+    None,
+}
+
+impl Namespace {
+    /// Get the namespace as a string, if one is present.
+    pub fn as_str(&self) -> Option<&str> {
+        match self {
+            Namespace::Some(s) => Some(s),
+            Namespace::Underscore | Namespace::None => None,
+        }
     }
 }
 
@@ -326,17 +388,25 @@ mod tests {
     #[test]
     fn sanitize_package_names() {
         let inputs = vec![
-            ("package", false),
+            ("package", true),
             ("namespace/package_name", true),
+            ("_/package_name", true),
             ("name-space/package-name", true),
             ("n9/p21", true),
-            ("name space/name", false),
             ("wasmer/package", true),
-            ("@wasmer/package-name", false),
             (
                 "abcdefghijklmopqrstuvwxyz_ABCDEFGHIJKLMOPQRSTUVWXYZ0123456789/abcdefghijklmopqrstuvwxyz-ABCDEFGHIJKLMOPQRSTUVWXYZ0123456789",
                 true,
             ),
+            ("_wasmer/package", false),
+            ("wasmer/_package", false),
+            ("लाज/तोब", false),
+            ("-wasmer/package", false),
+            ("wasmer/-package", false),
+            ("wasmer/-", false),
+            ("wasmer/597d361e-f431-4960-9b2a-7e78ec0dbfeb", false),
+            ("name space/name", false),
+            ("@wasmer/package-name", false),
             ("", false),
         ];
 
