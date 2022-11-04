@@ -15,7 +15,12 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
-## 💥 Breaking Changed 💥
+### Fixed
+
+- Update `PackageName` validation to accept the `_` namespace and global
+  packages ([#74](https://github.com/wasmerio/wasmer-pack/pull/74))
+
+### 💥 Breaking Changed 💥
 
 - The project has been renamed from `wit-pack` to `wasmer-pack`
 
