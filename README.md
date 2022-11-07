@@ -1,6 +1,6 @@
 # Wasmer Pack
 
-[![Continuous integration](https://github.com/wasmerio/wasmer_pack/workflows/Continuous%20Integration/badge.svg?branch=master)](https://github.com/wasmerio/wasmer_pack/actions)
+[![Continuous integration](https://github.com/wasmerio/wasmer-pack/workflows/Continuous%20Integration/badge.svg?branch=master)](https://github.com/wasmerio/wasmer-pack/actions)
 
 ([API Docs][api-docs] | [User Docs][user-docs])
 
@@ -11,7 +11,7 @@ Import your WebAssembly code just like any other dependency.
 The easiest way to get started by installing with the `wasmer-pack` CLI.
 
 ```console
-$ cargo install --git https://github.com/wasmerio/wasmer_pack
+$ cargo install --git https://github.com/wasmerio/wasmer-pack
 $ wasmer-pack --version
 wasmer-pack-cli 0.2.3
 ```
