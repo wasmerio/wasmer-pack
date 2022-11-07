@@ -18,10 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Give GitHub Actions access to wasmerio/pirita
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.PIRITA_REPO_DEPLOY_KEY }}
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -67,10 +63,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Give GitHub Actions access to wasmerio/pirita
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.PIRITA_REPO_DEPLOY_KEY }}
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -95,10 +87,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Give GitHub Actions access to wasmerio/pirita
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.PIRITA_REPO_DEPLOY_KEY }}
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
