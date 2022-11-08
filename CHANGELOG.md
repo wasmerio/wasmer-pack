@@ -15,6 +15,12 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- Switched from Wasmer's fork of `wit-bindgen` on GitHub to the `wai-bindgen`
+  crate on crates.io
+  ([#71](https://github.com/wasmerio/wasmer-pack/pull/71))
+
 ### Fixed
 
 - Update `PackageName` validation to accept the `_` namespace and global
