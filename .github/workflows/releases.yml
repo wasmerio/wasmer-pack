@@ -40,7 +40,7 @@ jobs:
       - name: Login to wapm.io
         run: |
           wapm config set registry.url https://registry.wapm.io
-          wapm login ${{ secrets.WAPM_IO_TOKEN }}
+          wapm login ${{ secrets.WAPM_PROD_TOKEN }}
       - name: Publish to wapm.io
         run: cargo wapm --workspace
         # Note: wapm.io currently times out even on success
