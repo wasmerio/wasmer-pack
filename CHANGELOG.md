@@ -122,29 +122,29 @@ change, where applicable.
   of blindly assuming everything is a command
   ([#32](https://github.com/wasmerio/wasmer_pack/issues/32))
 
-# [0.2.3] - 2022-09-15
+## [0.2.3] - 2022-09-15
 
-## Fixed
+### Fixed
 
 - When run as a WASI program, the `wit-pack` CLI would unconditionally fail
   to load inputs because `mmap` isn't available ([#24](https://github.com/wasmerio/wasmer_pack/pull/24))
 
-# [0.2.2] - 2022-09-15
+## [0.2.2] - 2022-09-15
 
 (no user-facing changes)
 
-# [0.2.1] - 2022-09-15
+## [0.2.1] - 2022-09-15
 
 (no user-facing changes)
 
-# [0.2.0] - 2022-09-15
+## [0.2.0] - 2022-09-15
 
-## Added
+### Added
 
 - The `wit-pack` crate now allows packages to contain multiple WebAssembly
   modules ([#22](https://github.com/wasmerio/wasmer_pack/pull/22))
 
-## 💥 Breaking Changed 💥
+### 💥 Breaking Changed 💥
 
 - The `wit-pack` CLI now takes a Pirita file as its only input
   ([#20](https://github.com/wasmerio/wasmer_pack/pull/20))
@@ -157,26 +157,26 @@ change, where applicable.
     $ wit-pack js -o=wit-js ./hello-world.webc
     ```
 
-# [0.1.5] - 2022-09-12
+## [0.1.5] - 2022-09-12
 
-## Added
+### Added
 
 - Introduced support for WASI libraries ([#12](https://github.com/wasmerio/wasmer_pack/pull/12))
 
-## Changed
+### Changed
 
 - The `crates/wit-pack-cli` and `crates/wit-pack-wasm` crates are now published
   to WAPM under the `wasmer` namespace instead of `Michael-F-Bryan`
 
-# [0.1.4] - 2022-08-25
+## [0.1.4] - 2022-08-25
 
 (no user-facing changes)
 
-# [0.1.3] - 2022-08-25
+## [0.1.3] - 2022-08-25
 
 (no user-facing changes)
 
-# [0.1.2] - 2022-08-24
+## [0.1.2] - 2022-08-24
 
 
 <!-- next-url -->
