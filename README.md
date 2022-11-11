@@ -16,13 +16,6 @@ $ wasmer-pack --version
 wasmer-pack-cli 0.2.3
 ```
 
-The `wasmer-pack` command accepts input in the form of [Pirita][pirita]
-containers, so let's download a container we can generate bindings for.
-
-```console
-$ curl -O https://registry-cdn.wapm.dev/packages/wasmer/tutorial-01/tutorial-01-0.1.0.webc
-```
-
 Now we've got everything we need to generate Python bindings to the `wasmer-pack`
 package.
 
