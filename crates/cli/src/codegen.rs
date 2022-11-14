@@ -17,7 +17,7 @@ impl Codegen {
     pub fn run(self, language: Language) -> Result<(), Error> {
         let Codegen { out_dir, input } = self;
 
-        let pkg = crate::load_pirita_file(&input)?;
+        let pkg = crate::pirita::load(&input)?;
 
         let files = match language {
             Language::JavaScript => wasmer_pack::generate_javascript(&pkg)?,

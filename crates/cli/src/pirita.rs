@@ -1,15 +1,21 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Error};
+use wapm_targz_to_pirita::TransformManifestFunctions;
 use wasmer_pack::{Command, Interface, Library, Metadata, Module, Package};
 use webc::{DirOrFile, Manifest, ParseOptions, WebC, WebCOwned};
 
-pub(crate) fn load_pirita_file(path: &Path) -> Result<Package, Error> {
-    let options = ParseOptions::default();
+pub(crate) fn load(path: &Path) -> Result<Package, Error> {
+    let raw_webc: Vec<u8> = if path.is_dir() {
+        webc_from_dir(path)?
+    } else if path.extension() == Some("webc".as_ref()) {
+        std::fs::read(path).with_context(|| format!("Unable to read \"{}\"", path.display()))?
+    } else {
+        webc_from_tarball(path)?
+    };
 
-    let raw =
-        std::fs::read(path).with_context(|| format!("Unable to read \"{}\"", path.display()))?;
-    let webc = WebCOwned::parse(raw, &options)
+    let options = ParseOptions::default();
+    let webc = WebCOwned::parse(raw_webc, &options)
         .with_context(|| format!("Unable to parse \"{}\" as a WEBC file", path.display()))?;
 
     let fully_qualified_package_name = webc.get_package_name();
@@ -18,6 +24,41 @@ pub(crate) fn load_pirita_file(path: &Path) -> Result<Package, Error> {
     let commands = commands(&webc, &fully_qualified_package_name)?;
 
     Ok(Package::new(metadata, libraries, commands))
+}
+
+fn webc_from_dir(path: &Path) -> Result<Vec<u8>, Error> {
+    if !path.join("wapm.toml").exists() {
+        anyhow::bail!(
+            "The \"{}\" directory doesn't contain a \"wapm.tom\" file",
+            path.display()
+        );
+    }
+
+    todo!("Read all files into a FileMap and call generate_webc_file()");
+}
+
+fn webc_from_tarball(path: &Path) -> Result<Vec<u8>, Error> {
+    let tarball =
+        std::fs::read(path).with_context(|| format!("Unable to read \"{}\"", path.display()))?;
+    let files =
+        wapm_targz_to_pirita::unpack_tar_gz(tarball).context("Unable to unpack the tarball")?;
+
+    wapm_targz_to_pirita::generate_webc_file(
+        files,
+        &PathBuf::new(),
+        None,
+        &TransformManifestFunctions {
+            get_atoms_wapm_toml: wapm_toml::get_wapm_atom_file_paths,
+            get_dependencies: wapm_toml::get_dependencies,
+            get_package_annotations: wapm_toml::get_package_annotations,
+            get_modules: wapm_toml::get_modules,
+            get_commands: wapm_toml::get_commands,
+            get_manifest_file_names: wapm_toml::get_manifest_file_names,
+            get_metadata_paths: wapm_toml::get_metadata_paths,
+            get_bindings: wapm_toml::get_bindings,
+            get_wapm_manifest_file_name: wapm_toml::get_wapm_manifest_file_name,
+        },
+    )
 }
 
 fn commands(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Vec<Command>, Error> {
