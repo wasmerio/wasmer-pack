@@ -178,11 +178,11 @@ $ python main.py
 The resource is a useful tool for exposing stateful objects that have behaviour,
 and should be familiar to
 
-
 With the addition of resources, we've introduced most of the fundamental
 constructs in WIT.
 
 Exercises for the reader:
+
 - Expand the `calculator` resource to be a fully fledged calculator
 - Try to create your own Regex package using the `regex` crate
 
