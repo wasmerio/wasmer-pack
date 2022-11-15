@@ -16,7 +16,7 @@ $ cd tutorial-02 && rm src/lib.rs
 Just like last time, our first step is to define a WIT file for our interface.
 
 This file has two functions, the first function will create a string that greets
-a person by name (i.e. *"Hello, Michael!"*)...
+a person by name (i.e. _"Hello, Michael!"_)...
 
 ```wai
 // strings-and-lists.wai
@@ -78,7 +78,7 @@ impl strings_and_lists::StringsAndLists for StringsAndLists {
 
 The implementation of these functions is fairly straightforward, so we don't
 need to go into too much detain about it other than pointing out
-`greet_many()`'s use of [*Slice Patterns*][slice-patterns].
+`greet_many()`'s use of [_Slice Patterns_][slice-patterns].
 
 ### A Note on Ownership
 
@@ -185,9 +185,9 @@ Finally, we're able to start writing some code.
 import { bindings } from "@wasmer/tutorial-02";
 
 async function main() {
-    const strings = await bindings.strings_and_lists();
-    console.log(strings.greet("World"));
-    console.log(strings.greetMany(["a", "b", "c"]));
+  const strings = await bindings.strings_and_lists();
+  console.log(strings.greet("World"));
+  console.log(strings.greetMany(["a", "b", "c"]));
 }
 
 main();
