@@ -2,25 +2,23 @@
 source: crates/wasmer-pack/src/js/mod.rs
 expression: "files[\"package/src/commands/second-with-dashes.js\"].utf8_contents().unwrap()"
 ---
-import fs from "fs/promises";
-import url from "url";
-import { init as initWasi, WASI } from "@wasmer/wasi";
+const fs = require("fs/promises");
+const { init: initWasi, WASI } = require("@wasmer/wasi");
 
-let module = undefined;
+let compiledModule = undefined;
 
 /** Lazily fetch and compile the WebAssembly module */
 async function getModule() {
-    if (!module) {
-        const path = url.fileURLToPath(new URL("./second-with-dashes.wasm", import.meta.url));
-        const wasm = await fs.readFile(path);
+    if (!compiledModule) {
+        const wasm = await fs.readFile(`${__dirname}/second-with-dashes.wasm`);
 
-        module = WebAssembly.compile(wasm);
+        compiledModule = WebAssembly.compile(wasm);
     }
 
-    return await module;
+    return await compiledModule;
 }
 
-export default async function(options) {
+async function load(options) {
     await initWasi();
     const module = options?.module || await getModule();
     const wasi = options?.wasi || new WASI({}, module);
@@ -30,3 +28,5 @@ export default async function(options) {
 
     return { code: wasi.start() };
 }
+
+module.exports = { load };

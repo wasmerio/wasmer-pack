@@ -8,7 +8,7 @@ expression: got.utf8_contents().unwrap()
   },
   "main": "src/index.js",
   "name": "@wasmerio/wabt",
-  "type": "module",
+  "type": "commonjs",
   "types": "src/index.d.ts",
   "version": "0.0.0"
 }

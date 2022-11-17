@@ -6,7 +6,7 @@ expression: got.utf8_contents().unwrap()
   "dependencies": {},
   "main": "src/index.js",
   "name": "@wasmerio/wasmer-pack",
-  "type": "module",
+  "type": "commonjs",
   "types": "src/index.d.ts",
   "version": "0.0.0"
 }

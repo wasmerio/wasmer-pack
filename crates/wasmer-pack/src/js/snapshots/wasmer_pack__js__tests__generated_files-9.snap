@@ -2,11 +2,10 @@
 source: crates/wasmer-pack/src/js/mod.rs
 expression: "files[\"package/src/bindings/index.js\"].utf8_contents().unwrap()"
 ---
-import fs from "fs/promises";
-import * as url from "url";
-import { WasmerPack as _WasmerPack } from "./wasmer-pack/wasmer-pack.js";
+const fs = require("fs/promises");
+const { WasmerPack: _WasmerPack } = require("./wasmer-pack/wasmer-pack.js");
 
-export default class Bindings {
+class Bindings {
     constructor() {
         this._cache = {}
     }
@@ -17,8 +16,7 @@ export default class Bindings {
             return this._cache[filename];
         }
 
-        const path = url.fileURLToPath(new URL(filename, import.meta.url));
-        const wasm = await fs.readFile(path);
+        const wasm = await fs.readFile(`${__dirname}/${filename}`);
         this._cache[filename] = await WebAssembly.compile(wasm);
         return this._cache[filename];
     }
@@ -32,3 +30,5 @@ export default class Bindings {
         return wrapper;
     }
 }
+
+module.exports = { Bindings };
