@@ -211,7 +211,7 @@ fn generate_package_json(needs_wasi: bool, metadata: &Metadata) -> SourceFile {
         "version": &metadata.version,
         "main": format!("src/index.js"),
         "types": format!("src/index.d.ts"),
-        "type": "module",
+        "type": "commonjs",
         "dependencies": dependencies,
     });
 

@@ -4,4 +4,4 @@ expression: "files[\"package/src/commands/second-with-dashes.d.ts\"].utf8_conten
 ---
 import type { ExitStatus, RunOptions } from "../index";
 
-export default function(options?: Partial<RunOptions>): Promise<ExitStatus>;
+export function load(options?: Partial<RunOptions>): Promise<ExitStatus>;

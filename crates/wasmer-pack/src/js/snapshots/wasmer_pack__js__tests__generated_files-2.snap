@@ -4,4 +4,4 @@ expression: "files[\"package/src/commands/first.d.ts\"].utf8_contents().unwrap()
 ---
 import type { ExitStatus, RunOptions } from "../index";
 
-export default function(options?: Partial<RunOptions>): Promise<ExitStatus>;
+export function load(options?: Partial<RunOptions>): Promise<ExitStatus>;

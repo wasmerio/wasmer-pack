@@ -15,6 +15,11 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- The `wasmer-pack` tool now generates CommonJS packages instead of ES Modules
+  ([#89](https://github.com/wasmerio/wasmer-pack/pull/89))
+
 ## [0.5.0] - 2022-11-08
 
 ### Changed

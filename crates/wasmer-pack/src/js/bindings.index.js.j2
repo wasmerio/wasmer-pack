@@ -1,13 +1,12 @@
-import fs from "fs/promises";
-import * as url from "url";
+const fs = require("fs/promises");
 {%- if wasi %}
-import { init as initWasi, WASI } from "@wasmer/wasi";
+const { init: initWasi, WASI } = require("@wasmer/wasi");
 {%- endif %}
 {%- for lib in libraries %}
-import { {{lib.class_name}} as _{{lib.class_name}} } from "./{{lib.interface_name}}/{{lib.interface_name}}.js";
+const { {{lib.class_name}}: _{{lib.class_name}} } = require("./{{lib.interface_name}}/{{lib.interface_name}}.js");
 {%- endfor %}
 
-export default class Bindings {
+class Bindings {
     constructor() {
         this._cache = {}
     }
@@ -18,8 +17,7 @@ export default class Bindings {
             return this._cache[filename];
         }
 
-        const path = url.fileURLToPath(new URL(filename, import.meta.url));
-        const wasm = await fs.readFile(path);
+        const wasm = await fs.readFile(`${__dirname}/${filename}`);
         this._cache[filename] = await WebAssembly.compile(wasm);
         return this._cache[filename];
     }
@@ -48,3 +46,5 @@ export default class Bindings {
     }
     {%- endfor %}
 }
+
+module.exports = { Bindings };
