@@ -936,8 +936,9 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "wai-bindgen-gen-core"
-version = "0.2.0"
-source = "git+https://github.com/wasmerio/wai?branch=commonjs#7a24295157ca4db00edca828ad69a9fb1079e4c0"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd16a4dc5fb71faaa3d21530a1d004b7fc88f0bf70cda6f5c4099220254d947b"
 dependencies = [
  "anyhow",
  "wai-parser",
@@ -945,8 +946,9 @@ dependencies = [
 
 [[package]]
 name = "wai-bindgen-gen-js"
-version = "0.2.0"
-source = "git+https://github.com/wasmerio/wai?branch=commonjs#7a24295157ca4db00edca828ad69a9fb1079e4c0"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e5563a334aba04ad6b60b23ec7d823161778a731a670427bc1e4d9015377a66"
 dependencies = [
  "heck 0.3.3",
  "wai-bindgen-gen-core",
@@ -954,9 +956,9 @@ dependencies = [
 
 [[package]]
 name = "wai-bindgen-gen-rust"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7be9a8d43877a97d0eea17f95e79abc3870a590459352126354ee3991248c399"
+checksum = "17625f823712dd6eff5656b4308842b7aeac9eca429f6eea36443d4305cadf7d"
 dependencies = [
  "heck 0.3.3",
  "wai-bindgen-gen-core",
@@ -964,9 +966,9 @@ dependencies = [
 
 [[package]]
 name = "wai-bindgen-gen-rust-wasm"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f33c72295f2fa33594e0efee829377c7c62a9b69d1e25fc402153e1d56ac4402"
+checksum = "757fbff15d11d0578ee879cea209b111bd09f8b39346c7b212a7e7f52585d2f7"
 dependencies = [
  "heck 0.3.3",
  "wai-bindgen-gen-core",
@@ -975,8 +977,9 @@ dependencies = [
 
 [[package]]
 name = "wai-bindgen-gen-wasmer-py"
-version = "0.2.0"
-source = "git+https://github.com/wasmerio/wai?branch=commonjs#7a24295157ca4db00edca828ad69a9fb1079e4c0"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a3ad10afa33b677ed09c94059dacbcfcdffa4fef2b621b5a82fc1eb3a00aa6a2"
 dependencies = [
  "heck 0.3.3",
  "wai-bindgen-gen-core",
@@ -984,9 +987,9 @@ dependencies = [
 
 [[package]]
 name = "wai-bindgen-rust"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93957196c4344f2826023233b8354e0dd522af87f77e620992d6d1d4f52f1210"
+checksum = "90e6c91f681f714599326252f4ae8b9897293110055d25c576fa09ffb01661cd"
 dependencies = [
  "async-trait",
  "bitflags",
@@ -995,9 +998,9 @@ dependencies = [
 
 [[package]]
 name = "wai-bindgen-rust-impl"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab28580d6620f593c0501d88348b489338c2e4f5c0d81769fd1c0bbac3f884ec"
+checksum = "eb36c407339837a5e1fcd9b41641fbe36488fc53ab0664add14d5f7105f6fbbb"
 dependencies = [
  "proc-macro2",
  "syn",
@@ -1007,8 +1010,9 @@ dependencies = [
 
 [[package]]
 name = "wai-parser"
-version = "0.2.0"
-source = "git+https://github.com/wasmerio/wai?branch=commonjs#7a24295157ca4db00edca828ad69a9fb1079e4c0"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a24cfad91494925ba41c6a03bd7d092eb3c3cdbccf4ef680b06831030bd7a69"
 dependencies = [
  "anyhow",
  "id-arena",
