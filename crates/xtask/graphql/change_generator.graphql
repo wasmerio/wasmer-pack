@@ -1,0 +1,8 @@
+mutation ChangeGenerator($id: ID!, $command: String!) {
+  generateBindingsForAllPackages(input: {
+    bindingsGeneratorId: $id,
+    bindingsGeneratorCommand: $command,
+  }) {
+    message
+  }
+}

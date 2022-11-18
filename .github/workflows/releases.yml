@@ -31,18 +31,40 @@ jobs:
         with:
           command: install
           args: cargo-wapm --verbose --debug
+
       - name: Login to wapm.dev
         run: |
           wapm config set registry.url https://registry.wapm.dev
           wapm login ${{ secrets.WAPM_DEV_TOKEN }}
       - name: Publish to wapm.dev
         run: cargo wapm --workspace
+      - name: Update the bindings generator on wapm.dev
+        uses: actions-rs/cargo@v1
+        with:
+          command: xtask
+          args: set-generator wasmer/wasmer-pack-cli
+        env:
+          REGISTRY: https://registry.wapm.dev/graphql
+          TOKEN: ${{ secrets.WAPM_DEV_TOKEN }}
+          VERSION: latest
+          RUST_LOG: info,xtask=debug
+
       - name: Login to wapm.io
         run: |
           wapm config set registry.url https://registry.wapm.io
           wapm login ${{ secrets.WAPM_PROD_TOKEN }}
       - name: Publish to wapm.io
         run: cargo wapm --workspace
-        # Note: wapm.io currently times out even on success
-        # See https://github.com/wasmerio/wapm.io-backend/issues/199 for more
+      - name: Update the bindings generator on wapm.io
+        uses: actions-rs/cargo@v1
+        with:
+          command: xtask
+          args: set-generator wasmer/wasmer-pack-cli
+        env:
+          REGISTRY: https://registry.wapm.io/graphql
+          TOKEN: ${{ secrets.WAPM_PROD_TOKEN }}
+          VERSION: latest
+          COMMAND: wasmer-pack
+          RUST_LOG: info,xtask=debug
+        # The mutation isn't available on prod yet
         continue-on-error: true

@@ -55,21 +55,45 @@ To achieve this,
 
 ## Release Process
 
-The checklist:
+The manual checklist:
 
-- [ ] Create a new PR named something like *"Release v1.2.3"*
+- [ ] Make a PR which mentions the new version in its title (e.g.
+      *"Release v1.2.3"* on a `releases` branch)
 - [ ] Update [`CHANGELOG.md`][changelog] to include any user-facing changes
       since the last release (the `[Unreleased]` link at the bottom is
       particularly helpful here)
-- [ ] Run [`cargo release`][cargo-release] to bump version numbers, tag commits,
-      and push changes to GitHub
-- [ ] Make sure the [*"Releases"*][releases] job has passed, and new binaries
-      were published to WAPM
-- [ ] Merge the *"Release v1.2.3"* PR in
+- [ ] Run [`cargo release`][cargo-release]. This will...
+     - Promote the change log's `[Unreleased]` items to a named version
+     - Bump version numbers in all `Cargo.toml` files
+     - Tag the commit (e.g. `v1.2.3`)
+     - Publish to crates.io, and
+     - Push all commits and tags to GitHub
+- [ ] Wait for the [*"Releases"*][releases] job to pass. This will...
+     - Publish WebAssembly binaries to WAPM
+     - Use `cargo xtask set-generator` to make the WAPM backend generate
+       bindings with the new version of `wasmer-pack-cli`
+- [ ] Merge the *"Release v1.2.3"* PR into the `master` branch!
 
+## Cargo xtask
+
+We use [the `cargo xtask` pattern][xtask] for any project automation more
+complex than 1 or 2 lines of shell. This means we get access to any library
+on crates.io, and having everything in pure Rust means you don't need to
+manually install anything or worry about OS-specific weirdness.
+
+Currently, there are only a couple major tasks,
+
+- `cargo xtask set-generator` calls the mutation for setting a bindings
+  generator
+- `cargo xtask sync-schema` will make sure the `schema.graphql` file is in sync
+  with the WAPM backend, automatically updating the file if necessary
+
+You can run `cargo xtask --help` to find out more details.
 
 [cargo-release]: https://github.com/crate-ci/cargo-release
-[changelog]: https://github.com/wasmerio/wasmer_pack/blob/master/CHANGELOG.md
+[changelog]: https://github.com/wasmerio/wasmer-pack/blob/master/CHANGELOG.md
+[changelog]: https://github.com/wasmerio/wasmer-pack/blob/master/crates/xtask/graphql/change_generator.graphql
 [fast-rust-builds]: https://matklad.github.io/2021/09/04/fast-rust-builds.html
-[releases]: https://github.com/wasmerio/wasmer_pack/actions/workflows/releases.yml
+[releases]: https://github.com/wasmerio/wasmer-pack/actions/workflows/releases.yml
 [workflow-timer]: https://github.com/Michael-F-Bryan/workflow-timer
+[xtask]: https://github.com/matklad/cargo-xtask
