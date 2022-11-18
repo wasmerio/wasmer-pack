@@ -30,11 +30,11 @@ pub struct SetGenerator {
     #[clap(long, env)]
     token: String,
     /// The package version to use.
-    #[clap(long, default_value = "latest")]
+    #[clap(long, default_value = "latest", env)]
     version: String,
     /// The WASI command from the generator package to use (inferred if there is
     /// only one)
-    #[clap(long, short)]
+    #[clap(long, short, env)]
     command: Option<String>,
     /// The name of the package
     package_name: String,
@@ -51,19 +51,19 @@ impl SetGenerator {
             package_name,
         } = self;
 
-        let pkg_info = lookup_commands(&registry, &package_name, &version)
+        let pkg_info = query_package_info(&registry, &package_name, &version)
             .context("Unable to look up information about the command")?;
 
         let command = infer_command(command, &pkg_info.commands)?;
 
-        set_generator(&registry, &token, &pkg_info, &command, dry_run)
+        set_bindings_generator(&registry, &token, &pkg_info, &command, dry_run)
             .context("Unable to set the bindings generator")?;
 
         Ok(())
     }
 }
 
-fn set_generator(
+fn set_bindings_generator(
     registry: &str,
     token: &str,
     pkg: &PackageInfo,
@@ -73,7 +73,7 @@ fn set_generator(
     use self::change_generator::{ResponseData, Variables};
 
     let id = &pkg.id;
-    log::info!("Setting the generator id={id} command={command}");
+    log::info!("Setting the bindings generator id={id} command={command}");
 
     let query = ChangeGenerator::build_query(Variables {
         command: command.to_string(),
@@ -95,7 +95,7 @@ fn set_generator(
     Ok(())
 }
 
-fn lookup_commands(
+fn query_package_info(
     registry: &str,
     package_name: &str,
     version: &str,
@@ -154,7 +154,7 @@ where
 
     let response = update_request(request)
         .send_string(&query)
-        .map_err(|e| translate_graphql_error::<R>(e))
+        .map_err(translate_graphql_error)
         .context("Request failed")?;
 
     let status = response.status();
@@ -174,23 +174,21 @@ where
     response.data.context("The response was empty")
 }
 
-fn translate_graphql_error<R>(e: ureq::Error) -> Error
-where
-    R: DeserializeOwned,
-{
+fn translate_graphql_error(e: ureq::Error) -> Error {
     let msg = e.to_string();
 
     e.into_response()
         .and_then(|response| {
             serde_json::from_reader(response.into_reader())
                 .ok()
-                .and_then(|r: graphql_client::Response<R>| r.errors)
+                .and_then(|r: graphql_client::Response<serde_json::Value>| r.errors)
                 .and_then(|r| coalesce_errors(&r))
                 .map(Error::from)
         })
         .unwrap_or_else(|| Error::msg(msg))
 }
 
+/// Turn 1 or more GraphQL errors into a single [`Error`] we can return.
 fn coalesce_errors(errors: &[graphql_client::Error]) -> Option<Error> {
     match errors {
         [] => None,
@@ -209,6 +207,7 @@ fn coalesce_errors(errors: &[graphql_client::Error]) -> Option<Error> {
     }
 }
 
+/// Use some fuzzy logic to let users
 fn infer_command(
     requested: Option<String>,
     available_commands: &[String],
@@ -220,7 +219,7 @@ fn infer_command(
             if let Some(requested) = requested {
                 anyhow::ensure!(
                     commands.contains(&requested),
-                    "The package doesn't contain a \"{requested}\" command (found {})",
+                    "The package doesn't contain a \"{requested}\" command (available: {})",
                     commands.join(", "),
                 );
                 return Ok(requested);

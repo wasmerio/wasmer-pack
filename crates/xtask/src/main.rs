@@ -8,6 +8,7 @@ use crate::{schema::SyncSchema, set_generator::SetGenerator};
 
 fn main() -> Result<(), Error> {
     if std::env::var_os("RUST_LOG").is_none() {
+        // Use a sane default
         std::env::set_var("RUST_LOG", "warn,xtask=info");
     }
     env_logger::init();
