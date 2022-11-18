@@ -15,6 +15,12 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- Running `wasmer run --mapdir .:. wasmer/wasmer-pack-cli ...` would fail
+  because the `[fs]` table was being used incorrectly in `wapm.toml`
+  ([#91](https://github.com/wasmerio/wasmer-pack/pull/91))
+
 ### Changed
 
 - The `wasmer-pack` tool now generates CommonJS packages instead of ES Modules
