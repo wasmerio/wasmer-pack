@@ -17,7 +17,7 @@ async function getModule() {
 async function load(options) {
     await initWasi();
     const module = options?.module || await getModule();
-    const wasi = options?.wasi || new WASI({}, module);
+    const wasi = new WASI(options?.wasi || {}, module);
     const imports = options?.imports || {};
 
     await wasi.instantiate(module, imports);
