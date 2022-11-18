@@ -2,7 +2,7 @@ use std::path::Path;
 
 use anyhow::{Context, Error};
 use wasmer_pack::{Command, Interface, Library, Metadata, Module, Package};
-use webc::{Manifest, ParseOptions, WebC, WebCOwned};
+use webc::{DirOrFile, Manifest, ParseOptions, WebC, WebCOwned};
 
 pub(crate) fn load_pirita_file(path: &Path) -> Result<Package, Error> {
     let options = ParseOptions::default();
@@ -66,11 +66,13 @@ fn load_library(
         .with_context(|| format!("Expected WIT bindings, but found \"{}\"", bindings.kind))?;
 
     let (volume, exports_path) = bindings.exports.split_once("://").unwrap();
-    let exports = webc
-        .get_volume(fully_qualified_package_name, volume)
-        .with_context(|| format!("The container doesn't have a \"{volume}\" volume"))?
-        .get_file(exports_path)
-        .with_context(|| format!("Unable to find \"{}\"", bindings.exports))?;
+    let exports: &[u8] = get_file_from_volume(
+        webc,
+        fully_qualified_package_name,
+        volume,
+        exports_path,
+        &bindings,
+    )?;
     let exports = std::str::from_utf8(exports).context("The WIT file should be a UTF-8 string")?;
     let interface =
         Interface::from_wit(&bindings.exports, exports).context("Unable to parse the WIT file")?;
@@ -90,6 +92,45 @@ fn load_library(
     };
 
     Ok(Library { module, interface })
+}
+
+fn get_file_from_volume<'webc>(
+    webc: &'webc WebC,
+    fully_qualified_package_name: &str,
+    volume: &str,
+    exports_path: &str,
+    bindings: &webc::WitBindings,
+) -> Result<&'webc [u8], Error> {
+    let volume = webc
+        .get_volume(fully_qualified_package_name, volume)
+        .with_context(|| format!("The container doesn't have a \"{volume}\" volume"))?;
+
+    let result = volume
+        .get_file(exports_path)
+        .with_context(|| format!("Unable to find \"{}\"", bindings.exports));
+
+    if result.is_err() {
+        // Older versions of wapm2pirita would create entries where the filename
+        // section contained an internal `/` (i.e. the root directory has a file
+        // called `path/to/foo.wasm`, rather than a `path/` directory that
+        // contains a `to/` directory which contains a `foo.wasm` file).
+        //
+        // That means calls to volume.get_file() will always fail.
+        // See https://github.com/wasmerio/pirita/issues/30 for more
+
+        let path = DirOrFile::File(exports_path.into());
+        if let Some(entry) = volume
+            .get_all_file_entries()
+            .ok()
+            .and_then(|entries| entries.get(&path).cloned())
+        {
+            let start = entry.offset_start as usize;
+            let end = entry.offset_end as usize;
+            return Ok(&volume.data[start..end]);
+        }
+    }
+
+    result
 }
 
 fn wasm_abi(module: &[u8]) -> wasmer_pack::Abi {
