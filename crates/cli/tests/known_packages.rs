@@ -37,7 +37,6 @@ macro_rules! codegen_test {
 }
 
 codegen_test! {
-    #[ignore]
     name: wabt,
     url: "https://registry-cdn.wapm.dev/packages/wasmer/wabt/wabt-1.0.33.webc",
     libraries: ["bindings"],
