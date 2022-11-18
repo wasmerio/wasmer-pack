@@ -1265,7 +1265,7 @@ checksum = "1c38c045535d93ec4f0b4defec448e4291638ee608530863b1e2ba115d4fff7f"
 
 [[package]]
 name = "wasmer-pack"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -1285,7 +1285,7 @@ dependencies = [
 
 [[package]]
 name = "wasmer-pack-cli"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "clap 3.2.23",
@@ -1301,7 +1301,7 @@ dependencies = [
 
 [[package]]
 name = "wasmer-pack-wasm"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "wai-bindgen-rust",
