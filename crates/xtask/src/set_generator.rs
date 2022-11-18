@@ -17,6 +17,7 @@ struct ChangeGenerator;
 )]
 struct GetPackageVersionQuery;
 
+/// Change the bindings generator used by the WAPM backend.
 #[derive(Debug, clap::Parser)]
 pub struct SetGenerator {
     /// The GraphQL endpoint to send requests to.
