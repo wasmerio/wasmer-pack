@@ -15,6 +15,8 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+## [0.5.1] - 2022-11-18
+
 ### Fixed
 
 - Running `wasmer run --mapdir .:. wasmer/wasmer-pack-cli ...` would fail
@@ -194,7 +196,8 @@ change, where applicable.
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/wasmerio/wasmer_pack/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/wasmerio/wasmer_pack/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/wasmerio/wasmer_pack/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/wasmerio/wasmer_pack/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/wasmerio/wasmer_pack/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/wasmerio/wasmer_pack/compare/v0.4.0...v0.4.1
