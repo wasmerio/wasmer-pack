@@ -233,6 +233,53 @@ If we had x,y for representing points in each of these geometries it would have 
 
 > Records can further have _type identifiers_ such as u8, u16, float32, enum, tuple, etc.
 
+## Writing Some Rust Again
+
+```Rust
+use crate::geometry::{Circle, MultiLine, Point};
+
+wai_bindgen_rust::export!("geometry.wai");
+
+struct Geometry;
+
+impl geometry::Geometry for Geometry {
+    fn distance_between(p1: Point, p2: Point) -> f32 {
+        let Point { x: x1, y: y1 } = p1;
+        let Point { x: x2, y: y2 } = p2;
+
+        ((x2 - x1).powi(2) + (y2 - y1).powi(2)).sqrt()
+    }
+    fn perimeter_of_circle(c: Circle) -> f32 {
+        let Circle { center: _, radius } = c;
+        (2.0 * 22.0 * radius as f32) / 7.0
+    }
+    fn area_of_circle(c: Circle) -> f32 {
+        let Circle { center: _, radius } = c;
+        (22.0 * (radius * radius) as f32) / 7.0
+    }
+    fn multi_line_length(l: MultiLine) -> f32 {
+        if l.points.len() == 0 {
+            return 0.0;
+        }
+        let mut result = 0.0;
+        for i in 1..l.points.len() {
+            let p1 = l.points[i - 1];
+            let p2 = l.points[i];
+            result += Geometry::distance_between(p1, p2);
+        }
+        result
+    }
+}
+```
+
+Here, we defined multiple functions such as:
+
+- `perimeter_of_circle`
+- `area_of_circle`
+- `multi_line_length`
+
+> All of these functions show how the nested records can be used to perform operations.
+
 ## Publishing
 
 Similar to last time, if we want to publish our package to WAPM, we'll need to
