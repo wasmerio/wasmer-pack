@@ -31,7 +31,10 @@ wasmer-pack = { version = "0.5.1", path = "../wasmer-pack" }
 webc = "3.0.1"
 
 [dev-dependencies]
+assert_cmd = "2.0.6"
+flate2 = "1.0.24"
 insta = "1.18.2"
+tar = "0.4.38"
 tempfile = "3"
 ureq = "2.5.0"
 url = "2.3.1"

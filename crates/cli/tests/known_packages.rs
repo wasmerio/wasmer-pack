@@ -1,10 +1,17 @@
+use assert_cmd::Command;
+use flate2::read::GzDecoder;
 use std::{
     collections::BTreeSet,
+    fs::File,
     path::{Path, PathBuf},
-    process::{Command, Stdio},
 };
+use tar::Archive;
+use tempfile::TempDir;
 
 use url::Url;
+
+const WIT_PACK_TARBALL: &str =
+    "https://registry-cdn.wapm.dev/packages/wasmer/wit-pack/wit-pack-0.3.0-beta.tar.gz";
 
 /// Download a WEBC package and make sure it would contain the expected
 /// libraries and commands.
@@ -59,6 +66,29 @@ codegen_test! {
     commands: [],
 }
 
+codegen_test! {
+    name: wasmer_pack_tarball,
+    url: WIT_PACK_TARBALL,
+    libraries: ["wit-pack"],
+    commands: [],
+}
+
+#[test]
+fn load_a_package_from_a_directory() {
+    let temp = TempDir::new().unwrap();
+    let tarball = cached_url(WIT_PACK_TARBALL);
+
+    let reader = File::open(tarball).unwrap();
+    let reader = GzDecoder::new(reader);
+    let mut archive = Archive::new(reader);
+    archive.unpack(temp.path()).unwrap();
+
+    let meta = metadata(temp.path());
+
+    insta::assert_display_snapshot!(format!("{meta:#}"));
+    assert_contains_libraries_and_commands(&meta, &[], &["asdf"]);
+}
+
 fn assert_contains_libraries_and_commands(
     meta: &serde_json::Value,
     libraries: &[&str],
@@ -86,44 +116,26 @@ fn assert_contains_libraries_and_commands(
 }
 
 fn metadata(webc_file: &Path) -> serde_json::Value {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_wasmer-pack"));
-    cmd.arg("show")
+    let result = Command::cargo_bin("wasmer-pack")
+        .unwrap()
+        .arg("show")
         .arg("--format=json")
         .arg(webc_file)
-        .stdin(Stdio::null())
-        .stderr(Stdio::piped())
-        .stdout(Stdio::piped());
-
-    let output = cmd.output().expect("Unable to invoke wasmer-pack");
-    assert_success(&output, &cmd);
-
-    serde_json::from_slice(&output.stdout).expect("Unable to deserialize the metadata")
+        .assert()
+        .success();
+    let output = result.get_output();
+    serde_json::from_slice(&output.stdout).unwrap()
 }
 
 fn generate_bindings(webc_file: &Path, out_dir: &Path) {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_wasmer-pack"));
-    cmd.arg("js")
+    Command::cargo_bin("wasmer-pack")
+        .unwrap()
+        .arg("js")
         .arg(webc_file)
         .arg("--out-dir")
         .arg(out_dir)
-        .stdin(Stdio::null())
-        .stderr(Stdio::piped())
-        .stdout(Stdio::piped());
-
-    let output = cmd.output().expect("Unable to invoke wasmer-pack");
-    assert_success(&output, &cmd);
-}
-
-fn assert_success(output: &std::process::Output, cmd: &Command) {
-    if !output.status.success() {
-        eprintln!("----- STDOUT -----");
-        eprintln!("{}", String::from_utf8_lossy(&output.stdout).trim());
-
-        eprintln!("----- STDERR -----");
-        eprintln!("{}", String::from_utf8_lossy(&output.stderr).trim());
-
-        panic!("Command failed: {cmd:?}");
-    }
+        .assert()
+        .success();
 }
 
 fn cached_url(url: &str) -> PathBuf {
