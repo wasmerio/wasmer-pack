@@ -1,31 +1,16 @@
 # Records
 
-You're just doing great! Now, let us introduce record types, often called "structs" in other languages
+You're just doing great! Now, let us introduce record types, often called "structs" in other languages.
 
 ## Project Setup
 
-```console
-$ cargo new --lib tutorial-03
-$ cd tutorial-03 && rm src/lib.rs
-```
+Let's clear our `./src/lib.rs` and start from scratch
 
 ## Introduction
 
 Record is a combination of data that structurally belongs together such as:
 
-```console
-record pair {
-   x: u32,
-   y: u32,
-}
-record person {
-   name: string,
-   age: u32,
-   has-lego-action-figure: bool,
-}
-```
-
-### Syntax for a record:
+### Syntax for a record
 
 > record-item ::= 'record' id '{' record-fields '}'
 >
@@ -34,13 +19,37 @@ record person {
 >
 > record-field ::= id ':' ty
 
-A _Record_ lets you pass data from the **guest** to the **host**
+A _Record_ lets you pass data between the **guests** and the **hosts**
 
 ## The WIT File
 
 Now let us define our WIT file for our interface.
 
-This file has a record and a function. The record is a structure for a point in a coordinate system _(x,y)_. The function performs the distance calculation between two points as arguements.
+```wai
+//geometry.wai
+
+/// A point coordinate structure with { x, y }
+record point {
+    x: float32,
+    y: float32
+}
+```
+
+> Note: As you use `cargo expand`, the generated file won't contain the `Point` Geometry 🙁
+
+```Rust
+#![feature(prelude_import)]
+#[prelude_import]
+use std::prelude::rust_2021::*;
+#[macro_use]
+extern crate std;
+#[allow(clippy::all)]
+mod geometry {}
+```
+
+> This happens because we didn't use our `Point` geometry in any function/interface so it is not compiled to an underlying struct for `Rust`.
+
+So now let's use our `Point` geometry in a function.
 
 ```wai
 // geometry.wai
@@ -54,6 +63,63 @@ record point {
 /// Calculate distance between two points
 distance-between: func(p1: point, p2: point) -> float32
 ```
+
+> `cargo expand`
+
+```Rust
+#![feature(prelude_import)]
+#[prelude_import]
+use std::prelude::rust_2021::*;
+#[macro_use]
+extern crate std;
+use crate::geometry::{Circle, MultiLine, Point};
+#[allow(clippy::all)]
+mod geometry {
+    /// A point coordinate structure with { x, y }
+    #[repr(C)]
+    pub struct Point {
+        pub x: f32,
+        pub y: f32,
+    }
+    #[automatically_derived]
+    impl ::core::marker::Copy for Point {}
+    #[automatically_derived]
+    impl ::core::clone::Clone for Point {
+        #[inline]
+        fn clone(&self) -> Point {
+            let _: ::core::clone::AssertParamIsClone<f32>;
+            *self
+        }
+    }
+    impl core::fmt::Debug for Point {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            f.debug_struct("Point").field("x", &self.x).field("y", &self.y).finish()
+        }
+    }
+    #[export_name = "distance-between"]
+    unsafe extern "C" fn __wai_bindgen_geometry_distance_between(
+        arg0: f32,
+        arg1: f32,
+        arg2: f32,
+        arg3: f32,
+    ) -> f32 {
+        let result = <super::Geometry as Geometry>::distance_between(
+            Point { x: arg0, y: arg1 },
+            Point { x: arg2, y: arg3 },
+        );
+        wai_bindgen_rust::rt::as_f32(result)
+    }
+    pub trait Geometry {
+        /// Calculate distance between two points
+        fn distance_between(p1: Point, p2: Point) -> f32;
+    }
+}
+```
+
+> Here, we see that our `Point` struct can be seen `distance_between` function is present and is exported as an external variable for use in our Rust file.
+> We also see the Debug trait being implemented for the Point record.
+
+This file has a record and a function. The record is a structure for a point in a coordinate system _(x,y)_. The function performs the distance calculation between two points as arguements.
 
 ## Writing Some Rust
 
@@ -75,7 +141,7 @@ wai_bindgen_rust::export!("geometry.wai");
 ```
 
 Next, we need to define a `geometry` struct and implement the
-`geometry::Geometry` on it.
+`geometry::Geometry` Trait on it.
 
 ```rust
 struct Geometry;
@@ -89,6 +155,12 @@ impl geometry::Geometry for Geometry {
     }
 }
 ```
+
+> Note: This may seem comfusing so I've boiled it down:
+>
+> - `geometry` is the crate
+> - `Geometry` is the struct
+> - `geometry::Geometry` is the Trait that implements the function `distance_between` on `Geometry`
 
 ### Explaination
 
@@ -105,11 +177,21 @@ We then find the distance between the two points using the [distance formula](ht
 
 ### Nested Records
 
-As we saw, the use of simpler identifiers to create a point record. We can further extend this functionality using records or other _type identifiers_ to specify the record arguments to create more complex and _nested records_.
+As we saw, the use of simpler identifiers to create a `Point` record. we can further extend this functionality using records or other valid `WAI types` to specify the record arguments to create more complex and _nested records_.
 
-`😐 Seems Confusing`
+> ⚠️ Recursive types are explicitly forbidden in WAI.
 
-Let's futher explain this with an example:
+```wai
+record tree-node {
+    children: list<tree-node>
+}
+```
+
+> 👆🏼, is not allowed.
+
+Let's futher explain `Nested Records` this with an example:
+
+> WAI file with nested records :
 
 ```wai
 /// A line geometry to represent a line segment with starting and ending point
@@ -124,13 +206,22 @@ record circle {
     radius: float32
 }
 
-/// represention of a shape with n number of points using a list of points
-record shape {
-    points: list<point>
+/// Arbitary shape - represent a shape with n number of points using a list of points
+record multi-line{
+    points: list<point>,
 }
+
+/// Calculate the perimeter of a Circle using 2*π*r.
+perimeter-of-circle: func(c: circle) -> float32
+
+/// Calculate the area of a Circle using π*r*r.
+area-of-circle: func(c: circle) -> float32
+
+/// Calculate the length of the multi-line by iterating over all the points and adding the result
+multi-line-length: func(l: multi-line) -> float32
 ```
 
-Here we used the `point` struct that we created earlier to futher define inherent records that use a currently existing record.
+Here we used the `point` struct that we created earlier to futher define records (i.e. `line-segment`, `circle` and `shape`).
 
 - line segment uses points to define starting and ending of the line
 - Circle uses the point record for defining a center
@@ -140,32 +231,7 @@ If we had x,y for representing points in each of these geometries it would have 
 
 ##### Note📝
 
-Records can further have the following _type identifiers_ for any variable in them:
-
-```wai
-
-'type'
-'resource'
-'func'
-'u8' | 'u16' | 'u32' | 'u64'
-'s8' | 's16' | 's32' | 's64'
-'float32' | 'float64'
-'char'
-'handle'
-'record'
-'enum'
-'flags'
-'variant'
-'union'
-'bool'
-'string'
-'option'
-'list'
-'expected'
-'static'
-'interface'
-'tuple'
-```
+> Records can further have _type identifiers_ such as u8, u16, float32, enum, tuple, etc.
 
 ## Publishing
 
