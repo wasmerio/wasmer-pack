@@ -1492,7 +1492,8 @@ dependencies = [
 [[package]]
 name = "tar"
 version = "0.4.38"
-source = "git+https://github.com/fschutt/tar-rs?rev=04ded46840bb195f6c14ca85c5a6d25b61ca349c#04ded46840bb195f6c14ca85c5a6d25b61ca349c"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b55807c0344e1e6c04d7c965f5289c39a8d94ae23ed5c0b57aabac549f871c6"
 dependencies = [
  "filetime",
  "libc",
@@ -1910,7 +1911,7 @@ dependencies = [
 [[package]]
 name = "wapm-resolve-url"
 version = "0.1.0"
-source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#351fdc2f69a53fa9c82d21e2bd03cc2b0fc87ec9"
+source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#c042580239765e8a68a33169290acb90dd214787"
 dependencies = [
  "anyhow",
  "graphql_client 0.9.0",
@@ -1925,7 +1926,7 @@ dependencies = [
 [[package]]
 name = "wapm-targz-to-pirita"
 version = "0.1.0"
-source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#351fdc2f69a53fa9c82d21e2bd03cc2b0fc87ec9"
+source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#c042580239765e8a68a33169290acb90dd214787"
 dependencies = [
  "anyhow",
  "base64",
@@ -1943,7 +1944,7 @@ dependencies = [
  "validator",
  "wapm-resolve-url",
  "wapm-toml",
- "webc 3.0.1 (git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io)",
+ "webc",
 ]
 
 [[package]]
@@ -2069,7 +2070,7 @@ dependencies = [
  "wapm-targz-to-pirita",
  "wapm-toml",
  "wasmer-pack",
- "webc 3.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "webc",
 ]
 
 [[package]]
@@ -2094,29 +2095,7 @@ dependencies = [
 [[package]]
 name = "webc"
 version = "3.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef87e7b955d5d1feaa8697ae129f1a9ce8859e151574ad3baceae9413b48d2f0"
-dependencies = [
- "anyhow",
- "base64",
- "indexmap",
- "leb128",
- "lexical-sort",
- "memchr",
- "path-clean",
- "rand",
- "serde",
- "serde_cbor",
- "serde_json",
- "sha2",
- "url",
- "walkdir",
-]
-
-[[package]]
-name = "webc"
-version = "3.0.1"
-source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#351fdc2f69a53fa9c82d21e2bd03cc2b0fc87ec9"
+source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#c042580239765e8a68a33169290acb90dd214787"
 dependencies = [
  "anyhow",
  "base64",

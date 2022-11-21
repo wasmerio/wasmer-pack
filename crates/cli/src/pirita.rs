@@ -1,7 +1,10 @@
-use std::path::{Path, PathBuf};
+use std::{
+    collections::BTreeMap,
+    path::{Path, PathBuf},
+};
 
 use anyhow::{Context, Error};
-use wapm_targz_to_pirita::TransformManifestFunctions;
+use wapm_targz_to_pirita::{generate_webc_file, TransformManifestFunctions};
 use wasmer_pack::{Command, Interface, Library, Metadata, Module, Package};
 use webc::{DirOrFile, Manifest, ParseOptions, WebC, WebCOwned};
 
@@ -34,7 +37,44 @@ fn webc_from_dir(path: &Path) -> Result<Vec<u8>, Error> {
         );
     }
 
-    todo!("Read all files into a FileMap and call generate_webc_file()");
+    let mut files = BTreeMap::new();
+
+    fn read_dir(
+        files: &mut BTreeMap<DirOrFile, Vec<u8>>,
+        dir: &Path,
+        base_dir: &Path,
+    ) -> Result<(), Error> {
+        let entries = dir
+            .read_dir()
+            .with_context(|| format!("Unable to read the contents of \"{}\"", dir.display()))?;
+
+        for entry in entries {
+            let path = entry?.path();
+            let relative_path = path
+                .strip_prefix(base_dir)
+                .expect("The filename is always prefixed by base_dir")
+                .to_path_buf();
+
+            if path.is_dir() {
+                read_dir(&mut *files, &path, base_dir)?;
+                files.insert(DirOrFile::Dir(relative_path), Vec::new());
+            } else {
+                let bytes = std::fs::read(&path)
+                    .with_context(|| format!("Unable to read \"{}\"", path.display()))?;
+                files.insert(DirOrFile::File(relative_path), bytes);
+            }
+        }
+
+        Ok(())
+    }
+
+    read_dir(&mut files, path, path).context("Unable to read the directory into memory")?;
+
+    let functions = TransformManifestFunctions::default();
+    let tarball = generate_webc_file(files, &path.to_path_buf(), None, &functions)
+        .context("Unable to convert the files to a tarball")?;
+
+    Ok(tarball)
 }
 
 fn webc_from_tarball(path: &Path) -> Result<Vec<u8>, Error> {
