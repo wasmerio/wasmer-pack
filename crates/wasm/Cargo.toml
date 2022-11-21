@@ -15,7 +15,7 @@ version.workspace = true
 package = "wasmer-pack"
 namespace = "wasmer"
 abi = "none"
-bindings = { wit-exports = "wasmer-pack.exports.wit", wit-bindgen = "0.1.0" }
+bindings = { wai-version = "0.2.0", exports = "wasmer-pack.exports.wai" }
 
 [lib]
 crate-type = ["cdylib", "rlib"]
