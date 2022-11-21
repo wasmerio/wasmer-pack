@@ -1910,7 +1910,7 @@ dependencies = [
 [[package]]
 name = "wapm-resolve-url"
 version = "0.1.0"
-source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#9bdaa1cb4b0c26fb19de4f0e401f8fc6f3201d5a"
+source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#351fdc2f69a53fa9c82d21e2bd03cc2b0fc87ec9"
 dependencies = [
  "anyhow",
  "graphql_client 0.9.0",
@@ -1925,7 +1925,7 @@ dependencies = [
 [[package]]
 name = "wapm-targz-to-pirita"
 version = "0.1.0"
-source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#9bdaa1cb4b0c26fb19de4f0e401f8fc6f3201d5a"
+source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#351fdc2f69a53fa9c82d21e2bd03cc2b0fc87ec9"
 dependencies = [
  "anyhow",
  "base64",
@@ -2116,7 +2116,7 @@ dependencies = [
 [[package]]
 name = "webc"
 version = "3.0.1"
-source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#9bdaa1cb4b0c26fb19de4f0e401f8fc6f3201d5a"
+source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#351fdc2f69a53fa9c82d21e2bd03cc2b0fc87ec9"
 dependencies = [
  "anyhow",
  "base64",

@@ -47,17 +47,7 @@ fn webc_from_tarball(path: &Path) -> Result<Vec<u8>, Error> {
         files,
         &PathBuf::new(),
         None,
-        &TransformManifestFunctions {
-            get_atoms_wapm_toml: wapm_toml::get_wapm_atom_file_paths,
-            get_dependencies: wapm_toml::get_dependencies,
-            get_package_annotations: wapm_toml::get_package_annotations,
-            get_modules: wapm_toml::get_modules,
-            get_commands: wapm_toml::get_commands,
-            get_manifest_file_names: wapm_toml::get_manifest_file_names,
-            get_metadata_paths: wapm_toml::get_metadata_paths,
-            get_bindings: wapm_toml::get_bindings,
-            get_wapm_manifest_file_name: wapm_toml::get_wapm_manifest_file_name,
-        },
+        &TransformManifestFunctions::default(),
     )
 }
 
