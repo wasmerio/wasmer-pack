@@ -38,6 +38,7 @@ jobs:
           wapm login ${{ secrets.WAPM_DEV_TOKEN }}
       - name: Publish to wapm.dev
         run: cargo wapm --workspace
+        continue-on-error: true
       - name: Update the bindings generator on wapm.dev
         uses: actions-rs/cargo@v1
         with:
