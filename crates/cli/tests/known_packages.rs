@@ -86,9 +86,10 @@ fn load_a_package_from_a_directory() {
     let meta = metadata(temp.path());
 
     insta::assert_display_snapshot!(format!("{meta:#}"));
-    assert_contains_libraries_and_commands(&meta, &[], &["asdf"]);
+    assert_contains_libraries_and_commands(&meta, &["wit-pack"], &[]);
 }
 
+#[track_caller]
 fn assert_contains_libraries_and_commands(
     meta: &serde_json::Value,
     libraries: &[&str],

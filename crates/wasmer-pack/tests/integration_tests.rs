@@ -102,8 +102,7 @@ fn wasmer_pack_fixture() -> Package {
     let exports = project_root
         .join("crates")
         .join("wasm")
-        .join("wasmer-pack.exports.wit");
-    assert!(exports.exists());
+        .join("wasmer-pack.exports.wai");
 
     execute(
         "cargo build --target=wasm32-unknown-unknown --package=wasmer-pack-wasm",

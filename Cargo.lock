@@ -1731,7 +1731,19 @@ checksum = "8ce8c33a8d48bd45d624a6e523445fd21ec13d3653cd51f681abf67418f54eb8"
 dependencies = [
  "cfg-if",
  "pin-project-lite",
+ "tracing-attributes",
  "tracing-core",
+]
+
+[[package]]
+name = "tracing-attributes"
+version = "0.1.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4017f8f45139870ca7e672686113917c71c7a6e02d4924eda67186083c03081a"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -2000,7 +2012,7 @@ dependencies = [
 [[package]]
 name = "wapm-resolve-url"
 version = "0.1.0"
-source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#c042580239765e8a68a33169290acb90dd214787"
+source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#ad44b2a7b9b2113b4bc499b2572d633c85633ba4"
 dependencies = [
  "anyhow",
  "graphql_client 0.9.0",
@@ -2015,7 +2027,7 @@ dependencies = [
 [[package]]
 name = "wapm-targz-to-pirita"
 version = "0.1.0"
-source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#c042580239765e8a68a33169290acb90dd214787"
+source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#ad44b2a7b9b2113b4bc499b2572d633c85633ba4"
 dependencies = [
  "anyhow",
  "base64",
@@ -2030,6 +2042,7 @@ dependencies = [
  "sha2",
  "tar",
  "toml",
+ "tracing",
  "validator",
  "wapm-resolve-url",
  "wapm-toml",
@@ -2187,7 +2200,7 @@ dependencies = [
 [[package]]
 name = "webc"
 version = "3.0.1"
-source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#c042580239765e8a68a33169290acb90dd214787"
+source = "git+ssh://git@github.com/wasmerio/pirita.git?branch=wapm-toml-from-crates-io#ad44b2a7b9b2113b4bc499b2572d633c85633ba4"
 dependencies = [
  "anyhow",
  "base64",
