@@ -15,6 +15,8 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+## [0.5.2] - 2022-11-24
+
 ### Added
 
 - Users can now also generate bindings from a directory containing a
@@ -204,7 +206,8 @@ change, where applicable.
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/wasmerio/wasmer-pack/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/wasmerio/wasmer-pack/compare/v0.4.1...v0.4.2
