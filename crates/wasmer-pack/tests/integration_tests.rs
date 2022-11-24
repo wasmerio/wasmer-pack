@@ -102,8 +102,7 @@ fn wasmer_pack_fixture() -> Package {
     let exports = project_root
         .join("crates")
         .join("wasm")
-        .join("wasmer-pack.exports.wit");
-    assert!(exports.exists());
+        .join("wasmer-pack.exports.wai");
 
     execute(
         "cargo build --target=wasm32-unknown-unknown --package=wasmer-pack-wasm",
@@ -118,7 +117,7 @@ fn wasmer_pack_fixture() -> Package {
 
     let metadata = Metadata::new("wasmer/wasmer-pack".parse().unwrap(), "0.0.0");
     let libraries = vec![Library {
-        module: Module::from_path(&wasm, Abi::None).unwrap(),
+        module: Module::from_path(wasm, Abi::None).unwrap(),
         interface: Interface::from_path(exports).unwrap(),
     }];
     let commands = Vec::new();

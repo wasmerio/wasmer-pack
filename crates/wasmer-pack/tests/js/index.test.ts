@@ -20,7 +20,7 @@ describe("wasmer-pack bindings", () => {
             projectRoot,
             "crates",
             "wasm",
-            "wasmer-pack.exports.wit"
+            "wasmer-pack.exports.wai"
         );
         const witFile = await fs.readFile(wit, { encoding: "utf8" });
         const pkg: Package = {

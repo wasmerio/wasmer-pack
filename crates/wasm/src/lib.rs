@@ -6,7 +6,7 @@ use anyhow::Error;
 use upstream::SourceFile;
 use wai_bindgen_rust::Handle;
 
-wai_bindgen_rust::export!("wasmer-pack.exports.wit");
+wai_bindgen_rust::export!("wasmer-pack.exports.wai");
 
 pub struct WasmerPack;
 

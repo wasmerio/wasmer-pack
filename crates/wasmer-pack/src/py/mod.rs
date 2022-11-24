@@ -295,7 +295,7 @@ mod tests {
             "wasmer-pack.exports.wit",
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../wasm/wasmer-pack.exports.wit"
+                "/../wasm/wasmer-pack.exports.wai"
             )),
         )
         .unwrap();

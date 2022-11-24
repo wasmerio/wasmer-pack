@@ -38,7 +38,7 @@ def unwrap(value: Union[Ok[T], Err[Error]]) -> T:
 def load_bindings(wasmer_pack: WasmerPack) -> Package:
     metadata = unwrap(Metadata.new(wasmer_pack, "wasmer/wasmer-pack", "1.2.3"))
 
-    exports_wit = project_root.joinpath("crates", "wasm", "wasmer-pack.exports.wit")
+    exports_wit = project_root.joinpath("crates", "wasm", "wasmer-pack.exports.wai")
     name = str(exports_wit)
     contents = exports_wit.read_text()
     exports = unwrap(Interface.from_wit(wasmer_pack, name, contents))
