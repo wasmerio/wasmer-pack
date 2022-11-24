@@ -15,6 +15,14 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- Users can now also generate bindings from a directory containing a
+  `wapm.toml` file or a `*.tar.gz` downloaded from WAPM
+  ([#80](https://github.com/wasmerio/wasmer-pack/pull/80))
+- Added a tutorial on using records
+  ([#83](https://github.com/wasmerio/wasmer-pack/pull/83))
+
 ## [0.5.1] - 2022-11-18
 
 ### Fixed
@@ -196,18 +204,18 @@ change, where applicable.
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/wasmerio/wasmer_pack/compare/v0.5.1...HEAD
-[0.5.1]: https://github.com/wasmerio/wasmer_pack/compare/v0.5.0...v0.5.1
-[0.5.0]: https://github.com/wasmerio/wasmer_pack/compare/v0.4.2...v0.5.0
-[0.4.2]: https://github.com/wasmerio/wasmer_pack/compare/v0.4.1...v0.4.2
-[0.4.1]: https://github.com/wasmerio/wasmer_pack/compare/v0.4.0...v0.4.1
-[0.4.0]: https://github.com/wasmerio/wasmer_pack/compare/v0.3.0...v0.4.0
-[0.3.0]: https://github.com/wasmerio/wasmer_pack/compare/v0.2.3...v0.3.0
-[0.2.3]: https://github.com/wasmerio/wasmer_pack/compare/v0.2.2...v0.2.3
-[0.2.2]: https://github.com/wasmerio/wasmer_pack/compare/v0.2.1...v0.2.2
-[0.2.1]: https://github.com/wasmerio/wasmer_pack/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/wasmerio/wasmer_pack/compare/v0.1.5...v0.2.0
-[0.1.5]: https://github.com/wasmerio/wasmer_pack/compare/v0.1.4...v0.1.5
-[0.1.4]: https://github.com/wasmerio/wasmer_pack/compare/v0.1.3...v0.1.4
-[0.1.3]: https://github.com/wasmerio/wasmer_pack/compare/v0.1.2...v0.1.3
-[0.1.2]: https://github.com/wasmerio/wasmer_pack/compare/6f1e4ca6f...v0.1.2
+[Unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/wasmerio/wasmer-pack/compare/v0.4.2...v0.5.0
+[0.4.2]: https://github.com/wasmerio/wasmer-pack/compare/v0.4.1...v0.4.2
+[0.4.1]: https://github.com/wasmerio/wasmer-pack/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/wasmerio/wasmer-pack/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/wasmerio/wasmer-pack/compare/v0.2.3...v0.3.0
+[0.2.3]: https://github.com/wasmerio/wasmer-pack/compare/v0.2.2...v0.2.3
+[0.2.2]: https://github.com/wasmerio/wasmer-pack/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/wasmerio/wasmer-pack/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/wasmerio/wasmer-pack/compare/v0.1.5...v0.2.0
+[0.1.5]: https://github.com/wasmerio/wasmer-pack/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/wasmerio/wasmer-pack/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/wasmerio/wasmer-pack/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/wasmerio/wasmer-pack/compare/6f1e4ca6f...v0.1.2
