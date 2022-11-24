@@ -10,6 +10,3 @@ readme = "README.md"
 repository = "https://github.com/wasmerio/wasmer-pack"
 rust-version = "1.64.0"                                       # Required for [workspace.package]
 version = "0.5.1"
-
-[patch.crates-io]
-webc = { git = "ssh://git@github.com/wasmerio/pirita.git", branch = "wapm-toml-from-crates-io" }
