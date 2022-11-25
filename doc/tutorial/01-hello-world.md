@@ -194,7 +194,7 @@ been compiled to WebAssembly.
 $ rustup target add wasm32-unknown-unknown
 ```
 
-We'll go into target triples a bit more when [discussing WASI][wasi], but
+We'll go into target triples a bit more when discussing WASI, but
 `wasm32-unknown-unknown` basically means we want generic 32-bit WebAssembly
 where the OS is unknown (i.e. we know nothing about the underlying OS, so we
 can't use it).
@@ -408,6 +408,5 @@ Some exercises for the reader:
 [query]: https://registry.wapm.dev/graphql?query=%7B%0A%20%20getPackageVersion(name%3A%20%22wasmer%2Ftutorial-01%22)%20%7B%0A%20%20%20%20version%0A%20%20%20%20bindings%20%7B%0A%20%20%20%20%20%20language%0A%20%20%20%20%20%20url%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A
 [venv]: https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment
 [wapm-io-signup]: https://wapm.io/signup
-[wasi]: 07-wasi.md
 [wai-bindgen]: https://github.com/wasmerio/wai
 [wit]: https://github.com/WebAssembly/component-model/blob/5754989219db51ba24def50c3ac28bb9775ead33/design/mvp/WIT.md

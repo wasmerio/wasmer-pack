@@ -7,14 +7,14 @@
   - [Hello, World!](tutorial/01-hello-world.md)
   - [Strings and Lists](tutorial/02-strings-and-lists.md)
   - [Records](tutorial/03-records.md)
-  - [Variants](tutorial/04-variants.md)
+  - [Variants]()
   - [Exposing Resources](tutorial/05-resources.md)
-  - [Importing Host Functions](tutorial/06-host-functions.md)
-  - [Doing IO with WASI](tutorial/07-wasi.md)
-  - [Commands](tutorial/08-commands.md)
-  - [Writing Guests in C](tutorial/09-c-guest.md)
-  - [Tantivy](tutorial/10-tantivy.md)
-  - [Integrating Tantivy with a React App](tutorial/11-react-app.md)
+  - [Importing Host Functions]()
+  - [Doing IO with WASI]()
+  - [Commands]()
+  - [Writing Guests in C]()
+  - [Tantivy]()
+  - [Integrating Tantivy with a React App]()
 
 # For Developers
 
