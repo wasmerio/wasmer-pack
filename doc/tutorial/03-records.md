@@ -307,35 +307,9 @@ $ cargo wapm
 Successfully published package `wasmer/tutorial-03@0.1.0`
 ```
 
+<!--
+TODO(@dynamite-bud):
 - write the installation for typescript/python and conclusion
-- write about the importance of nested records and ask bryan about records with resources in them
+- write about the importance of nested records and ask Michael about records with resources in them
 - Justify how the records are converted to the host e.g: data class in python and typed object in typescript. Show code snippets
-
-## Conclusion
-
-- Reminder of how helpful the guide is
-- Reiterate how important your topic is
-  - Records (structs) are the building blocks for abstraction
-- Call-to-action
-  - Add different fields to the record or play around with the types to see
-    what is generated for the guest/host
-
-## Checklist
-
-### Inspiration 💡
-
-- [ ] Read articles and watch videos that inspire me
-- [ ] Brainstorm the topics that I want to write about in bullet points
-- [ ] Reorder those bullet points to create a line of thought
-
-### Draft ✏
-
-- [ ] Expand those bullet points into sentences/text
-- [ ] Go over the document
-
-### Ready to Publish 🗞
-
-- [ ] Draft 5 titles and pick one
-- [ ] Revise the complete text for typos
-- [ ] Preview the text
-- [ ] Publish or schedule the post
+-->
