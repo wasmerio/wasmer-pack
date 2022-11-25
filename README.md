@@ -11,54 +11,63 @@ Import your WebAssembly code just like any other dependency.
 The easiest way to get started by installing with the `wasmer-pack` CLI.
 
 ```console
-$ cargo install --git https://github.com/wasmerio/wasmer-pack
+$ cargo install wasmer-pack-cli
 $ wasmer-pack --version
-wasmer-pack-cli 0.2.3
+wasmer-pack-cli 0.5.2
 ```
 
-Now we've got everything we need to generate Python bindings to the `wasmer-pack`
-package.
+We also need the WAPM package we are generating bindings for. One option is to
+create your own, but for convenience we'll use the `wasmer/wasmer-pack-cli`
+package from WAPM.
 
 ```console
-$ wasmer-pack python tutorial-01-0.1.0.webc --out-dir py
-$ tree ./py
-./py
+$ curl -sSO https://registry-cdn.wapm.io/packages/wasmer/wasmer-pack-cli/wasmer-pack-cli-0.5.2.tar.gz
+$ tar -xzvf wasmer-pack-cli-0.5.2.tar.gz
+$ tree .
+.
+├── wapm.toml
+├── wasmer-pack-cli-0.5.2.tar.gz
+└── wasmer-pack.wasm
+
+0 directories, 2 files
+```
+
+Now we've got everything we need to generate Python bindings to the
+`wasmer/wasmer-pack-cli` package.
+
+```console
+$ wasmer-pack python . --out-dir ./py
+$ tree py
+py
 ├── MANIFEST.in
 ├── pyproject.toml
-└── tutorial_01
-    ├── bindings
-    │   ├── hello_world
-    │   │   ├── bindings.py
-    │   │   ├── __init__.py
-    │   │   └── tutorial-01.wasm
-    │   └── __init__.py
+└── wasmer_pack_cli
+    ├── commands
+    │   ├── __init__.py
+    │   └── wasmer_pack.wasm
     ├── __init__.py
     └── py.typed
 
-3 directories, 8 files
+2 directories, 6 files
 ```
 
 We can generate JavaScript bindings with a similar command
 
 ```console
-$ wasmer-pack js tutorial-01-0.1.0.webc --out-dir js
+$ wasmer-pack js . --out-dir ./js
 $ tree ./js
 ./js
 └── package
     ├── package.json
     └── src
-        ├── bindings
-        │   ├── hello-world
-        │   │   ├── hello-world.d.ts
-        │   │   ├── hello-world.js
-        │   │   ├── intrinsics.js
-        │   │   └── tutorial-01.wasm
-        │   ├── index.d.ts
-        │   └── index.js
+        ├── commands
+        │   ├── wasmer-pack.d.ts
+        │   ├── wasmer-pack.js
+        │   └── wasmer-pack.wasm
         ├── index.d.ts
         └── index.js
 
-4 directories, 9 files
+3 directories, 6 files
 ```
 
 Check out [the tutorial][tutorial] for more.
@@ -74,5 +83,4 @@ trustworthiness of each of your dependencies, including this one.
 [api-docs]: https://wasmerio.github.io/wasmer-pack/api-docs
 [user-docs]: https://wasmerio.github.io/wasmer-pack/user-docs
 [crev]: https://github.com/crev-dev/cargo-crev
-[pirita]: https://github.com/wasmerio/pirita
 [tutorial]: https://wasmerio.github.io/wasmer-pack/user-docs/tutorial/01-hello-world.html
