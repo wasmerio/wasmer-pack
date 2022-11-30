@@ -21,7 +21,7 @@ async function load(options) {
     const imports = options?.imports || {};
 
     await wasi.instantiate(module, imports);
-    
+
     const code = wasi.start();
     return { code:code, wasi: wasi };
 }

@@ -21,7 +21,8 @@ async function getModule() {
 async function load(options) {
     await initWasi();
     const module = options?.module || await getModule();
-    const wasi = options?.wasi || new WASI({}, module);
+    const wasiConfig = options?.wasi || { args: ["second-with-dashes.wasm"]};
+    const wasi = new WASI(wasiConfig, module);
     const imports = options?.imports || {};
 
     await wasi.instantiate(module, imports);

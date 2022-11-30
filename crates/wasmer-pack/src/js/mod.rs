@@ -106,8 +106,11 @@ fn top_level(libraries: &[Library], commands: &[Command]) -> Result<Files, Error
             }
         })
         .collect::<Vec<_>>();
+    let requires_wasi = commands.len() > 0 || libraries.iter().any(|lib| lib.requires_wasi());
+
     let ctx = minijinja::context! {
        commands,
+       requires_wasi,
        generator => crate::GENERATOR,
        libraries => !libraries.is_empty(),
     };

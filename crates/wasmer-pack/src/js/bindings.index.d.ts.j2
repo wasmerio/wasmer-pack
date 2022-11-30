@@ -1,6 +1,6 @@
 // @ts-ignore
 {%- if wasi %}
-import { Wasi } from "@wasmer/wasi";
+import type { WasiConfig } from "..";
 {%- endif %}
 
 {%- for lib in libraries %}
@@ -25,8 +25,8 @@ export type LoadOptions = {
 * Extended options used when loading a WASI library.
  */
 export type WasiLoadOptions = LoadOptions & {
-    /** An initialized `@wasmer/wasi` object. */
-    wasi: Wasi,
+    /** Configuration used to initialize the WASI environment. */
+    wasi: Partial<WasiConfig>,
 };
 {%- endif %}
 
