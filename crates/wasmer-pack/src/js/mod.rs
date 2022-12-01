@@ -11,7 +11,10 @@ use wai_parser::Interface;
 use crate::{types::Command, Files, Library, Metadata, Package, SourceFile};
 
 /// The version of `@wasmer/wasi` pulled in when using a WASI library.
-const WASMER_WASI_VERSION: &str = "^1.1.2";
+///
+/// Note: we need at least `1.2.2` so we get the fix for
+/// [wasmer-js#310](https://github.com/wasmerio/wasmer-js/pull/310).
+const WASMER_WASI_VERSION: &str = "^1.2.2";
 
 static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
     let mut env = Environment::new();
@@ -106,8 +109,11 @@ fn top_level(libraries: &[Library], commands: &[Command]) -> Result<Files, Error
             }
         })
         .collect::<Vec<_>>();
+    let requires_wasi = commands.len() > 0 || libraries.iter().any(|lib| lib.requires_wasi());
+
     let ctx = minijinja::context! {
        commands,
+       requires_wasi,
        generator => crate::GENERATOR,
        libraries => !libraries.is_empty(),
     };

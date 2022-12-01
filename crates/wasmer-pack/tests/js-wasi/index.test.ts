@@ -1,15 +1,11 @@
-import {bindings, commands} from "wabt";
+import { bindings, commands } from "wabt";
 import {
     WASM_FEATURE_SIMD,
     WASM_FEATURE_BULK_MEMORY,
 } from "wabt/src/bindings/wabt/wabt.js";
-// @ts-ignore
-import { WASI, init as initWasi } from "@wasmer/wasi";
 import {} from "jasmine";
 
 describe("Generated WASI bindings", () => {
-    beforeAll(() => initWasi());
-
     it("can use the wabt library", async () => {
         const wabt = await bindings.wabt();
 
@@ -22,18 +18,11 @@ describe("Generated WASI bindings", () => {
     });
 
     it("can invoke the wat2wasm executable", async () => {
-        const wasi = new WASI({
-            args: ["wat2wasm", "--help"],
-        });
+        const env = { args: ["wat2wasm", "--help"] };
 
-        try {
-            const exitStatus = await commands.wat2wasm({ wasi });
+        const { code, wasi } = await commands.wat2wasm({ wasi: env });
 
-            expect(exitStatus).toEqual({ code: 123 });
-        } catch {
-            // For some reason, non-zero exit codes trigger an exception. Ignore
-            // it...
-        }
+        expect(code).toEqual(0);
 
         const stdout = wasi.getStdoutString();
         expect(stdout).toContain("usage: wat2wasm [options] filename");
