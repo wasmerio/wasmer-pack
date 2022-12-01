@@ -113,8 +113,8 @@ impl PackageName {
         let PackageName { namespace, name } = self;
 
         match namespace.as_str() {
-            Some(ns) => format!("@{ns}/{name}").to_lowercase(),
-            None => name.to_string().to_lowercase(),
+            Some(ns) => format!("@wasmer-package/{ns}__{name}").to_lowercase(),
+            None => format!("@wasmer-package/{name}").to_lowercase(),
         }
     }
 
@@ -128,7 +128,13 @@ impl PackageName {
     /// > should also have short, all-lowercase names, although the use of
     /// > underscores is discouraged.
     pub fn python_name(&self) -> String {
-        self.name.to_snake_case()
+        let PackageName { namespace, name } = self;
+        let name = name.to_snake_case();
+
+        match namespace.as_str() {
+            Some(ns) => format!("wasmer_package__{}__{name}", ns.to_snake_case()),
+            None => format!("wasmer_package__{name}"),
+        }
     }
 }
 
