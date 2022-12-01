@@ -7,7 +7,7 @@ expression: got.utf8_contents().unwrap()
     "@wasmer/wasi": "^1.2.2"
   },
   "main": "src/index.js",
-  "name": "@wasmerio/wabt",
+  "name": "@wasmer-package/wasmerio__wabt",
   "type": "commonjs",
   "types": "src/index.d.ts",
   "version": "0.0.0"

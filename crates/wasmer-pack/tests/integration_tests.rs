@@ -68,7 +68,12 @@ fn use_python_bindings() {
     execute("pipenv install", &python_dir);
     execute("pipenv run pytest", &python_dir);
     execute(
-        format!("pipenv run mypy {}", out_dir.join("wasmer_pack").display()),
+        format!(
+            "pipenv run mypy {}",
+            out_dir
+                .join("wasmer_package__wasmer__wasmer_pack")
+                .display()
+        ),
         &python_dir,
     );
 }
@@ -91,7 +96,10 @@ fn use_wasi_python_bindings() {
     execute("pipenv install", &python_dir);
     execute("pipenv run pytest", &python_dir);
     execute(
-        format!("pipenv run mypy {}", out_dir.join("wabt").display()),
+        format!(
+            "pipenv run mypy {}",
+            out_dir.join("wasmer_package__wasmer__wabt").display()
+        ),
         &python_dir,
     );
 }

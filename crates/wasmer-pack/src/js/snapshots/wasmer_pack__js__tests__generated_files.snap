@@ -7,7 +7,7 @@ expression: "files[\"package/package.json\"].utf8_contents().unwrap()"
     "@wasmer/wasi": "^1.2.2"
   },
   "main": "src/index.js",
-  "name": "@wasmer/wasmer-pack",
+  "name": "@wasmer-package/wasmer__wasmer-pack",
   "type": "commonjs",
   "types": "src/index.d.ts",
   "version": "1.2.3"

@@ -3,7 +3,7 @@ source: crates/wasmer-pack/src/py/mod.rs
 expression: "files[\"pyproject.toml\"].utf8_contents().unwrap()"
 ---
 [project]
-name = "wasmer_pack"
+name = "wasmer_package__wasmer__wasmer_pack"
 version = "1.2.3"
 keywords = []
 dependencies = ["wasmer", "wasmer_compiler_cranelift"]
