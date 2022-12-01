@@ -22,7 +22,7 @@ describe("Generated WASI bindings", () => {
 
         const { code, wasi } = await commands.wat2wasm({ wasi: env });
 
-        expect(code).toEqual(123);
+        expect(code).toEqual(0);
 
         const stdout = wasi.getStdoutString();
         expect(stdout).toContain("usage: wat2wasm [options] filename");

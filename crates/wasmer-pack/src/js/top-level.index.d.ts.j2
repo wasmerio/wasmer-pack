@@ -2,21 +2,13 @@
 
 {%- if requires_wasi %}
 // @ts-ignore TS7016
-import { Wasi } from "@wasmer/wasi";
+import { Wasi, WasiConfig } from "@wasmer/wasi";
 {%- endif %}
 
 {%- if libraries %}
 import Bindings from "./bindings";
 
 export const bindings: Bindings;
-{%- endif %}
-
-{%- if requires_wasi %}
-export type WasiConfig = {
-    args: string[],
-    env: Record<string, string>,
-    fs: any,
-};
 {%- endif %}
 
 {%- if commands %}
