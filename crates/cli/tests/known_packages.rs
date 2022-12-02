@@ -67,6 +67,14 @@ codegen_test! {
 }
 
 codegen_test! {
+    /// The issue we ran into when releasing Wasmer Pack
+    name: wai_tutorial_01,
+    url: "https://storage.googleapis.com/wapm-registry-dev/packages/wai/tutorial-01/tutorial-01-0.1.1-b2773b70-7278-11ed-ace2-e60b9cd6ac8c.webc",
+    libraries: ["hello-world"],
+    commands: [],
+}
+
+codegen_test! {
     name: wasmer_pack_tarball,
     url: WIT_PACK_TARBALL,
     libraries: ["wit-pack"],

@@ -1,0 +1,15 @@
+---
+source: crates/cli/tests/known_packages.rs
+expression: "format!(\"{meta:#}\")"
+---
+{
+  "bindings": [
+    {
+      "interface_name": "hello-world"
+    }
+  ],
+  "commands": [],
+  "description": null,
+  "name": "wai/tutorial-01",
+  "version": "0.1.1"
+}
