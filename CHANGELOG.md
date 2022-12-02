@@ -15,6 +15,11 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- The `wasmer-pack` CLI wasn't extracting the `*.wai` export files correctly
+  ([#105](https://github.com/wasmerio/wasmer-pack/pull/105))
+
 ## [0.5.2] - 2022-11-24
 
 ### Added
