@@ -15,6 +15,8 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+## [0.5.3] - 2022-12-02
+
 ### Fixed
 
 - The `wasmer-pack` CLI wasn't extracting the `*.wai` export files correctly
@@ -211,7 +213,8 @@ change, where applicable.
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.3...HEAD
+[0.5.3]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/wasmerio/wasmer-pack/compare/v0.4.2...v0.5.0
