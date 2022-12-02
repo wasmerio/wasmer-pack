@@ -11,6 +11,7 @@ env:
   RUST_BACKTRACE: 1
   CARGO_NET_GIT_FETCH_WITH_CLI: true
   MDBOOK_VERSION: v0.4.21
+  MSRV: "1.64.0" # Required for [workspace.package]
 
 jobs:
   check:
@@ -18,15 +19,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Give GitHub Actions access to wasmerio/pirita
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.PIRITA_REPO_DEPLOY_KEY }}
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: "1.64.0" # Required for [workspace.package]
+          toolchain: ${{ env.MSRV }}
           override: true
           target: wasm32-unknown-unknown
       - name: Rust Cache
@@ -67,10 +64,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Give GitHub Actions access to wasmerio/pirita
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.PIRITA_REPO_DEPLOY_KEY }}
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -95,10 +88,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Give GitHub Actions access to wasmerio/pirita
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.PIRITA_REPO_DEPLOY_KEY }}
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
