@@ -39,7 +39,7 @@ jobs:
           wapm login ${{ secrets.WAPM_DEV_TOKEN }}
       - name: Publish to wapm.dev
         run: cargo wapm --workspace
-        continue-on-error: ${{ github.event_name == "workflow_dispatch" }}
+        continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
       - name: Update the bindings generator on wapm.dev
         uses: actions-rs/cargo@v1
         with:
@@ -50,7 +50,7 @@ jobs:
           TOKEN: ${{ secrets.WAPM_DEV_TOKEN }}
           VERSION: latest
           RUST_LOG: info,xtask=debug
-        continue-on-error: ${{ github.event_name == "workflow_dispatch" }}
+        continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
 
       - name: Login to wapm.io
         run: |
@@ -58,7 +58,7 @@ jobs:
           wapm login ${{ secrets.WAPM_PROD_TOKEN }}
       - name: Publish to wapm.io
         run: cargo wapm --workspace
-        continue-on-error: ${{ github.event_name == "workflow_dispatch" }}
+        continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
       - name: Update the bindings generator on wapm.io
         uses: actions-rs/cargo@v1
         with:
@@ -70,4 +70,4 @@ jobs:
           VERSION: latest
           COMMAND: wasmer-pack
           RUST_LOG: info,xtask=debug
-        continue-on-error: ${{ github.event_name == "workflow_dispatch" }}
+        continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
