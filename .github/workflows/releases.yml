@@ -9,21 +9,18 @@ on:
 env:
   RUST_BACKTRACE: 1
   CARGO_NET_GIT_FETCH_WITH_CLI: true
+  MSRV: "1.64.0" # Required for [workspace.package]
 
 jobs:
   publish-to-wapm:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Give GitHub Actions access to wasmerio/pirita
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.PIRITA_REPO_DEPLOY_KEY }}
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: "1.64.0" # Required for [workspace.package]
+          toolchain: ${{ env.MSRV }}
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Install WebAssembly targets
