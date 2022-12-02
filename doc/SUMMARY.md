@@ -1,7 +1,7 @@
 # Summary
 
 [Wasmer Pack](README.md)
-[Ecosystem Overview](README.md)
+[Quickstart Guide](./quickstart.md)
 
 # Tutorial
 
