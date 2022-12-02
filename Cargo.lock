@@ -1992,9 +1992,9 @@ dependencies = [
 
 [[package]]
 name = "wapm-targz-to-pirita"
-version = "0.1.2"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98c42cb3c72f94abb375cdf04003f703085d5fd20a75fb4a411491430d9e4f41"
+checksum = "9a9599c6180c771078b0b8e25559ffa606e8a9521f4d0b3c1879839ab78172c6"
 dependencies = [
  "anyhow",
  "base64",
@@ -2013,7 +2013,7 @@ dependencies = [
  "validator",
  "wapm-toml 0.4.0",
  "wasmer-registry",
- "webc",
+ "webc 0.4.0-rc.1",
 ]
 
 [[package]]
@@ -2175,7 +2175,7 @@ dependencies = [
  "wapm-targz-to-pirita",
  "wapm-toml 0.3.3",
  "wasmer-pack",
- "webc",
+ "webc 0.4.0-rc.1",
 ]
 
 [[package]]
@@ -2212,7 +2212,7 @@ dependencies = [
  "toml",
  "url",
  "wapm-toml 0.2.2",
- "webc",
+ "webc 3.0.1",
  "whoami",
 ]
 
@@ -2224,6 +2224,28 @@ checksum = "bcda906d8be16e728fd5adc5b729afad4e444e106ab28cd1c7256e54fa61510f"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "webc"
+version = "0.4.0-rc.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b5b99f00eec08b032b1cb22a8f75277c5e77d5179be2255a27279b32ee4ae04f"
+dependencies = [
+ "anyhow",
+ "base64",
+ "indexmap",
+ "leb128",
+ "lexical-sort",
+ "memchr",
+ "path-clean",
+ "rand 0.8.5",
+ "serde",
+ "serde_cbor",
+ "serde_json",
+ "sha2",
+ "url",
+ "walkdir",
 ]
 
 [[package]]

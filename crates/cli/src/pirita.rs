@@ -133,25 +133,24 @@ fn load_library(
     fully_qualified_package_name: &str,
 ) -> Result<Library, Error> {
     let bindings = bindings
-        .get_wit_bindings()
-        .with_context(|| format!("Expected WIT bindings, but found \"{}\"", bindings.kind))?;
+        .get_bindings()
+        .context("Unable to read the bindings metadata")?;
 
-    let (volume, exports_path) = bindings.exports.split_once("://").unwrap();
-    let exports: &[u8] = get_file_from_volume(
-        webc,
-        fully_qualified_package_name,
-        volume,
-        exports_path,
-        &bindings,
-    )?;
+    let exports_path = bindings
+        .exports()
+        .context("The library doesn't have any exports")?;
+
+    let (volume, exports_path) = exports_path.split_once("://").unwrap();
+    let exports: &[u8] =
+        get_file_from_volume(webc, fully_qualified_package_name, volume, exports_path)?;
     let exports = std::str::from_utf8(exports).context("The WIT file should be a UTF-8 string")?;
     let interface =
-        Interface::from_wit(&bindings.exports, exports).context("Unable to parse the WIT file")?;
-    let exports = bindings.module.trim_start_matches("atoms://");
+        Interface::from_wit(&exports_path, exports).context("Unable to parse the WIT file")?;
+    let exports = bindings.module().trim_start_matches("atoms://");
 
     let module = webc
         .get_atom(fully_qualified_package_name, exports)
-        .with_context(|| format!("Unable to get the \"{}\" atom", bindings.module))?;
+        .with_context(|| format!("Unable to get the \"{}\" atom", bindings.module()))?;
     let module = Module {
         name: Path::new(exports)
             .file_stem()
@@ -168,17 +167,16 @@ fn load_library(
 fn get_file_from_volume<'webc>(
     webc: &'webc WebC,
     fully_qualified_package_name: &str,
-    volume: &str,
+    volume_name: &str,
     exports_path: &str,
-    bindings: &webc::WitBindings,
 ) -> Result<&'webc [u8], Error> {
     let volume = webc
-        .get_volume(fully_qualified_package_name, volume)
-        .with_context(|| format!("The container doesn't have a \"{volume}\" volume"))?;
+        .get_volume(fully_qualified_package_name, volume_name)
+        .with_context(|| format!("The container doesn't have a \"{volume_name}\" volume"))?;
 
-    let result = volume
-        .get_file(exports_path)
-        .with_context(|| format!("Unable to find \"{}\"", bindings.exports));
+    let result = volume.get_file(exports_path).with_context(|| {
+        format!("Unable to find \"{exports_path}\" in the \"{volume_name}\" volume")
+    });
 
     if result.is_err() {
         // Older versions of wapm2pirita would create entries where the filename
