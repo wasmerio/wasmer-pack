@@ -1,5 +1,6 @@
 # Summary
 
+[Wasmer Pack](README.md)
 [Ecosystem Overview](README.md)
 
 # Tutorial
@@ -15,6 +16,10 @@
   - [Writing Guests in C]()
   - [Tantivy]()
   - [Integrating Tantivy with a React App]()
+
+# Advanced
+
+- [The Ecosystem](./explainers/ecosystem.md)
 
 # For Developers
 
