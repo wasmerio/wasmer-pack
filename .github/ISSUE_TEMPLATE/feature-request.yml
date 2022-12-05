@@ -10,12 +10,9 @@ body:
     attributes:
       label: Context and Problem Statement
       description: |
-        Please present a concise description of the problem to be addressed by
-        this feature request.
+        Please present a concise description of the problem to be addressed by this feature request.
 
-        Try to be clear about which parts of the problem are considered to be
-        in-scope and out-of-scope, as well as any additional context that may be
-        relevant.
+        Try to be clear about which parts of the problem are considered to be in-scope and out-of-scope, as well as any additional context that may be relevant.
       placeholder: |
         A concise description of the problem and its context.
     validations:
@@ -30,5 +27,4 @@ body:
         - Tradeoffs made in design decisions
         - Caveats and considerations for the future
 
-        If there are multiple solutions, please present each one separately.
-        Save comparisons for the very end.
+        If there are multiple solutions, please present each one separately. Save comparisons for the very end.

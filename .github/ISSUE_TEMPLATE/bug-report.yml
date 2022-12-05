@@ -11,8 +11,7 @@ body:
     attributes:
       label: What happened?
       description: |
-        Don't forget to include steps to reproduce the issue and any error
-        messages you encountered!
+        Don't forget to include steps to reproduce the issue and any error messages you encountered!
     validations:
       required: true
   - type: input
