@@ -2,7 +2,7 @@
 
 [![Continuous integration](https://github.com/wasmerio/wasmer-pack/workflows/Continuous%20Integration/badge.svg?branch=master)](https://github.com/wasmerio/wasmer-pack/actions)
 
-([API Docs][api-docs] | [User Docs][user-docs])
+([API Docs][api-docs] | [Project Docs][user-docs])
 
 Import your WebAssembly code just like any other dependency.
 

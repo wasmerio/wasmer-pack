@@ -5,17 +5,17 @@
 
 # Tutorial
 
-  - [Hello, World!](tutorial/01-hello-world.md)
-  - [Strings and Lists](tutorial/02-strings-and-lists.md)
-  - [Records](tutorial/03-records.md)
-  - [Variants]()
-  - [Exposing Resources](tutorial/05-resources.md)
-  - [Importing Host Functions]()
-  - [Doing IO with WASI]()
-  - [Commands]()
-  - [Writing Guests in C]()
-  - [Tantivy]()
-  - [Integrating Tantivy with a React App]()
+- [Hello, World!](tutorial/01-hello-world.md)
+- [Strings and Lists](tutorial/02-strings-and-lists.md)
+- [Records](tutorial/03-records.md)
+- [Variants]()
+- [Exposing Resources](tutorial/05-resources.md)
+- [Importing Host Functions]()
+- [Doing IO with WASI]()
+- [Commands]()
+- [Writing Guests in C]()
+- [Tantivy]()
+- [Integrating Tantivy with a React App]()
 
 # Advanced
 
@@ -23,8 +23,8 @@
 
 # For Developers
 
-- [Project Architecture](architecture.md)
 - [Contributing Guide](contributing.md)
+- [Project Architecture](architecture/README.md)
 
 ---
 

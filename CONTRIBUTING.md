@@ -55,7 +55,7 @@ To achieve this,
 
 ## Release Process
 
-The manual checklist:
+This is the process if you ever need to cut a release:
 
 - [ ] Make a PR which mentions the new version in its title (e.g.
       *"Release v1.2.3"* on a `releases` branch)
