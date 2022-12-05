@@ -1,0 +1,34 @@
+name: Feature Request
+description: Suggest an idea for this project
+labels: ["category: feature", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+  - type: textarea
+    attributes:
+      label: Context and Problem Statement
+      description: |
+        Please present a concise description of the problem to be addressed by
+        this feature request.
+
+        Try to be clear about which parts of the problem are considered to be
+        in-scope and out-of-scope, as well as any additional context that may be
+        relevant.
+      placeholder: |
+        A concise description of the problem and its context.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Suggested Solution
+      description: |
+        A concise description of your preferred solution.
+
+        - Details of the technical implementation
+        - Tradeoffs made in design decisions
+        - Caveats and considerations for the future
+
+        If there are multiple solutions, please present each one separately.
+        Save comparisons for the very end.

@@ -1,0 +1,29 @@
+name: Bug Report
+description: File a bug report
+title: "[Bug]: "
+labels: ["category: bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: |
+        Don't forget to include steps to reproduce the issue and any error
+        messages you encountered!
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Wasmer Pack Version
+      description: The output from `wasmer-pack --version`
+  - type: dropdown
+    attributes:
+      label: How were you using wasmer-pack?
+      options:
+        - the command-line
+        - wasmer run
+        - WAPM
+        - rust library
