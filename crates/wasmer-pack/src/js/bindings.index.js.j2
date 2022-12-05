@@ -1,5 +1,5 @@
 const fs = require("fs/promises");
-{%- if wasi %}
+{%- if has_wasi_libraries %}
 const { init: initWasi, WASI } = require("@wasmer/wasi");
 {%- endif %}
 {%- for lib in libraries %}

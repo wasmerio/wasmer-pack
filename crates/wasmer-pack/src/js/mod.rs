@@ -44,19 +44,15 @@ static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
 pub fn generate_javascript(package: &Package) -> Result<Files, Error> {
     let mut files = Files::new();
 
-    let libraries = package.libraries();
-    if !libraries.is_empty() {
-        files.insert_child_directory(
-            Path::new("src").join("bindings"),
-            library_bindings(libraries)?,
-        );
-    }
+    let ctx = Context::for_package(package);
 
-    for cmd in package.commands() {
+    files.insert_child_directory(Path::new("src").join("bindings"), library_bindings(&ctx)?);
+
+    for cmd in &ctx.commands {
         files.insert_child_directory(Path::new("src").join("commands"), command_bindings(cmd)?);
     }
 
-    files.insert_child_directory("src", top_level(package.libraries(), package.commands())?);
+    files.insert_child_directory("src", top_level(&ctx)?);
 
     let package_json = generate_package_json(package.requires_wasi(), package.metadata());
     files.insert("package.json", package_json);
@@ -69,127 +65,61 @@ pub fn generate_javascript(package: &Package) -> Result<Files, Error> {
     Ok(f)
 }
 
-fn command_bindings(cmd: &Command) -> Result<Files, Error> {
-    let mut files = Files::new();
-    let module_filename = Path::new(&cmd.name).with_extension("wasm");
-    let ctx = minijinja::context! {
-        name => cmd.name.replace('-', "_"),
-        module_filename,
-    };
-
-    files.insert(
-        Path::new(&cmd.name).with_extension("js"),
-        TEMPLATES
-            .get_template("command.js")
-            .unwrap()
-            .render(&ctx)?
-            .into(),
-    );
-
-    files.insert(
-        Path::new(&cmd.name).with_extension("d.ts"),
-        TEMPLATES
-            .get_template("command.d.ts")
-            .unwrap()
-            .render(&ctx)?
-            .into(),
-    );
-    files.insert(module_filename, SourceFile::from(&cmd.wasm));
-
-    Ok(files)
-}
-
-fn top_level(libraries: &[Library], commands: &[Command]) -> Result<Files, Error> {
-    let commands = commands
-        .iter()
-        .map(|cmd| {
-            minijinja::context! {
-                module => &cmd.name,
-                ident => cmd.name.replace('-', "_"),
-            }
-        })
-        .collect::<Vec<_>>();
-    let requires_wasi = commands.len() > 0 || libraries.iter().any(|lib| lib.requires_wasi());
-
-    let ctx = minijinja::context! {
-       commands,
-       requires_wasi,
-       generator => crate::GENERATOR,
-       libraries => !libraries.is_empty(),
-    };
-    let mut files = Files::new();
-
-    files.insert(
-        "index.js",
-        TEMPLATES
-            .get_template("top-level.index.js")
-            .unwrap()
-            .render(&ctx)?
-            .into(),
-    );
-
-    files.insert(
-        "index.d.ts",
-        TEMPLATES
-            .get_template("top-level.index.d.ts")
-            .unwrap()
-            .render(&ctx)?
-            .into(),
-    );
-
-    Ok(files)
-}
-
-fn library_bindings(libraries: &[Library]) -> Result<Files, Error> {
-    let mut files = Files::new();
-    let mut lib_ctx = Vec::new();
-
-    for lib in libraries {
-        let module_filename = Path::new(lib.module_filename()).with_extension("wasm");
-        let interface_name = lib.interface_name();
-        let ident = interface_name.to_snake_case();
-        let class_name = lib.class_name();
-
-        let mut bindings = generate_bindings(&lib.interface.0);
-        bindings.insert(&module_filename, lib.module.wasm.clone().into());
-        files.insert_child_directory(interface_name, bindings);
-
-        lib_ctx.push(LibraryContext {
-            ident,
-            interface_name: interface_name.to_string(),
-            class_name,
-            module_filename: module_filename.display().to_string(),
-            wasi: lib.requires_wasi(),
-        });
-    }
-
-    let ctx = LibrariesContext {
-        libraries: lib_ctx,
-        wasi: libraries.iter().any(|lib| lib.requires_wasi()),
-    };
-
-    let index_js = TEMPLATES
-        .get_template("bindings.index.js")
-        .unwrap()
-        .render(&ctx)?;
-    files.insert("index.js", index_js.into());
-
-    let typings_file = TEMPLATES
-        .get_template("bindings.index.d.ts")
-        .unwrap()
-        .render(&ctx)?;
-    files.insert("index.d.ts", typings_file.into());
-
-    Ok(files)
-}
-
-#[derive(Debug, Default, serde::Serialize)]
-struct LibrariesContext {
+#[derive(Debug, serde::Serialize)]
+struct Context {
     libraries: Vec<LibraryContext>,
+    commands: Vec<CommandContext>,
+    generator: String,
     wasi: bool,
+    has_wasi_libraries: bool,
 }
 
-#[derive(Debug, Default, serde::Serialize)]
+impl Context {
+    fn for_package(pkg: &Package) -> Self {
+        let libraries: Vec<_> = pkg
+            .libraries()
+            .iter()
+            .map(LibraryContext::for_lib)
+            .collect();
+        let commands: Vec<_> = pkg.commands().iter().map(CommandContext::for_cmd).collect();
+
+        let has_wasi_libraries = libraries.iter().any(|lib| lib.wasi);
+
+        let wasi = !commands.is_empty() || has_wasi_libraries;
+
+        Context {
+            libraries,
+            commands,
+            generator: crate::GENERATOR.to_string(),
+            wasi,
+            has_wasi_libraries,
+        }
+    }
+}
+
+#[derive(Debug, serde::Serialize)]
+struct CommandContext {
+    name: String,
+    ident: String,
+    module_filename: String,
+    #[serde(skip)]
+    wasm: Vec<u8>,
+}
+
+impl CommandContext {
+    fn for_cmd(cmd: &Command) -> CommandContext {
+        let module_filename = Path::new(&cmd.name).with_extension("wasm");
+
+        CommandContext {
+            name: cmd.name.clone(),
+            ident: cmd.name.replace('-', "_"),
+            module_filename: module_filename.display().to_string(),
+            wasm: cmd.wasm.clone(),
+        }
+    }
+}
+
+#[derive(Debug, serde::Serialize)]
 struct LibraryContext {
     /// The identifier that should be used when accessing this library.
     ident: String,
@@ -200,7 +130,112 @@ struct LibraryContext {
     class_name: String,
     /// The filename of the WebAssembly module (e.g. `wasmer-pack.wasm`).
     module_filename: String,
+    /// Does this library require WASI?
     wasi: bool,
+    #[serde(skip)]
+    interface: Interface,
+    #[serde(skip)]
+    wasm: Vec<u8>,
+}
+
+impl LibraryContext {
+    fn for_lib(lib: &Library) -> Self {
+        let module_filename = Path::new(lib.module_filename()).with_extension("wasm");
+        let interface_name = lib.interface_name();
+        let ident = interface_name.to_snake_case();
+        let class_name = lib.class_name();
+
+        LibraryContext {
+            ident,
+            interface_name: interface_name.to_string(),
+            class_name,
+            module_filename: module_filename.display().to_string(),
+            wasi: lib.requires_wasi(),
+            interface: lib.interface.0.clone(),
+            wasm: lib.module.wasm.clone(),
+        }
+    }
+}
+
+fn command_bindings(cmd: &CommandContext) -> Result<Files, Error> {
+    let mut files = Files::new();
+    let module_filename = Path::new(&cmd.name).with_extension("wasm");
+
+    files.insert(
+        Path::new(&cmd.name).with_extension("js"),
+        TEMPLATES
+            .get_template("command.js")
+            .unwrap()
+            .render(cmd)?
+            .into(),
+    );
+
+    files.insert(
+        Path::new(&cmd.name).with_extension("d.ts"),
+        TEMPLATES
+            .get_template("command.d.ts")
+            .unwrap()
+            .render(cmd)?
+            .into(),
+    );
+    files.insert(module_filename, SourceFile::from(&cmd.wasm));
+
+    Ok(files)
+}
+
+fn top_level(ctx: &Context) -> Result<Files, Error> {
+    let mut files = Files::new();
+
+    files.insert(
+        "index.js",
+        TEMPLATES
+            .get_template("top-level.index.js")
+            .unwrap()
+            .render(ctx)?
+            .into(),
+    );
+
+    files.insert(
+        "index.d.ts",
+        TEMPLATES
+            .get_template("top-level.index.d.ts")
+            .unwrap()
+            .render(ctx)?
+            .into(),
+    );
+
+    Ok(files)
+}
+
+fn library_bindings(ctx: &Context) -> Result<Files, Error> {
+    let mut files = Files::new();
+
+    for LibraryContext {
+        interface_name,
+        module_filename,
+        interface,
+        wasm,
+        ..
+    } in &ctx.libraries
+    {
+        let mut bindings = generate_bindings(interface);
+        bindings.insert(module_filename, wasm.into());
+        files.insert_child_directory(interface_name, bindings);
+    }
+
+    let index_js = TEMPLATES
+        .get_template("bindings.index.js")
+        .unwrap()
+        .render(ctx)?;
+    files.insert("index.js", index_js.into());
+
+    let typings_file = TEMPLATES
+        .get_template("bindings.index.d.ts")
+        .unwrap()
+        .render(ctx)?;
+    files.insert("index.d.ts", typings_file.into());
+
+    Ok(files)
 }
 
 fn generate_package_json(needs_wasi: bool, metadata: &Metadata) -> SourceFile {

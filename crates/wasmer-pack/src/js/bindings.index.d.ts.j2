@@ -1,5 +1,5 @@
 // @ts-ignore
-{%- if wasi %}
+{%- if has_wasi_libraries %}
 import type { WasiConfig } from "@wasmer/wasi";
 {%- endif %}
 
@@ -20,7 +20,7 @@ export type LoadOptions = {
     module: WebAssembly.Module,
 };
 
-{%- if wasi %}
+{%- if has_wasi_libraries %}
 /**
 * Extended options used when loading a WASI library.
  */
