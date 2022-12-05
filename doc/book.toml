@@ -6,12 +6,13 @@ title = "Wasmer Pack User Guide"
 
 [output.html]
 default-theme = "rust"
-edit-url-template = "https://github.com/wasmerio/wasmer-pack/edit/master/{path}"
+edit-url-template = "https://github.com/wasmerio/wasmer-pack/edit/master/doc/{path}"
+git-repository-url = "https://github.com/wasmerio/wasmer-pack"
 no-section-label = true
 
 [output.html.fold]
 enable = true
-level = 1
+level = 0
 
 [output.linkcheck]
 optional = true # Only run the linkchecker when mdbook-linkcheck is installed

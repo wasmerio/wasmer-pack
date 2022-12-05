@@ -17,7 +17,7 @@ The main crates are:
 
 ## Architecture Decision Records
 
-An architectural decision record (ADR) is a document that describes a choice the
+An [architectural decision record][adr] (ADR) is a document that describes a choice the
 team makes about a significant aspect of the software architecture they’re
 planning to build. Each ADR describes the architectural decision, its context,
 and its consequences.
@@ -34,11 +34,9 @@ you are probably doing it wrong!
 ```md
 # (short title of solved problem and solution)
 
-| Metadata     | Value                                                                               |
-| ------------ | ----------------------------------------------------------------------------------- |
-| Status       | *proposed, rejected, accepted, deprecated, superseded by [ADR-123](123-example.md)* |
-| Deciders     |                                                                                     |
-| Last Updated | YYYY-MM-DD                                                                          |
+| Metadata | Value                                                                               |
+| -------- | ----------------------------------------------------------------------------------- |
+| Status   | *proposed, rejected, accepted, deprecated, superseded by [ADR-123](123-example.md)* |
 
 ## Context and Problem Statement
 
@@ -46,15 +44,14 @@ you are probably doing it wrong!
 
 ## Decision Drivers <!-- optional -->
 
-- *(driver 1, e.g., a force, facing concern, …)*
-- … <!-- numbers of drivers can vary -->
+1. *(driver 1, e.g., a force, facing concern, …)*
+2. … <!-- numbers of drivers can vary -->
 
 ## Considered Options
 
-- option 1
-- option 2
-- option 3
-- … <!-- numbers of options can vary -->
+1. option 1
+2. option 2
+4. … <!-- numbers of options can vary -->
 
 ## Decision Outcome
 
@@ -87,6 +84,7 @@ Chosen option: "option 1", because (justification. e.g., only option, which meet
 ```
 </details>
 
+[adr]: https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions
 [cli]: https://github.com/wasmerio/wasmer-pack/tree/master/crates/cli
 [exports]: https://github.com/wasmerio/wasmer-pack/tree/master/crates/wasm/wasmer-pack.exports.wai
 [pirita]: https://github.com/wasmerio/pirita

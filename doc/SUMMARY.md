@@ -25,6 +25,7 @@
 
 - [Contributing Guide](contributing.md)
 - [Project Architecture](architecture/README.md)
+  - [001 Generated Package Naming](architecture/001-generated-package-naming.md)
 
 ---
 
