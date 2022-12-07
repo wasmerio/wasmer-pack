@@ -37,7 +37,9 @@ resource %interface {
 /// A library that we should generate bindings for.
 record library {
     /// The interface exposed by this library.
-    %interface: %interface,
+    exports: %interface,
+    /// Zero or more interfaces the host will provide to the guest.
+    imports: list<%interface>,
     abi: abi,
     /// The WebAssembly bytecode for this library.
     wasm: list<u8>,

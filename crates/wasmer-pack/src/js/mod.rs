@@ -133,7 +133,9 @@ struct LibraryContext {
     /// Does this library require WASI?
     wasi: bool,
     #[serde(skip)]
-    interface: Interface,
+    exports: Interface,
+    #[serde(skip)]
+    imports: Vec<Interface>,
     #[serde(skip)]
     wasm: Vec<u8>,
 }
@@ -151,7 +153,8 @@ impl LibraryContext {
             class_name,
             module_filename: module_filename.display().to_string(),
             wasi: lib.requires_wasi(),
-            interface: lib.interface.0.clone(),
+            exports: lib.exports.0.clone(),
+            imports: lib.imports.iter().map(|i| i.0.clone()).collect(),
             wasm: lib.module.wasm.clone(),
         }
     }
@@ -213,12 +216,13 @@ fn library_bindings(ctx: &Context) -> Result<Files, Error> {
     for LibraryContext {
         interface_name,
         module_filename,
-        interface,
+        exports,
+        imports,
         wasm,
         ..
     } in &ctx.libraries
     {
-        let mut bindings = generate_bindings(interface);
+        let mut bindings = generate_bindings(exports, imports);
         bindings.insert(module_filename, wasm.into());
         files.insert_child_directory(interface_name, bindings);
     }
@@ -259,12 +263,16 @@ fn generate_package_json(needs_wasi: bool, metadata: &Metadata) -> SourceFile {
     format!("{package_json:#}").into()
 }
 
-fn generate_bindings(interface: &Interface) -> Files {
-    let imports: &[wai_parser::Interface] = std::slice::from_ref(interface);
-    let exports = &[];
+fn generate_bindings(guest_exports: &Interface, guest_imports: &[Interface]) -> Files {
+    // Note: imports and exports were reported from the perspective of the
+    // guest, but we're generating bindings from the perspective of the host.
+    // Hence the "host_imports = guest_exports" thing.
+    let host_imports: &[wai_parser::Interface] = std::slice::from_ref(guest_exports);
+    let host_exports = guest_imports;
+
     let mut generated = wai_bindgen_gen_core::Files::default();
 
-    Js::new().generate_all(imports, exports, &mut generated);
+    Js::new().generate_all(host_imports, host_exports, &mut generated);
 
     generated.into()
 }
@@ -297,10 +305,23 @@ mod tests {
         insta::assert_display_snapshot!(got.utf8_contents().unwrap());
     }
 
+    const WASMER_PACK_EXPORTS: &str = include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../wasm/wasmer-pack.exports.wai"
+    ));
+
     #[test]
     fn generated_files() {
         let expected: BTreeSet<&Path> = [
             "package/package.json",
+            "package/src/bindings/index.d.ts",
+            "package/src/bindings/index.js",
+            "package/src/bindings/wasmer-pack/browser.d.ts",
+            "package/src/bindings/wasmer-pack/browser.js",
+            "package/src/bindings/wasmer-pack/intrinsics.js",
+            "package/src/bindings/wasmer-pack/wasmer_pack_wasm.wasm",
+            "package/src/bindings/wasmer-pack/wasmer-pack.d.ts",
+            "package/src/bindings/wasmer-pack/wasmer-pack.js",
             "package/src/commands/first.d.ts",
             "package/src/commands/first.js",
             "package/src/commands/first.wasm",
@@ -309,12 +330,6 @@ mod tests {
             "package/src/commands/second-with-dashes.wasm",
             "package/src/index.d.ts",
             "package/src/index.js",
-            "package/src/bindings/index.d.ts",
-            "package/src/bindings/index.js",
-            "package/src/bindings/wasmer-pack/intrinsics.js",
-            "package/src/bindings/wasmer-pack/wasmer_pack_wasm.wasm",
-            "package/src/bindings/wasmer-pack/wasmer-pack.d.ts",
-            "package/src/bindings/wasmer-pack/wasmer-pack.js",
         ]
         .iter()
         .map(Path::new)
@@ -325,25 +340,20 @@ mod tests {
             abi: crate::Abi::None,
             wasm: Vec::new(),
         };
-        let interface = crate::Interface::from_wit(
-            "wasmer-pack.exports.wit",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../wasm/wasmer-pack.exports.wai"
-            )),
-        )
-        .unwrap();
+        let exports =
+            crate::Interface::from_wit("wasmer-pack.exports.wit", WASMER_PACK_EXPORTS).unwrap();
         let commands = vec![
-            Command {
-                name: "first".to_string(),
-                wasm: Vec::new(),
-            },
-            Command {
-                name: "second-with-dashes".to_string(),
-                wasm: Vec::new(),
-            },
+            Command::new("first", []),
+            Command::new("second-with-dashes", []),
         ];
-        let libraries = vec![Library { module, interface }];
+        let browser =
+            crate::Interface::from_wit("browser.wit", "greet: func(who: string) -> string")
+                .unwrap();
+        let libraries = vec![Library {
+            module,
+            exports,
+            imports: vec![browser],
+        }];
         let pkg = Package::new(metadata, libraries, commands);
 
         let files = generate_javascript(&pkg).unwrap();
@@ -378,6 +388,12 @@ mod tests {
                 .utf8_contents()
                 .unwrap());
             insta::assert_display_snapshot!(files["package/src/bindings/index.js"]
+                .utf8_contents()
+                .unwrap());
+            insta::assert_display_snapshot!(files["package/src/bindings/wasmer-pack/browser.d.ts"]
+                .utf8_contents()
+                .unwrap());
+            insta::assert_display_snapshot!(files["package/src/bindings/wasmer-pack/browser.js"]
                 .utf8_contents()
                 .unwrap());
         });

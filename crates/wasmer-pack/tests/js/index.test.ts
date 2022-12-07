@@ -27,9 +27,10 @@ describe("wasmer-pack bindings", () => {
             metadata: unwrap(Metadata.new(wasmerPack, "wasmer/wasmer-pack", "0.0.0")),
             libraries: [
                 {
-                    interface: unwrap(
+                    exports: unwrap(
                         Interface.fromWit(wasmerPack, path.basename(wit), witFile)
                     ),
+                    imports: [unwrap(Interface.fromWit(wasmerPack, "browser.wit", "hello-world: func()"))],
                     wasm: await loadWasmModule(projectRoot),
                     abi: "none",
                 },
@@ -46,6 +47,8 @@ describe("wasmer-pack bindings", () => {
             "package/package.json",
             "package/src/bindings/index.d.ts",
             "package/src/bindings/index.js",
+            "package/src/bindings/wasmer-pack/browser.d.ts",
+            "package/src/bindings/wasmer-pack/browser.js",
             "package/src/bindings/wasmer-pack/intrinsics.js",
             "package/src/bindings/wasmer-pack/wasmer-pack.d.ts",
             "package/src/bindings/wasmer-pack/wasmer-pack.js",
