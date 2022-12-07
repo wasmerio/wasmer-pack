@@ -4,6 +4,7 @@ expression: "files[\"package/src/bindings/index.d.ts\"].utf8_contents().unwrap()
 ---
 // @ts-ignore
 import { WasmerPack as _WasmerPack } from "./wasmer-pack/wasmer-pack";
+import { Browser as _WasmerPack__Browser } from "./wasmer-pack/browser";
 
 /**
  * Options used when initializing the bindings.
@@ -19,5 +20,5 @@ export type LoadOptions = {
 };
 
 export default class Bindings {
-    wasmer_pack(options?: Partial<LoadOptions>): Promise<_WasmerPack>;
+    wasmer_pack(browser: _WasmerPack__Browser, options?: Partial<LoadOptions>): Promise<_WasmerPack>;
 }

@@ -2014,8 +2014,7 @@ dependencies = [
 [[package]]
 name = "wapm-targz-to-pirita"
 version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a9599c6180c771078b0b8e25559ffa606e8a9521f4d0b3c1879839ab78172c6"
+source = "git+ssh://git@github.com/wasmerio/pirita?rev=497f6db#497f6db4d4c355cf0d2d9fbbcec6b8ccf7f25742"
 dependencies = [
  "anyhow",
  "base64",
@@ -2257,8 +2256,7 @@ dependencies = [
 [[package]]
 name = "webc"
 version = "0.4.0-rc.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5b99f00eec08b032b1cb22a8f75277c5e77d5179be2255a27279b32ee4ae04f"
+source = "git+ssh://git@github.com/wasmerio/pirita?rev=497f6db#497f6db4d4c355cf0d2d9fbbcec6b8ccf7f25742"
 dependencies = [
  "anyhow",
  "base64",
