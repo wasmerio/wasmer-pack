@@ -54,10 +54,17 @@ jobs:
         with:
           command: test
           args: --workspace --verbose --locked
+
+  workflow-times:
+    name: Compile and Test
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
       - name: Time Reporter
         uses: Michael-F-Bryan/workflow-timer@v0.1.5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          jobs: check
 
   lints:
     name: Linting and Formatting
