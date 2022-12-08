@@ -15,6 +15,13 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- Renamed `wasmer-pack`'s sub-commands to be called `javascript` and `python`,
+  with `js` and `py` as aliases (i.e. running `wasmer-pack js` is equivalent to
+  `wasmer-pack javascript`)
+  [#111](https://github.com/wasmerio/wasmer-pack/pull/111)
+
 ## [0.5.3] - 2022-12-02
 
 ### Fixed
