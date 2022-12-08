@@ -1,16 +1,17 @@
 use std::path::PathBuf;
 
-use anyhow::{Context, Error};
+use crate::Error;
+use anyhow::Context;
 use clap::Parser;
 
 #[derive(Debug, Parser)]
 pub struct Codegen {
     /// Where to save the generated bindings.
     #[clap(short, long)]
-    out_dir: Option<PathBuf>,
+    pub out_dir: Option<PathBuf>,
     /// The Pirita file to read.
     #[clap(parse(from_os_str))]
-    input: PathBuf,
+    pub input: PathBuf,
 }
 
 impl Codegen {

@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 tempfile = "3.3.0"
+tracing = "0.1.37"
+wasmer-pack-cli = { version = "0.5.3", path = "../cli" }

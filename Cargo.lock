@@ -2283,6 +2283,8 @@ name = "wasmer-pack-testing"
 version = "0.1.0"
 dependencies = [
  "tempfile",
+ "tracing",
+ "wasmer-pack-cli",
 ]
 
 [[package]]
