@@ -139,20 +139,24 @@ fn load_library(
     let exports_path = bindings
         .exports()
         .context("The library doesn't have any exports")?;
+    let exports = load_interface(webc, exports_path, fully_qualified_package_name)
+        .context("Unable to load the exports interface")?;
 
-    let (volume, exports_path) = exports_path.split_once("://").unwrap();
-    let exports: &[u8] =
-        get_file_from_volume(webc, fully_qualified_package_name, volume, exports_path)?;
-    let exports = std::str::from_utf8(exports).context("The WIT file should be a UTF-8 string")?;
-    let interface =
-        Interface::from_wit(&exports_path, exports).context("Unable to parse the WIT file")?;
-    let exports = bindings.module().trim_start_matches("atoms://");
+    let imports_paths = match &bindings {
+        webc::BindingsExtended::Wit(_) => &[],
+        webc::BindingsExtended::Wai(w) => w.imports.as_slice(),
+    };
+    let imports = imports_paths
+        .iter()
+        .map(|path| load_interface(webc, path, fully_qualified_package_name))
+        .collect::<Result<Vec<_>, Error>>()?;
 
+    let module_name = bindings.module().trim_start_matches("atoms://");
     let module = webc
-        .get_atom(fully_qualified_package_name, exports)
+        .get_atom(fully_qualified_package_name, module_name)
         .with_context(|| format!("Unable to get the \"{}\" atom", bindings.module()))?;
     let module = Module {
-        name: Path::new(exports)
+        name: Path::new(module_name)
             .file_stem()
             .and_then(|s| s.to_str())
             .context("Unable to determine the module's name")?
@@ -161,7 +165,23 @@ fn load_library(
         wasm: module.to_vec(),
     };
 
-    Ok(Library { module, interface })
+    Ok(Library {
+        module,
+        exports,
+        imports,
+    })
+}
+
+fn load_interface(
+    webc: &WebC<'_>,
+    exports_path: &str,
+    fully_qualified_package_name: &str,
+) -> Result<Interface, Error> {
+    let (volume, exports_path) = exports_path.split_once("://").unwrap();
+    let exports: &[u8] =
+        get_file_from_volume(webc, fully_qualified_package_name, volume, exports_path)?;
+    let exports = std::str::from_utf8(exports).context("The WIT file should be a UTF-8 string")?;
+    Interface::from_wit(exports_path, exports).context("Unable to parse the WIT file")
 }
 
 fn get_file_from_volume<'webc>(

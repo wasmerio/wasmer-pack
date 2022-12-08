@@ -107,17 +107,19 @@ impl From<crate::wasmer_pack::Package> for upstream::Package {
 impl From<wasmer_pack::Library> for upstream::Library {
     fn from(lib: wasmer_pack::Library) -> Self {
         let wasmer_pack::Library {
-            interface,
+            exports,
+            imports,
             abi,
             wasm,
         } = lib;
         upstream::Library {
             module: upstream::Module {
-                name: format!("{}.wasm", interface.0.name()),
+                name: format!("{}.wasm", exports.0.name()),
                 abi: abi.into(),
                 wasm,
             },
-            interface: interface.0.clone(),
+            exports: exports.0.clone(),
+            imports: imports.iter().map(|i| i.0.clone()).collect(),
         }
     }
 }

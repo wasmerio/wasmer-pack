@@ -1,0 +1,19 @@
+[package]
+name = "hello-wasi"
+description = "The simplest possible WASI WebAssembly library."
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+wai-bindgen-rust = "0.2.1"
+
+[package.metadata.wapm]
+namespace = "Michael-F-Bryan"
+abi = "wasi"
+bindings = { wai-version = "0.2.0", exports = "hello-wasi.exports.wai" }
+
+[lib]
+crate-type = ["cdylib"]

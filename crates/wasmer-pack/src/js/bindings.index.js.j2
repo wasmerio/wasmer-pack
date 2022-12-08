@@ -1,9 +1,15 @@
 const fs = require("fs/promises");
-{%- if wasi %}
+{%- if has_wasi_libraries %}
 const { init: initWasi, WASI } = require("@wasmer/wasi");
 {%- endif %}
+
 {%- for lib in libraries %}
-const { {{lib.class_name}}: _{{lib.class_name}} } = require("./{{lib.interface_name}}/{{lib.interface_name}}.js");
+const { {{lib.exports.class_name}}: _{{lib.exports.class_name}} } = require("./{{lib.exports.interface_name}}/{{lib.exports.interface_name}}.js");
+
+{%- for import in lib.imports %}
+const { add{{import.class_name}}ToImports: _{{lib.exports.class_name}}__add{{import.class_name}}ToImports } = require("./{{lib.exports.interface_name}}/{{import.interface_name}}.js");
+{%- endfor %}
+
 {%- endfor %}
 
 class Bindings {
@@ -23,18 +29,25 @@ class Bindings {
     }
 
     {%- for lib in libraries %}
-    async {{lib.ident}}(options) {
-        const wrapper = new _{{lib.class_name}}();
+    async {{lib.ident}}({%- for import in lib.imports %}{{import.interface_name}}, {% endfor -%}options) {
+        const wrapper = new _{{lib.exports.class_name}}();
 
         {%- if lib.wasi %}
         await initWasi();
-        const module = options?.module || await this._getModule("{{lib.interface_name}}/{{lib.module_filename}}");
+        const module = options?.module || await this._getModule("{{lib.exports.interface_name}}/{{lib.module_filename}}");
         const wasi = options?.wasi || new WASI({}, module);
         const imports = Object.assign({}, options?.imports, wasi.getImports(module));
         {%- else %}
-        const module = await this._getModule("{{lib.interface_name}}/{{lib.module_filename}}");
+        const module = await this._getModule("{{lib.exports.interface_name}}/{{lib.module_filename}}");
         const imports = options?.imports || {};
         {%- endif %}
+
+        {%- for import in lib.imports %}
+        _{{lib.exports.class_name}}__add{{import.class_name}}ToImports(
+            {{import.interface_name}},
+            name => wrapper.exports[name],
+        );
+        {%- endfor %}
 
         await wrapper.instantiate(module, imports);
 

@@ -1,10 +1,13 @@
 // @ts-ignore
-{%- if wasi %}
+{%- if has_wasi_libraries %}
 import type { WasiConfig } from "@wasmer/wasi";
 {%- endif %}
 
 {%- for lib in libraries %}
-import { {{lib.class_name}} as _{{lib.class_name}} } from "./{{lib.interface_name}}/{{lib.interface_name}}";
+import { {{lib.exports.class_name}} as _{{lib.exports.class_name}} } from "./{{lib.exports.interface_name}}/{{lib.exports.interface_name}}";
+{%- for import in lib.imports %}
+import { {{import.class_name}} as _{{lib.exports.class_name}}__{{import.class_name}} } from "./{{lib.exports.interface_name}}/{{import.interface_name}}";
+{%- endfor %}
 {%- endfor %}
 
 /**
@@ -20,7 +23,7 @@ export type LoadOptions = {
     module: WebAssembly.Module,
 };
 
-{%- if wasi %}
+{%- if has_wasi_libraries %}
 /**
 * Extended options used when loading a WASI library.
  */
@@ -33,9 +36,13 @@ export type WasiLoadOptions = LoadOptions & {
 export default class Bindings {
     {%- for lib in libraries %}
     {%- if lib.wasi %}
-    {{lib.ident}}(options?: Partial<WasiLoadOptions>): Promise<_{{lib.class_name}}>;
+    {{lib.ident}}(
+        {%- for import in lib.imports %}{{import.interface_name}}: _{{lib.exports.class_name}}__{{import.class_name}},  {% endfor -%}
+        options?: Partial<WasiLoadOptions>): Promise<_{{lib.exports.class_name}}>;
     {%- else %}
-    {{lib.ident}}(options?: Partial<LoadOptions>): Promise<_{{lib.class_name}}>;
+    {{lib.ident}}(
+        {%- for import in lib.imports %}{{import.interface_name}}: _{{lib.exports.class_name}}__{{import.class_name}}, {% endfor -%}
+        options?: Partial<LoadOptions>): Promise<_{{lib.exports.class_name}}>;
     {%- endif %}
     {%- endfor %}
 }

@@ -1,0 +1,21 @@
+---
+source: crates/wasmer-pack/src/js/mod.rs
+expression: "files[\"package/src/bindings/wasmer-pack/browser.js\"].utf8_contents().unwrap()"
+---
+const { data_view, UTF8_DECODER, utf8_encode, utf8_encoded_len } = require('./intrinsics.js');
+function addBrowserToImports(imports, obj, get_export) {
+  if (!("browser" in imports)) imports["browser"] = {};
+  imports["browser"]["greet"] = function(arg0, arg1, arg2) {
+    const memory = get_export("memory");
+    const realloc = get_export("canonical_abi_realloc");
+    const ptr0 = arg0;
+    const len0 = arg1;
+    const ret = obj.greet(UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr0, len0)));
+    const ptr1 = utf8_encode(ret, realloc, memory);
+    const len1 = utf8_encoded_len();
+    data_view(memory).setInt32(arg2 + 4, len1, true);
+    data_view(memory).setInt32(arg2 + 0, ptr1, true);
+  };
+}
+module.exports = { addBrowserToImports };
+

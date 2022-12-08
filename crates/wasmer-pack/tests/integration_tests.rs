@@ -118,7 +118,8 @@ fn wasmer_pack_fixture() -> Package {
     let metadata = Metadata::new("wasmer/wasmer-pack".parse().unwrap(), "0.0.0");
     let libraries = vec![Library {
         module: Module::from_path(wasm, Abi::None).unwrap(),
-        interface: Interface::from_path(exports).unwrap(),
+        exports: Interface::from_path(exports).unwrap(),
+        imports: vec![],
     }];
     let commands = Vec::new();
 
@@ -138,13 +139,15 @@ fn wabt_fixture() -> Package {
     let libraries = vec![
         Library {
             module: Module::from_path(wabt_dir.join("libwabt.wasm"), Abi::Wasi).unwrap(),
-            interface: Interface::from_path(wabt_dir.join("wabt.exports.wit")).unwrap(),
+            exports: Interface::from_path(wabt_dir.join("wabt.exports.wit")).unwrap(),
+            imports: vec![],
         },
         // Note: we have a duplicate copy of libwabt to check support for
         // multiple libraries
         Library {
             module: Module::from_path(wabt_dir.join("libwabt.wasm"), Abi::Wasi).unwrap(),
-            interface: Interface::from_path(wabt_dir.join("wabt2.exports.wit")).unwrap(),
+            exports: Interface::from_path(wabt_dir.join("wabt2.exports.wit")).unwrap(),
+            imports: vec![],
         },
     ];
     let mut commands = Vec::new();

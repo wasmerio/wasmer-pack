@@ -116,7 +116,7 @@ fn library_bindings(libraries: &[Library]) -> Result<Files, Error> {
         let ident = lib.interface_name().to_snake_case();
         let class_name = lib.class_name();
 
-        let mut bindings = generate_bindings(&lib.interface.0);
+        let mut bindings = generate_bindings(&lib.exports.0);
         bindings.insert(&module_filename, lib.module.wasm.clone().into());
         files.insert_child_directory(&ident, bindings);
 
@@ -267,6 +267,11 @@ mod tests {
     use crate::Module;
     use std::collections::BTreeSet;
 
+    const WASMER_PACK_EXPORTS: &str = include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../wasm/wasmer-pack.exports.wai"
+    ));
+
     #[test]
     fn generated_files() {
         let expected: BTreeSet<&Path> = [
@@ -291,25 +296,20 @@ mod tests {
             abi: crate::Abi::None,
             wasm: Vec::new(),
         };
-        let interface = crate::Interface::from_wit(
-            "wasmer-pack.exports.wit",
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../wasm/wasmer-pack.exports.wai"
-            )),
-        )
-        .unwrap();
+        let exports =
+            crate::Interface::from_wit("wasmer-pack.exports.wit", WASMER_PACK_EXPORTS).unwrap();
         let commands = vec![
-            Command {
-                name: "first".into(),
-                wasm: Vec::new(),
-            },
-            Command {
-                name: "second-with-dashes".into(),
-                wasm: Vec::new(),
-            },
+            Command::new("first", []),
+            Command::new("second-with-dashes", []),
         ];
-        let libraries = vec![Library { interface, module }];
+        let browser =
+            crate::Interface::from_wit("browser.wit", "greet: func(who: string) -> string")
+                .unwrap();
+        let libraries = vec![Library {
+            module,
+            exports,
+            imports: vec![browser],
+        }];
         let package = Package::new(metadata, libraries, commands);
 
         let files = generate_python(&package).unwrap();

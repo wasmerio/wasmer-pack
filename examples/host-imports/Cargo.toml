@@ -1,0 +1,22 @@
+[package]
+name = "host-imports"
+version = "0.0.0"
+description = "A WebAssembly library that "
+edition = "2021"
+publish = false
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+wai-bindgen-rust = "0.2.1"
+
+[package.metadata.wapm]
+namespace = "Michael-F-Bryan"
+abi = "none"
+[package.metadata.wapm.bindings]
+wai-version = "0.2.0"
+exports = "main.export.wai"
+imports = ["fs.import.wai", "logging.import.wai"]
+
+[lib]
+crate-type = ["cdylib"]

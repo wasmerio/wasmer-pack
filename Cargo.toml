@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/*"]
+members = ["crates/*", "examples/*"]
 
 [workspace.package]
 authors = ["Wasmer Engineering Team <engineering@wasmer.io>"]

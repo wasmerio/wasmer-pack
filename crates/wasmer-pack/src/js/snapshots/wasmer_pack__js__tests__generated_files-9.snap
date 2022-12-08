@@ -4,6 +4,7 @@ expression: "files[\"package/src/bindings/index.js\"].utf8_contents().unwrap()"
 ---
 const fs = require("fs/promises");
 const { WasmerPack: _WasmerPack } = require("./wasmer-pack/wasmer-pack.js");
+const { addBrowserToImports: _WasmerPack__addBrowserToImports } = require("./wasmer-pack/browser.js");
 
 class Bindings {
     constructor() {
@@ -20,10 +21,14 @@ class Bindings {
         this._cache[filename] = await WebAssembly.compile(wasm);
         return this._cache[filename];
     }
-    async wasmer_pack(options) {
+    async wasmer_pack(browser, options) {
         const wrapper = new _WasmerPack();
         const module = await this._getModule("wasmer-pack/wasmer_pack_wasm.wasm");
         const imports = options?.imports || {};
+        _WasmerPack__addBrowserToImports(
+            browser,
+            name => wrapper.exports[name],
+        );
 
         await wrapper.instantiate(module, imports);
 

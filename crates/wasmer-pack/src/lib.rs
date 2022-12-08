@@ -15,8 +15,14 @@
 //!
 //! // Then we'll load the libraries from disk (this example only uses one)
 //! let module = Module::from_path("./module.wasm", Abi::None)?;
-//! let interface = Interface::from_path("./exports.wit")?;
-//! let libraries = vec![Library { module, interface }];
+//! // Definitions for the functionality it exposes
+//! let exports = Interface::from_path("./exports.wit")?;
+//! // Functionality imported from the host
+//! let imports = vec![
+//!     Interface::from_path("./fs.wit")?,
+//!     Interface::from_path("./logging.wit")?,
+//! ];
+//! let libraries = vec![Library { module, exports, imports }];
 //! let commands = Vec::new();
 //!
 //! // finally, we've got all the information we need

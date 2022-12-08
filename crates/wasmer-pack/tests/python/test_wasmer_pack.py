@@ -42,12 +42,15 @@ def load_bindings(wasmer_pack: WasmerPack) -> Package:
     name = str(exports_wit)
     contents = exports_wit.read_text()
     exports = unwrap(Interface.from_wit(wasmer_pack, name, contents))
+    imports = [
+        unwrap(Interface.from_wit(wasmer_pack, "browser.wit", "hello-world: func()"))
+    ]
 
     wasmer_pack_wasm = project_root.joinpath(
         "target", "wasm32-unknown-unknown", "debug", "wasmer_pack_wasm.wasm"
     )
     libraries = [
-        Library(exports, Abi.NONE, wasmer_pack_wasm.read_bytes()),
+        Library(exports, imports, Abi.NONE, wasmer_pack_wasm.read_bytes()),
     ]
     # Note: we need to provide a dummy command because of a bug in wit-bindgen
     commands = [Command("dummy", b"")]
@@ -83,4 +86,6 @@ def test_generate_bindings_for_wasmer_pack():
     finally:
         pkg.metadata.drop()
         for lib in pkg.libraries:
-            lib.interface.drop()
+            lib.exports.drop()
+            for import_ in lib.imports:
+                import_.drop()
