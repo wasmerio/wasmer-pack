@@ -1,11 +1,10 @@
-from hello_wasi import bindings, version
+import hello_wasi
 
 
 def test_expected_items_are_generated():
     # Top-level items
-    assert callable(bindings.hello_wasi)
-    assert version == "0.0.0"
+    assert callable(hello_wasi.bindings.hello_wasi)
 
     # Our WebAssembly library
-    wasm = bindings.hello_wasi()
+    wasm = hello_wasi.bindings.hello_wasi()
     assert callable(wasm.print_hello_wasi)
