@@ -65,7 +65,7 @@ jobs:
     needs: check
     steps:
       - name: Time Reporter
-        uses: Michael-F-Bryan/workflow-timer@v0.2.2
+        uses: Michael-F-Bryan/workflow-timer@v0.2.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           jobs: |
