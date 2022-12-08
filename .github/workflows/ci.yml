@@ -13,6 +13,10 @@ env:
   MDBOOK_VERSION: v0.4.21
   MSRV: "1.64.0" # Required for [workspace.package]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     name: Compile and Test
