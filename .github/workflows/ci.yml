@@ -7,11 +7,15 @@ on:
       - master
 
 env:
-  DEFAULT_CRATE_NAME: wit_pack
+  DEFAULT_CRATE_NAME: wasmer_pack
   RUST_BACKTRACE: 1
   CARGO_NET_GIT_FETCH_WITH_CLI: true
   MDBOOK_VERSION: v0.4.21
   MSRV: "1.64.0" # Required for [workspace.package]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
@@ -54,10 +58,25 @@ jobs:
         with:
           command: test
           args: --workspace --verbose --locked
+
+  workflow-times:
+    name: Workflow Timings
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
       - name: Time Reporter
-        uses: Michael-F-Bryan/workflow-timer@v0.1.5
+        uses: Michael-F-Bryan/workflow-timer@v0.2.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          jobs: |
+            Compile and Test
+          message: |
+            Make sure you keep an eye on build times!
+
+            One of this project's goals is to [keep CI runs under 5 minutes][goal]
+            so developers can maintain fast edit-compile-test cycles.
+
+            [goal]: https://github.com/wasmerio/wasmer-pack/blob/bdfd5c9483821651cf0bbd70189fc04416bc22b1/CONTRIBUTING.md#goal-1-fast-compile-times
 
   lints:
     name: Linting and Formatting
