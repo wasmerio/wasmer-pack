@@ -2279,6 +2279,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "wasmer-pack-testing"
+version = "0.1.0"
+dependencies = [
+ "tempfile",
+]
+
+[[package]]
 name = "wasmer-pack-wasm"
 version = "0.5.3"
 dependencies = [
