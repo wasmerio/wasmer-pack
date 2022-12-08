@@ -7,7 +7,7 @@ on:
       - master
 
 env:
-  DEFAULT_CRATE_NAME: wit_pack
+  DEFAULT_CRATE_NAME: wasmer_pack
   RUST_BACKTRACE: 1
   CARGO_NET_GIT_FETCH_WITH_CLI: true
   MDBOOK_VERSION: v0.4.21
@@ -61,7 +61,7 @@ jobs:
     needs: check
     steps:
       - name: Time Reporter
-        uses: Michael-F-Bryan/workflow-timer@v0.2.1
+        uses: Michael-F-Bryan/workflow-timer@v0.2.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           jobs: check
