@@ -2,7 +2,7 @@
 //!
 //! Typical.
 //!
-//! ```rust
+//! ```rust,no_run
 //! # use wasmer_pack_testing::TestEnvironment;
 //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
 //! let env = TestEnvironment::for_crate("./path/to/Cargo.toml")?;
@@ -224,9 +224,9 @@ impl Display for CommandFailed {
 
 fn initialize_python_virtual_environment(venv_dir: &Path) -> Result<(), TestFailure> {
     let python = if cfg!(windows) {
-        venv_dir.join("Scripts").join("python.exe")
+        "python.exe"
     } else {
-        venv_dir.join("bin").join("python")
+        "python3"
     };
 
     let mut cmd = Command::new(python);
@@ -293,7 +293,11 @@ fn compile_rust_to_wapm_package(
         .arg("--dry-run")
         .arg("--manifest-path")
         .arg(manifest_path)
-        .env("TARGET_DIR", target_dir);
+        .env("CARGO_TARGET_DIR", target_dir);
+
+    if let Some(parent) = manifest_path.parent() {
+        cmd.current_dir(parent);
+    }
 
     execute_command(&mut cmd).map_err(LoadError::CargoWapmFailed)?;
 

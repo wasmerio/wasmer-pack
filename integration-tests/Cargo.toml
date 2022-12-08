@@ -1,0 +1,10 @@
+[package]
+name = "integration-tests"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+wasmer-pack-testing = { version = "0.1.0", path = "../crates/testing" }
