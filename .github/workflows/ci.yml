@@ -56,12 +56,12 @@ jobs:
           args: --workspace --verbose --locked
 
   workflow-times:
-    name: Compile and Test
+    name: Workflow Timings
     runs-on: ubuntu-latest
     needs: check
     steps:
       - name: Time Reporter
-        uses: Michael-F-Bryan/workflow-timer@v0.2.0
+        uses: Michael-F-Bryan/workflow-timer@v0.2.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           jobs: check
