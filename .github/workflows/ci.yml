@@ -68,7 +68,8 @@ jobs:
         uses: Michael-F-Bryan/workflow-timer@v0.2.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          jobs: check
+          jobs: |
+            Compile and Test
 
   lints:
     name: Linting and Formatting
