@@ -32,37 +32,42 @@
 //! [jest]: https://jestjs.io/
 
 mod errors;
+mod javascript;
 mod python;
 mod utils;
 
 pub use crate::errors::{CommandFailed, LoadError, TestFailure};
 
 use std::path::{Path, PathBuf};
-use tempfile::TempDir;
 
 #[derive(Debug)]
 pub struct TestEnvironment {
-    temp_dir: TempDir,
+    temp_dir: PathBuf,
     wapm_dir: PathBuf,
 }
 
 impl TestEnvironment {
-    pub fn for_crate(manifest_path: impl AsRef<Path>) -> Result<Self, LoadError> {
-        let temp_dir = TempDir::new().map_err(LoadError::TempDir)?;
+    pub fn for_crate(
+        manifest_path: impl AsRef<Path>,
+        temp_dir: impl AsRef<Path>,
+    ) -> Result<Self, LoadError> {
         let manifest_path = manifest_path.as_ref();
+        let temp_dir = temp_dir.as_ref();
 
-        let wapm_dir =
-            utils::compile_rust_to_wapm_package(manifest_path, temp_dir.path().join("target"))?;
+        let wapm_dir = utils::compile_rust_to_wapm_package(manifest_path, temp_dir.join("target"))?;
 
-        Ok(TestEnvironment { temp_dir, wapm_dir })
+        Ok(TestEnvironment {
+            temp_dir: temp_dir.to_path_buf(),
+            wapm_dir,
+        })
     }
 
     pub fn python(&self, script_path: impl AsRef<Path>) -> Result<(), TestFailure> {
-        python::run(script_path.as_ref(), &self.wapm_dir, self.temp_dir.path())
+        python::run(script_path.as_ref(), &self.wapm_dir, &self.temp_dir)
     }
 
-    pub fn javascript(&self, _script_path: impl AsRef<Path>) -> Result<(), TestFailure> {
-        todo!();
+    pub fn javascript(&self, script_path: impl AsRef<Path>) -> Result<(), TestFailure> {
+        javascript::run(script_path.as_ref(), &self.wapm_dir, &self.temp_dir)
     }
 
     pub fn typescript(&self, _script_path: impl AsRef<Path>) -> Result<(), TestFailure> {

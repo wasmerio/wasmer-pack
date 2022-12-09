@@ -4,7 +4,9 @@ use std::{
     process::{Command, Output, Stdio},
 };
 
-use crate::{CommandFailed, LoadError};
+use wasmer_pack_cli::{Codegen, Language};
+
+use crate::{CommandFailed, LoadError, TestFailure};
 
 pub(crate) fn execute_command(cmd: &mut Command) -> Result<(), CommandFailed> {
     let command = format!("{cmd:?}");
@@ -83,4 +85,23 @@ fn first_dir_in_folder(dir: &Path) -> Result<PathBuf, std::io::Error> {
     }
 
     Ok(first_item)
+}
+
+pub(crate) fn generate_bindings(
+    dest: &Path,
+    wapm_dir: &Path,
+    lang: Language,
+) -> Result<(), TestFailure> {
+    tracing::info!(
+        output_dir=%dest.display(),
+        wapm_dir=%wapm_dir.display(),
+        language=?lang,
+        "Generating bindings",
+    );
+    let codegen = Codegen {
+        out_dir: Some(dest.to_path_buf()),
+        input: wapm_dir.to_path_buf(),
+    };
+    codegen.run(lang).map_err(TestFailure::BindingsGeneration)?;
+    Ok(())
 }

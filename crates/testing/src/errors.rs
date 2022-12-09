@@ -30,14 +30,14 @@ impl std::error::Error for CommandFailed {
 impl Display for CommandFailed {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            CommandFailed::Spawn { command, .. } => write!(f, "Unable to spawn \"{command:?}\""),
+            CommandFailed::Spawn { command, .. } => write!(f, "Unable to spawn {command:?}"),
             CommandFailed::CompletedUnsuccessfully {
                 command,
                 stdout,
                 stderr,
                 exit_code,
             } => {
-                write!(f, "Compiling to a WAPM package with {command} failed")?;
+                write!(f, "Executing {command} failed")?;
                 if let Some(exit_code) = exit_code {
                     write!(f, " (exit code: {exit_code})")?;
                 }
@@ -60,8 +60,10 @@ impl Display for CommandFailed {
 
 #[derive(Debug)]
 pub enum TestFailure {
+    InitializingJavascriptEnvironment(CommandFailed),
     BindingsGeneration(wasmer_pack_cli::Error),
     DeterminingScriptDirectory,
+    DeterminingScriptFilename,
     InstallingDependencies(CommandFailed),
     CreatingVirtualEnvironment {
         venv_dir: PathBuf,
@@ -77,7 +79,10 @@ impl std::error::Error for TestFailure {
             TestFailure::InstallingDependencies(e)
             | TestFailure::CreatingVirtualEnvironment { error: e, .. }
             | TestFailure::TestScript(e) => Some(e),
-            TestFailure::DeterminingScriptDirectory => None,
+            TestFailure::InitializingJavascriptEnvironment(e) => Some(e),
+            TestFailure::DeterminingScriptDirectory | TestFailure::DeterminingScriptFilename => {
+                None
+            }
         }
     }
 }
@@ -89,6 +94,9 @@ impl Display for TestFailure {
             TestFailure::DeterminingScriptDirectory => {
                 write!(f, "Unable to determine the script directory")
             }
+            TestFailure::DeterminingScriptFilename => {
+                write!(f, "Unable to determine the script filename")
+            }
             TestFailure::InstallingDependencies(_) => write!(f, "Unable to install dependencies"),
             TestFailure::CreatingVirtualEnvironment { venv_dir, .. } => write!(
                 f,
@@ -96,6 +104,9 @@ impl Display for TestFailure {
                 venv_dir.display()
             ),
             TestFailure::TestScript(_) => write!(f, "The tests failed"),
+            TestFailure::InitializingJavascriptEnvironment(_) => {
+                write!(f, "Unable to initialize the JavaScript environment")
+            }
         }
     }
 }
@@ -115,7 +126,8 @@ impl std::error::Error for LoadError {
             LoadError::TempDir(e)
             | LoadError::SpawnFailed(e)
             | LoadError::UnableToLocateBindings { error: e, .. } => Some(e),
-            LoadError::ManifestNotFound { .. } | LoadError::CargoWapmFailed { .. } => None,
+            LoadError::CargoWapmFailed(e) => Some(e),
+            LoadError::ManifestNotFound { .. } => None,
         }
     }
 }

@@ -3,15 +3,18 @@ use std::{
     process::Command,
 };
 
-use wasmer_pack_cli::{Codegen, Language};
+use wasmer_pack_cli::Language;
 
-use crate::{utils::execute_command, TestFailure};
+use crate::{
+    utils::{self, execute_command},
+    TestFailure,
+};
 
 pub(crate) fn run(script_path: &Path, wapm_dir: &Path, temp_dir: &Path) -> Result<(), TestFailure> {
     let dest = temp_dir.join("python");
     tracing::info!("Preparing the python package");
 
-    generate_bindings(&dest, wapm_dir)?;
+    utils::generate_bindings(&dest, wapm_dir, Language::Python)?;
 
     let script_dir = script_path
         .parent()
@@ -77,17 +80,6 @@ fn pip_install_generated_bindings(
         .arg(dest)
         .current_dir(script_dir);
     execute_command(&mut cmd).map_err(TestFailure::InstallingDependencies)?;
-    Ok(())
-}
-
-fn generate_bindings(dest: &Path, wapm_dir: &Path) -> Result<(), TestFailure> {
-    let codegen = Codegen {
-        out_dir: Some(dest.to_path_buf()),
-        input: wapm_dir.to_path_buf(),
-    };
-    codegen
-        .run(Language::Python)
-        .map_err(TestFailure::BindingsGeneration)?;
     Ok(())
 }
 
