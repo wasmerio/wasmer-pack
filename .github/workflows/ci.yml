@@ -11,7 +11,6 @@ env:
   RUST_BACKTRACE: 1
   CARGO_NET_GIT_FETCH_WITH_CLI: true
   MDBOOK_VERSION: v0.4.21
-  MSRV: "1.64.0" # Required for [workspace.package]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,11 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ env.MSRV }}
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Install Node
@@ -85,10 +79,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Check Formatting
@@ -107,10 +97,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Install mdbook

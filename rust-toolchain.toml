@@ -1,3 +1,5 @@
 [toolchain]
 components = ["rustfmt", "clippy"]
 targets = ["wasm32-unknown-unknown", "wasm32-wasi"]
+# MSRV - Required for [workspace.package]
+channel = "1.64"
