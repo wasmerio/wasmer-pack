@@ -78,8 +78,7 @@ jobs:
           message: |
             Make sure you keep an eye on build times!
 
-            One of this project's goals is to [keep CI runs under 5 minutes][goal]
-            so developers can maintain fast edit-compile-test cycles.
+            One of this project's goals is to [keep CI runs under 5 minutes][goal] so developers can maintain fast edit-compile-test cycles.
 
             [goal]: https://github.com/wasmerio/wasmer-pack/blob/bdfd5c9483821651cf0bbd70189fc04416bc22b1/CONTRIBUTING.md#goal-1-fast-compile-times
 
