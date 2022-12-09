@@ -31,16 +31,14 @@
 //! [pytest]: https://docs.pytest.org/
 //! [jest]: https://jestjs.io/
 
-use std::{
-    ffi::OsString,
-    fmt::{self, Display, Formatter},
-    io::ErrorKind,
-    path::{Path, PathBuf},
-    process::{Command, Output, Stdio},
-};
+mod errors;
+mod python;
+mod utils;
 
+pub use crate::errors::{CommandFailed, LoadError, TestFailure};
+
+use std::path::{Path, PathBuf};
 use tempfile::TempDir;
-use wasmer_pack_cli::{Codegen, Language};
 
 #[derive(Debug)]
 pub struct TestEnvironment {
@@ -53,68 +51,14 @@ impl TestEnvironment {
         let temp_dir = TempDir::new().map_err(LoadError::TempDir)?;
         let manifest_path = manifest_path.as_ref();
 
-        let wapm_dir = compile_rust_to_wapm_package(manifest_path, temp_dir.path().join("target"))?;
+        let wapm_dir =
+            utils::compile_rust_to_wapm_package(manifest_path, temp_dir.path().join("target"))?;
 
         Ok(TestEnvironment { temp_dir, wapm_dir })
     }
 
     pub fn python(&self, script_path: impl AsRef<Path>) -> Result<(), TestFailure> {
-        let dest = self.temp().join("python");
-        let script_path = script_path.as_ref();
-        tracing::info!("Preparing the python package");
-
-        let codegen = Codegen {
-            out_dir: Some(dest.clone()),
-            input: self.wapm_dir.clone(),
-        };
-        codegen
-            .run(Language::Python)
-            .map_err(TestFailure::BindingsGeneration)?;
-
-        let script_dir = script_path
-            .parent()
-            .ok_or(TestFailure::DeterminingScriptDirectory)?;
-
-        let venv_dir = script_dir.join(".venv");
-
-        if !venv_dir.exists() {
-            tracing::debug!(
-                venv = %venv_dir.display(),
-                "Creating a new virtual environment",
-            );
-            initialize_python_virtual_environment(&venv_dir)?;
-        }
-
-        let pip_path = python_program(&venv_dir, "pip");
-        tracing::info!(
-            pip = %pip_path.display(),
-            bindings = %dest.display(),
-            "Installing the bindings",
-        );
-
-        // TODO: check if this works on Windows. We might need to invoke pip
-        // through cmd.exe
-        let mut cmd = Command::new(&pip_path);
-        cmd.arg("install")
-            .arg("-e")
-            .arg(&dest)
-            .current_dir(script_dir);
-        execute_command(&mut cmd).map_err(TestFailure::InstallingDependencies)?;
-
-        let pytest = python_program(&venv_dir, "pytest");
-        if !pytest.exists() {
-            tracing::debug!("Installing pytest");
-            let mut cmd = Command::new(&pip_path);
-            cmd.arg("install").arg("pytest");
-            execute_command(&mut cmd).map_err(TestFailure::InstallingDependencies)?;
-        }
-
-        tracing::info!("Running the test suite");
-        let mut cmd = Command::new(pytest);
-        cmd.arg(script_path);
-        execute_command(&mut cmd).map_err(TestFailure::TestScript)?;
-
-        Ok(())
+        python::run(script_path.as_ref(), &self.wapm_dir, self.temp_dir.path())
     }
 
     pub fn javascript(&self, _script_path: impl AsRef<Path>) -> Result<(), TestFailure> {
@@ -123,252 +67,5 @@ impl TestEnvironment {
 
     pub fn typescript(&self, _script_path: impl AsRef<Path>) -> Result<(), TestFailure> {
         todo!();
-    }
-
-    fn temp(&self) -> &Path {
-        self.temp_dir.path()
-    }
-}
-
-fn python_program(venv_dir: &Path, binary: &str) -> PathBuf {
-    if cfg!(windows) {
-        venv_dir.join("Scripts").join(binary).with_extension("exe")
-    } else {
-        venv_dir.join("bin").join(binary)
-    }
-}
-
-fn execute_command(cmd: &mut Command) -> Result<(), CommandFailed> {
-    let command = format!("{cmd:?}");
-
-    tracing::debug!(%command, "Executing");
-
-    let Output {
-        status,
-        stdout,
-        stderr,
-    } = cmd
-        .stderr(Stdio::piped())
-        .stdout(Stdio::piped())
-        .output()
-        .map_err(|e| CommandFailed::Spawn {
-            command: cmd.get_program().to_os_string(),
-            error: e,
-        })?;
-
-    if status.success() {
-        Ok(())
-    } else {
-        return Err(CommandFailed::CompletedUnsuccessfully {
-            command,
-            stdout: String::from_utf8_lossy(&stdout).into_owned(),
-            stderr: String::from_utf8_lossy(&stderr).into_owned(),
-            exit_code: status.code(),
-        });
-    }
-}
-
-#[derive(Debug)]
-pub enum CommandFailed {
-    Spawn {
-        command: OsString,
-        error: std::io::Error,
-    },
-    CompletedUnsuccessfully {
-        command: String,
-        stdout: String,
-        stderr: String,
-        exit_code: Option<i32>,
-    },
-}
-
-impl std::error::Error for CommandFailed {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            CommandFailed::Spawn { error, .. } => Some(error),
-            CommandFailed::CompletedUnsuccessfully { .. } => None,
-        }
-    }
-}
-
-impl Display for CommandFailed {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            CommandFailed::Spawn { command, .. } => write!(f, "Unable to spawn \"{command:?}\""),
-            CommandFailed::CompletedUnsuccessfully {
-                command,
-                stdout,
-                stderr,
-                exit_code,
-            } => {
-                write!(f, "Compiling to a WAPM package with {command} failed")?;
-                if let Some(exit_code) = exit_code {
-                    write!(f, " (exit code: {exit_code})")?;
-                }
-                write!(f, ".")?;
-
-                if !stdout.trim().is_empty() {
-                    writeln!(f)?;
-                    writeln!(f, "Stdout: {stdout}")?;
-                }
-                if !stderr.trim().is_empty() {
-                    writeln!(f)?;
-                    writeln!(f, "Stderr: {stderr}")?;
-                }
-
-                Ok(())
-            }
-        }
-    }
-}
-
-fn initialize_python_virtual_environment(venv_dir: &Path) -> Result<(), TestFailure> {
-    let python = if cfg!(windows) {
-        "python.exe"
-    } else {
-        "python3"
-    };
-
-    let mut cmd = Command::new(python);
-    cmd.arg("-m").arg("venv").arg(venv_dir);
-
-    execute_command(&mut cmd).map_err(|e| TestFailure::CreatingVirtualEnvironment {
-        venv_dir: venv_dir.to_path_buf(),
-        error: e,
-    })?;
-
-    Ok(())
-}
-
-#[derive(Debug)]
-pub enum TestFailure {
-    BindingsGeneration(wasmer_pack_cli::Error),
-    DeterminingScriptDirectory,
-    InstallingDependencies(CommandFailed),
-    CreatingVirtualEnvironment {
-        venv_dir: PathBuf,
-        error: CommandFailed,
-    },
-    TestScript(CommandFailed),
-}
-
-impl std::error::Error for TestFailure {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            TestFailure::BindingsGeneration(e) => Some(&**e),
-            TestFailure::InstallingDependencies(e)
-            | TestFailure::CreatingVirtualEnvironment { error: e, .. }
-            | TestFailure::TestScript(e) => Some(e),
-            TestFailure::DeterminingScriptDirectory => None,
-        }
-    }
-}
-
-impl Display for TestFailure {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            TestFailure::BindingsGeneration(_) => write!(f, "Unable to generate bindings"),
-            TestFailure::DeterminingScriptDirectory => {
-                write!(f, "Unable to determine the script directory")
-            }
-            TestFailure::InstallingDependencies(_) => write!(f, "Unable to install dependencies"),
-            TestFailure::CreatingVirtualEnvironment { venv_dir, .. } => write!(
-                f,
-                "Unable to create a virtual environment in \"{}\"",
-                venv_dir.display()
-            ),
-            TestFailure::TestScript(_) => write!(f, "The tests failed"),
-        }
-    }
-}
-
-fn compile_rust_to_wapm_package(
-    manifest_path: &Path,
-    target_dir: impl AsRef<Path>,
-) -> Result<PathBuf, LoadError> {
-    let target_dir = target_dir.as_ref();
-
-    let mut cmd = Command::new("cargo");
-    cmd.arg("wapm")
-        .arg("--dry-run")
-        .arg("--manifest-path")
-        .arg(manifest_path)
-        .env("CARGO_TARGET_DIR", target_dir);
-
-    if let Some(parent) = manifest_path.parent() {
-        cmd.current_dir(parent);
-    }
-
-    execute_command(&mut cmd).map_err(LoadError::CargoWapmFailed)?;
-
-    let wapm_dir = target_dir.join("wapm");
-
-    let generated_package_dir =
-        first_dir_in_folder(&wapm_dir).map_err(|e| LoadError::UnableToLocateBindings {
-            dir: wapm_dir,
-            error: e,
-        })?;
-
-    Ok(generated_package_dir)
-}
-
-fn first_dir_in_folder(dir: &Path) -> Result<PathBuf, std::io::Error> {
-    let mut entries = dir.read_dir()?;
-
-    let first_item = match entries.next() {
-        Some(Ok(entry)) => entry.path(),
-        Some(Err(e)) => return Err(e),
-        None => todo!(),
-    };
-
-    if !first_item.is_dir() {
-        return Err(std::io::Error::new(
-            ErrorKind::Other,
-            format!("Expected \"{}\" to be a directory", first_item.display(),),
-        ));
-    }
-
-    Ok(first_item)
-}
-
-#[derive(Debug)]
-pub enum LoadError {
-    ManifestNotFound { path: PathBuf },
-    TempDir(std::io::Error),
-    SpawnFailed(std::io::Error),
-    CargoWapmFailed(CommandFailed),
-    UnableToLocateBindings { dir: PathBuf, error: std::io::Error },
-}
-
-impl std::error::Error for LoadError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            LoadError::TempDir(e)
-            | LoadError::SpawnFailed(e)
-            | LoadError::UnableToLocateBindings { error: e, .. } => Some(e),
-            LoadError::ManifestNotFound { .. } | LoadError::CargoWapmFailed { .. } => None,
-        }
-    }
-}
-
-impl Display for LoadError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            LoadError::ManifestNotFound { path } => {
-                write!(f, "\"{}\" doesn't exist", path.display())
-            }
-            LoadError::TempDir(_) => write!(f, "Unable to create a temporary directory"),
-            LoadError::SpawnFailed(_) => {
-                write!(f, "Unable to start \"cargo wapm\". Is it installed?")
-            }
-            LoadError::CargoWapmFailed(_) => {
-                write!(f, "Generating a WAPM package with \"cargo wapm\" failed")
-            }
-            LoadError::UnableToLocateBindings { dir, .. } => write!(
-                f,
-                "Unable to locate the generated bindings in \"{}\"",
-                dir.display()
-            ),
-        }
     }
 }
