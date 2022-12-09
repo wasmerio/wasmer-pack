@@ -29,7 +29,7 @@ jobs:
           profile: minimal
           toolchain: ${{ env.MSRV }}
           override: true
-          target: wasm32-unknown-unknown
+          target: wasm32-unknown-unknown, wasm32-wasi
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Install Node
