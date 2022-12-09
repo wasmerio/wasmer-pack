@@ -28,8 +28,6 @@ jobs:
         with:
           profile: minimal
           toolchain: ${{ env.MSRV }}
-          override: true
-          target: wasm32-unknown-unknown, wasm32-wasi
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Install Node
@@ -91,8 +89,6 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-          override: true
-          components: rustfmt, clippy
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Check Formatting
@@ -115,7 +111,6 @@ jobs:
         with:
           profile: minimal
           toolchain: nightly
-          override: true
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Install mdbook
