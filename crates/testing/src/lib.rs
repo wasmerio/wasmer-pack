@@ -5,7 +5,7 @@
 //! ```rust,no_run
 //! # use wasmer_pack_testing::TestEnvironment;
 //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
-//! let env = TestEnvironment::for_crate("./path/to/Cargo.toml")?;
+//! let env = TestEnvironment::for_crate("./path/to/Cargo.toml", "/tmp")?;
 //! env.python("./my_tests.py")?;
 //! env.javascript("./my_test.js")?;
 //! env.typescript("./my_tests.ts")?;
