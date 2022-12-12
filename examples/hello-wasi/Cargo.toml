@@ -13,7 +13,7 @@ wai-bindgen-rust = "0.2.1"
 [package.metadata.wapm]
 namespace = "Michael-F-Bryan"
 abi = "wasi"
-bindings = { wai-version = "0.2.0", exports = "hello-wasi.exports.wai" }
+bindings = { wai-version = "0.2.0", exports = "hello-wasi.export.wai" }
 
 [lib]
 crate-type = ["cdylib"]

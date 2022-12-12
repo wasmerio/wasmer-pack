@@ -11,7 +11,6 @@ env:
   RUST_BACKTRACE: 1
   CARGO_NET_GIT_FETCH_WITH_CLI: true
   MDBOOK_VERSION: v0.4.21
-  MSRV: "1.64.0" # Required for [workspace.package]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,13 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ env.MSRV }}
-          override: true
-          target: wasm32-unknown-unknown
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Install Node
@@ -43,6 +35,13 @@ jobs:
       - name: Install Pipenv
         run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python3
       - run: yarn --version
+      - name: Setup Wasmer
+        uses: wasmerio/setup-wasmer@v1
+      - name: Install cargo-wapm
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-wapm --debug --verbose
       - name: Type Checking
         uses: actions-rs/cargo@v1
         with:
@@ -73,8 +72,7 @@ jobs:
           message: |
             Make sure you keep an eye on build times!
 
-            One of this project's goals is to [keep CI runs under 5 minutes][goal]
-            so developers can maintain fast edit-compile-test cycles.
+            One of this project's goals is to [keep CI runs under 5 minutes][goal] so developers can maintain fast edit-compile-test cycles.
 
             [goal]: https://github.com/wasmerio/wasmer-pack/blob/bdfd5c9483821651cf0bbd70189fc04416bc22b1/CONTRIBUTING.md#goal-1-fast-compile-times
 
@@ -83,12 +81,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-          components: rustfmt, clippy
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Check Formatting
@@ -107,11 +99,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly
-          override: true
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Install mdbook

@@ -3,7 +3,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{Context, Error};
+use crate::Error;
+use anyhow::Context;
 use wapm_targz_to_pirita::{generate_webc_file, TransformManifestFunctions};
 use wasmer_pack::{Command, Interface, Library, Metadata, Module, Package};
 use webc::{DirOrFile, Manifest, ParseOptions, WebC, WebCOwned};
