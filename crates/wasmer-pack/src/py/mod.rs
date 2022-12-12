@@ -8,8 +8,8 @@ use wai_bindgen_gen_core::Generator;
 use wai_bindgen_gen_wasmer_py::WasmerPy;
 
 use crate::{
-    types::{Library, Package},
-    Command, Files, Metadata, SourceFile,
+    types::{Interface, Package},
+    Files, Metadata, Module, SourceFile,
 };
 
 static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
@@ -42,20 +42,19 @@ pub fn generate_python(package: &Package) -> Result<Files, Error> {
 
     let mut files = Files::new();
 
-    let libraries = package.libraries();
-    let commands = package.commands();
+    let ctx = Context::for_package(package);
 
-    if !libraries.is_empty() {
+    if !ctx.libraries.is_empty() {
         files.insert_child_directory(
             Path::new(&package_name).join("bindings"),
-            library_bindings(libraries)?,
+            library_bindings(&ctx)?,
         );
     }
 
-    if !commands.is_empty() {
+    if !ctx.commands.is_empty() {
         files.insert_child_directory(
             Path::new(&package_name).join("commands"),
-            command_bindings(package.commands())?,
+            command_bindings(&ctx)?,
         );
     }
 
@@ -79,21 +78,90 @@ pub fn generate_python(package: &Package) -> Result<Files, Error> {
     Ok(files)
 }
 
-fn command_bindings(commands: &[Command]) -> Result<Files, Error> {
-    let mut files = Files::new();
-    let mut cmds = Vec::new();
+#[derive(Debug, serde::Serialize)]
+struct Context {
+    commands: Vec<CommandContext>,
+    libraries: Vec<LibraryContext>,
+}
 
-    for cmd in commands {
-        let ident = cmd.name.replace('-', "_");
-        let module_filename = Path::new(&ident).with_extension("wasm");
+impl Context {
+    fn for_package(pkg: &Package) -> Self {
+        let commands = pkg
+            .commands()
+            .iter()
+            .cloned()
+            .map(CommandContext::from)
+            .collect();
 
-        files.insert(&module_filename, SourceFile::from(&cmd.wasm));
-        cmds.push(minijinja::context! {ident, module_filename});
+        let libraries = pkg
+            .libraries()
+            .iter()
+            .cloned()
+            .map(LibraryContext::from)
+            .collect();
+
+        Context {
+            commands,
+            libraries,
+        }
     }
+}
 
-    let ctx = minijinja::context! {
-        commands => cmds,
-    };
+#[derive(Debug, serde::Serialize)]
+struct LibraryContext {
+    ident: String,
+    class_name: String,
+    module_filename: String,
+    wasi: bool,
+    #[serde(skip)]
+    exports: Interface,
+    #[serde(skip)]
+    module: Module,
+}
+
+impl From<crate::Library> for LibraryContext {
+    fn from(lib: crate::Library) -> Self {
+        let module_filename = Path::new(lib.module_filename()).with_extension("wasm");
+        let ident = lib.interface_name().to_snake_case();
+        let class_name = lib.class_name();
+
+        LibraryContext {
+            ident,
+            class_name,
+            module_filename: module_filename.display().to_string(),
+            wasi: lib.requires_wasi(),
+            exports: lib.exports,
+            module: lib.module,
+        }
+    }
+}
+
+#[derive(Debug, serde::Serialize)]
+struct CommandContext {
+    ident: String,
+    module_filename: String,
+    #[serde(skip)]
+    wasm: Vec<u8>,
+}
+
+impl From<crate::Command> for CommandContext {
+    fn from(cmd: crate::Command) -> CommandContext {
+        let ident = cmd.name.replace('-', "_");
+        let module_filename = format!("{ident}.wasm");
+        CommandContext {
+            ident,
+            module_filename,
+            wasm: cmd.wasm,
+        }
+    }
+}
+
+fn command_bindings(ctx: &Context) -> Result<Files, Error> {
+    let mut files = Files::new();
+
+    for cmd in &ctx.commands {
+        files.insert(&cmd.module_filename, SourceFile::from(&cmd.wasm));
+    }
 
     files.insert(
         "__init__.py",
@@ -107,25 +175,13 @@ fn command_bindings(commands: &[Command]) -> Result<Files, Error> {
     Ok(files)
 }
 
-fn library_bindings(libraries: &[Library]) -> Result<Files, Error> {
+fn library_bindings(ctx: &Context) -> Result<Files, Error> {
     let mut files = Files::new();
-    let mut ctx = LibrariesContext::default();
 
-    for lib in libraries {
-        let module_filename = Path::new(lib.module_filename()).with_extension("wasm");
-        let ident = lib.interface_name().to_snake_case();
-        let class_name = lib.class_name();
-
+    for lib in &ctx.libraries {
         let mut bindings = generate_bindings(&lib.exports.0);
-        bindings.insert(&module_filename, lib.module.wasm.clone().into());
-        files.insert_child_directory(&ident, bindings);
-
-        ctx.libraries.push(LibraryContext {
-            ident,
-            class_name,
-            module_filename: module_filename.display().to_string(),
-            wasi: lib.requires_wasi(),
-        });
+        bindings.insert(&lib.module_filename, lib.module.wasm.clone().into());
+        files.insert_child_directory(&lib.ident, bindings);
     }
 
     let dunder_init = TEMPLATES
@@ -135,19 +191,6 @@ fn library_bindings(libraries: &[Library]) -> Result<Files, Error> {
     files.insert("__init__.py", dunder_init.into());
 
     Ok(files)
-}
-
-#[derive(Debug, Default, serde::Serialize)]
-struct LibrariesContext {
-    libraries: Vec<LibraryContext>,
-}
-
-#[derive(Debug, Default, serde::Serialize)]
-struct LibraryContext {
-    ident: String,
-    class_name: String,
-    module_filename: String,
-    wasi: bool,
 }
 
 fn generate_manifest(package: &Package, package_name: &str) -> Result<SourceFile, Error> {
@@ -264,7 +307,7 @@ mod tests {
     use insta::Settings;
 
     use super::*;
-    use crate::Module;
+    use crate::{Command, Library, Module};
     use std::collections::BTreeSet;
 
     const WASMER_PACK_EXPORTS: &str = include_str!(concat!(
