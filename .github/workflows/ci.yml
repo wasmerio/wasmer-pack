@@ -35,6 +35,8 @@ jobs:
       - name: Install Pipenv
         run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python3
       - run: yarn --version
+      - name: Setup Wasmer
+        uses: wasmerio/setup-wasmer@v1
       - name: Install cargo-wapm
         uses: actions-rs/cargo@v1
         with:
