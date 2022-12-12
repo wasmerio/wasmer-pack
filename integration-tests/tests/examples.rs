@@ -30,6 +30,7 @@ fn hello_wasi_python() {
 }
 
 #[test]
+#[ignore = "JavaScript tests aren't fully implemented yet"]
 fn hello_wasi_javascript() {
     initialize_logging();
 
