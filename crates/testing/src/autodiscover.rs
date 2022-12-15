@@ -34,6 +34,7 @@ pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
         let bindings = generated_bindings.join(language.name());
         tracing::info!(
             bindings_dir = %bindings.display(),
+            language = language.name(),
             "Generating bindings",
         );
         crate::generate_bindings(&bindings, &wapm_package, language)?;
@@ -77,6 +78,12 @@ fn snapshot_generated_bindings(
     package_dir: &Path,
     language: Language,
 ) -> Result<(), Error> {
+    tracing::info!(
+        package_dir=%package_dir.display(),
+        language=language.name(),
+        "Creating snapshot tests for the generated bindings",
+    );
+
     let snapshot_files: BTreeSet<_> = language_specific_matches(package_dir, language)?
         .filter_map(|entry| entry.ok())
         .filter(|entry| entry.path().is_file())
@@ -142,7 +149,11 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
     tracing::info!("Initializing the python package");
 
     let mut cmd = Command::new("poetry");
-    cmd.arg("init").arg("--name=tests").arg("--no-interaction");
+    cmd.arg("init")
+        .arg("--name=tests")
+        .arg("--no-interaction")
+        .arg("--description=Python integration tests")
+        .arg("--dependency=pytest");
     tracing::info!(?cmd, "Initializing the Python package");
     let status = cmd
         .stdin(Stdio::null())
@@ -152,18 +163,6 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
         .status()
         .context("Unable to run poetry. Is it installed?")?;
     anyhow::ensure!(status.success(), "Unable to initialize the Python package");
-
-    let mut cmd = Command::new("poetry");
-    cmd.arg("add").arg("--no-interaction").arg("pytest");
-    tracing::info!(?cmd, "Adding pytest as a dependency");
-    let status = cmd
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .current_dir(crate_dir)
-        .status()
-        .context("Unable to run poetry. Is it installed?")?;
-    anyhow::ensure!(status.success(), "Unable to add pytest as a dependency");
 
     let mut cmd = Command::new("poetry");
     cmd.arg("add")
@@ -187,6 +186,16 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
 }
 
 fn run_pytest(crate_dir: &Path) -> Result<(), Error> {
+    let status = Command::new("ls")
+        .arg("--recursive")
+        .arg(crate_dir)
+        .stdin(Stdio::null())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status()
+        .context("Unable to run ls. Is it installed?")?;
+    anyhow::ensure!(status.success(), "ls failed");
+
     let mut cmd = Command::new("poetry");
     cmd.arg("run").arg("pytest").arg("--verbose");
     tracing::info!(?cmd, "Running pytest");
@@ -197,7 +206,7 @@ fn run_pytest(crate_dir: &Path) -> Result<(), Error> {
         .current_dir(crate_dir)
         .status()
         .context("Unable to run poetry. Is it installed?")?;
-    anyhow::ensure!(status.success(), "Testing failed");
+    anyhow::ensure!(status.success(), "pytest failed");
 
     Ok(())
 }
