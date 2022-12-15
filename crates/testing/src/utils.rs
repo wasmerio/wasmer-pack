@@ -38,7 +38,7 @@ pub(crate) fn execute_command(cmd: &mut Command) -> Result<(), CommandFailed> {
     }
 }
 
-pub(crate) fn compile_rust_to_wapm_package(
+pub fn compile_rust_to_wapm_package(
     manifest_path: &Path,
     target_dir: impl AsRef<Path>,
 ) -> Result<PathBuf, LoadError> {
@@ -87,11 +87,7 @@ fn first_dir_in_folder(dir: &Path) -> Result<PathBuf, std::io::Error> {
     Ok(first_item)
 }
 
-pub(crate) fn generate_bindings(
-    dest: &Path,
-    wapm_dir: &Path,
-    lang: Language,
-) -> Result<(), TestFailure> {
+pub fn generate_bindings(dest: &Path, wapm_dir: &Path, lang: Language) -> Result<(), TestFailure> {
     tracing::info!(
         output_dir=%dest.display(),
         wapm_dir=%wapm_dir.display(),

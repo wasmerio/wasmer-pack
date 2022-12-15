@@ -8,7 +8,13 @@ from typing import Optional, Any
 from wasmer import Store, Module, wasi # type: ignore
 
 {%- for lib in libraries %}
-from .{{lib.ident}}.bindings import {{lib.class_name}} as _{{lib.class_name}}
+from .{{lib.ident}}.bindings import (
+    {{lib.class_name}} as _{{lib.class_name}},
+    {%- for imp in lib.imports %}
+    add_{{imp.ident}}_to_imports as _{{lib.ident}}__add_{{imp.ident}}_to_imports,
+    {{imp.class_name}} as _{{lib.ident}}__{{imp.class_name}},
+    {%- endfor %}
+)
 {%- endfor %}
 
 class Bindings:
@@ -35,7 +41,9 @@ class Bindings:
         {%- if lib.wasi %}
         env: Optional[wasi.Environment] = None,
         {%- endif %}
-        imports: Optional[dict[str, Any]] = None,
+        {%- for imp in lib.imports %}
+        {{imp.ident}}: _{{lib.ident}}__{{imp.class_name}},
+        {%- endfor %}
         module: Optional[Module] = None,
     ) -> _{{lib.class_name}}:
         """
@@ -45,8 +53,9 @@ class Bindings:
         :param env: A pre-initialized WASI environment. If not specified, a
                      default value will be used.
         {%- endif %}
-        :param imports: Additional imports to be provided to the WebAssembly
-                        module.
+        {%- for imp in lib.imports %}
+        :param {{imp.ident}}: An implementation of the "{{imp.interface_name}}" interface.
+        {%- endfor %}
         :param module: A user-specified WebAssembly module to use instead of the
                        one bundled with this package.
         """
@@ -55,8 +64,17 @@ class Bindings:
         if not module:
             module = self._get_module(filename)
 
-        if not imports:
-            imports = {}
+        imports = {}
+
+        wrapper = None
+
+        def get_export(item_name: str):
+            assert wrapper is not None
+            return getattr(wrapper.instance.exports, item_name)
+
+        {%- for imp in lib.imports %}
+        _{{lib.ident}}__add_{{imp.ident}}_to_imports(self._store, imports, {{imp.ident}}, get_export)
+        {%- endfor %}
 
         {%- if lib.wasi %}
         version = wasi.get_version(module, strict=True)
@@ -67,5 +85,6 @@ class Bindings:
         imports.update(wasi_imports)
         {%- endif %}
 
-        return _{{lib.class_name}}(self._store, imports, module)
+        wrapper = _{{lib.class_name}}(self._store, imports, module)
+        return wrapper
     {% endfor %}

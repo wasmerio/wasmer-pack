@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "host-imports-tests"
+version = "0.0.0"
+description = ""
+authors = ["Michael-F-Bryan <michael@wasmer.io>"]
+readme = "README.md"
+packages = []
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pytest = "^7.2.0"
+host-imports = { path = "generated_bindings", develop = true }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
