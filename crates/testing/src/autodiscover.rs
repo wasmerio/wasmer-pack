@@ -99,7 +99,13 @@ fn snapshot_generated_bindings(
 
     let _guard = settings.bind_to_scope();
 
-    insta::assert_debug_snapshot!("all files", &snapshot_files);
+    insta::assert_debug_snapshot!(
+        "all files",
+        snapshot_files
+            .iter()
+            .map(|path| path.strip_prefix(crate_dir).expect("unreachable"))
+            .collect::<Vec<_>>()
+    );
 
     for path in snapshot_files {
         let contents = std::fs::read_to_string(&path)

@@ -2,12 +2,12 @@
 source: crates/testing/src/autodiscover.rs
 input_file: examples/host-imports/generated_bindings/Python
 ---
-{
-    "/home/consulting/Documents/wasmer/wasmer-pack/examples/host-imports/generated_bindings/Python/MANIFEST.in",
-    "/home/consulting/Documents/wasmer/wasmer-pack/examples/host-imports/generated_bindings/Python/host_imports/__init__.py",
-    "/home/consulting/Documents/wasmer/wasmer-pack/examples/host-imports/generated_bindings/Python/host_imports/bindings/__init__.py",
-    "/home/consulting/Documents/wasmer/wasmer-pack/examples/host-imports/generated_bindings/Python/host_imports/bindings/host_imports/__init__.py",
-    "/home/consulting/Documents/wasmer/wasmer-pack/examples/host-imports/generated_bindings/Python/host_imports/bindings/host_imports/bindings.py",
-    "/home/consulting/Documents/wasmer/wasmer-pack/examples/host-imports/generated_bindings/Python/host_imports/py.typed",
-    "/home/consulting/Documents/wasmer/wasmer-pack/examples/host-imports/generated_bindings/Python/pyproject.toml",
-}
+[
+    "generated_bindings/Python/MANIFEST.in",
+    "generated_bindings/Python/host_imports/__init__.py",
+    "generated_bindings/Python/host_imports/bindings/__init__.py",
+    "generated_bindings/Python/host_imports/bindings/host_imports/__init__.py",
+    "generated_bindings/Python/host_imports/bindings/host_imports/bindings.py",
+    "generated_bindings/Python/host_imports/py.typed",
+    "generated_bindings/Python/pyproject.toml",
+]
