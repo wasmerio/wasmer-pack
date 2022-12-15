@@ -1,18 +1,14 @@
 use std::{
+    collections::HashSet,
     path::Path,
     process::{Command, Stdio},
 };
 
 use anyhow::{Context, Error};
-use wasmer_pack_testing::Language;
+use ignore::Walk;
+use wasmer_pack_cli::Language;
 
-fn main() -> Result<(), Error> {
-    let crate_root = Path::new(env!("CARGO_MANIFEST_DIR"));
-    autodiscover(&crate_root, Language::Python)?;
-    Ok(())
-}
-
-fn autodiscover(crate_dir: impl AsRef<Path>, language: Language) -> Result<(), Error> {
+pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
     let crate_dir = crate_dir.as_ref();
     tracing::info!(dir = %crate_dir.display(), "Looking for tests");
 
@@ -20,8 +16,7 @@ fn autodiscover(crate_dir: impl AsRef<Path>, language: Language) -> Result<(), E
     let temp = tempfile::tempdir().context("Unable to create a temporary directory")?;
 
     tracing::debug!("Compiling the crate and generating a WAPM package");
-    let wapm_package =
-        wasmer_pack_testing::compile_rust_to_wapm_package(&manifest_path, temp.path())?;
+    let wapm_package = crate::compile_rust_to_wapm_package(&manifest_path, temp.path())?;
 
     let generated_bindings = crate_dir.join("generated_bindings");
 
@@ -31,21 +26,42 @@ fn autodiscover(crate_dir: impl AsRef<Path>, language: Language) -> Result<(), E
             .context("Unable to delete the old generated bindings")?;
     }
 
-    tracing::debug!(
-        bindings_dir = %generated_bindings.display(),
-        "Generating bindings",
-    );
-    wasmer_pack_testing::generate_bindings(&generated_bindings, &wapm_package, language)?;
+    for language in detected_languages(crate_dir) {
+        let bindings = generated_bindings.join(language.name());
+        tracing::debug!(
+            bindings_dir = %bindings.display(),
+            "Generating bindings",
+        );
+        crate::generate_bindings(&bindings, &wapm_package, language)?;
 
-    match language {
-        Language::JavaScript => todo!(),
-        Language::Python => {
-            setup_python(crate_dir, &generated_bindings)?;
-            run_pytest(crate_dir)?;
+        match language {
+            Language::JavaScript => todo!(),
+            Language::Python => {
+                setup_python(crate_dir, &bindings)?;
+                run_pytest(crate_dir)?;
+            }
         }
     }
 
     Ok(())
+}
+
+fn detected_languages(crate_dir: &Path) -> HashSet<Language> {
+    let mut languages = HashSet::new();
+
+    for entry in Walk::new(crate_dir).filter_map(|entry| entry.ok()) {
+        match entry.path().extension().and_then(|s| s.to_str()) {
+            Some("py") => {
+                languages.insert(Language::Python);
+            }
+            Some("js") | Some("ts") => {
+                languages.insert(Language::JavaScript);
+            }
+            _ => {}
+        }
+    }
+
+    languages
 }
 
 fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error> {

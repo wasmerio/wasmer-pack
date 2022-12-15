@@ -31,12 +31,14 @@
 //! [pytest]: https://docs.pytest.org/
 //! [jest]: https://jestjs.io/
 
+mod autodiscover;
 mod errors;
 mod javascript;
 mod python;
 mod utils;
 
 pub use crate::{
+    autodiscover::autodiscover,
     errors::{CommandFailed, LoadError, TestFailure},
     utils::{compile_rust_to_wapm_package, generate_bindings},
 };
