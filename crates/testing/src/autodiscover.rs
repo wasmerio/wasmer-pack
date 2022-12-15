@@ -168,7 +168,7 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
     cmd.arg("add")
         .arg("--no-interaction")
         .arg("--editable")
-        .arg(generated_bindings);
+        .arg(generated_bindings.strip_prefix(crate_dir)?);
     tracing::info!(?cmd, "Adding the generated bindings as a dependency");
     let status = cmd
         .stdin(Stdio::null())
@@ -186,16 +186,6 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
 }
 
 fn run_pytest(crate_dir: &Path) -> Result<(), Error> {
-    let status = Command::new("ls")
-        .arg("--recursive")
-        .arg(crate_dir)
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .status()
-        .context("Unable to run ls. Is it installed?")?;
-    anyhow::ensure!(status.success(), "ls failed");
-
     let mut cmd = Command::new("poetry");
     cmd.arg("run").arg("pytest").arg("--verbose");
     tracing::info!(?cmd, "Running pytest");

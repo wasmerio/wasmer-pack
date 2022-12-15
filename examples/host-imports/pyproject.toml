@@ -1,14 +1,14 @@
 [tool.poetry]
 name = "tests"
 version = "0.1.0"
-description = ""
+description = "Python integration tests"
 authors = ["Michael-F-Bryan <michael@wasmer.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
 pytest = "^7.2.0"
-host-imports = {path = "/home/consulting/Documents/wasmer/wasmer-pack/examples/host-imports/generated_bindings/Python", develop = true}
+host-imports = {path = "generated_bindings/Python", develop = true}
 
 
 [build-system]
