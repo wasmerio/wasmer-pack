@@ -1,0 +1,13 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: examples/hello-wasi/generated_bindings/Python
+---
+[
+    "generated_bindings/Python/MANIFEST.in",
+    "generated_bindings/Python/hello_wasi/__init__.py",
+    "generated_bindings/Python/hello_wasi/bindings/__init__.py",
+    "generated_bindings/Python/hello_wasi/bindings/hello_wasi/__init__.py",
+    "generated_bindings/Python/hello_wasi/bindings/hello_wasi/bindings.py",
+    "generated_bindings/Python/hello_wasi/py.typed",
+    "generated_bindings/Python/pyproject.toml",
+]

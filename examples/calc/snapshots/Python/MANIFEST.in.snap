@@ -1,0 +1,6 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: examples/calc/generated_bindings/Python/MANIFEST.in
+---
+include calc/py.typed
+include calc/bindings/calc/*.wasm

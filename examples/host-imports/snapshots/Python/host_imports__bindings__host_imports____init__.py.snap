@@ -1,0 +1,5 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: examples/host-imports/generated_bindings/Python/host_imports/bindings/host_imports/__init__.py
+---
+from .bindings import *

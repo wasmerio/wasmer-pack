@@ -1,6 +1,6 @@
 ---
-source: crates/wasmer-pack/src/py/mod.rs
-expression: "files[\"wasmer_pack/bindings/__init__.py\"].utf8_contents().unwrap()"
+source: crates/testing/src/autodiscover.rs
+input_file: examples/calc/generated_bindings/Python/calc/bindings/__init__.py
 ---
 '''
 Bindings to the  library.
@@ -10,10 +10,8 @@ from pathlib import Path
 from typing import Optional, Any
 
 from wasmer import Store, Module, wasi # type: ignore
-from .wasmer_pack.bindings import (
-    WasmerPack as _WasmerPack,
-    add_browser_to_imports as _wasmer_pack__add_browser_to_imports,
-    Browser as _wasmer_pack__Browser,
+from .calc.bindings import (
+    Calc as _Calc,
 )
 
 class Bindings:
@@ -34,19 +32,17 @@ class Bindings:
         self._cache[filename] = module
         return module
 
-    def wasmer_pack(
+    def calc(
         self,
-        browser: _wasmer_pack__Browser,
         module: Optional[Module] = None,
-    ) -> _WasmerPack:
+    ) -> _Calc:
         """
-        Instantiate the "wasmer_pack" library.
-        :param browser: An implementation of the "browser" interface.
+        Instantiate the "calc" library.
         :param module: A user-specified WebAssembly module to use instead of the
                        one bundled with this package.
         """
 
-        filename = "wasmer_pack/wasmer_pack_wasm.wasm"
+        filename = "calc/calc.wasm"
         if not module:
             module = self._get_module(filename)
 
@@ -57,8 +53,7 @@ class Bindings:
         def get_export(item_name: str):
             assert wrapper is not None
             return getattr(wrapper.instance.exports, item_name)
-        _wasmer_pack__add_browser_to_imports(self._store, imports, browser, get_export)
 
-        wrapper = _WasmerPack(self._store, imports, module)
+        wrapper = _Calc(self._store, imports, module)
         return wrapper
     

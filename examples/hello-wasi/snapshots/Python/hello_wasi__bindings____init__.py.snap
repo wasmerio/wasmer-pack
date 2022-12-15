@@ -1,21 +1,18 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: examples/hello-wasi/generated_bindings/Python/hello_wasi/bindings/__init__.py
+---
 '''
-Bindings to the {{interface_name}} library.
+Bindings to the  library.
 '''
 
 from pathlib import Path
 from typing import Optional, Any
 
 from wasmer import Store, Module, wasi # type: ignore
-
-{%- for lib in libraries %}
-from .{{lib.ident}}.bindings import (
-    {{lib.class_name}} as _{{lib.class_name}},
-    {%- for imp in lib.imports %}
-    add_{{imp.ident}}_to_imports as _{{lib.ident}}__add_{{imp.ident}}_to_imports,
-    {{imp.class_name}} as _{{lib.ident}}__{{imp.class_name}},
-    {%- endfor %}
+from .hello_wasi.bindings import (
+    HelloWasi as _HelloWasi,
 )
-{%- endfor %}
 
 class Bindings:
     """
@@ -35,32 +32,20 @@ class Bindings:
         self._cache[filename] = module
         return module
 
-    {% for lib in libraries -%}
-    def {{lib.ident}}(
+    def hello_wasi(
         self,
-        {%- if lib.wasi %}
         env: Optional[wasi.Environment] = None,
-        {%- endif %}
-        {%- for imp in lib.imports %}
-        {{imp.ident}}: _{{lib.ident}}__{{imp.class_name}},
-        {%- endfor %}
         module: Optional[Module] = None,
-    ) -> _{{lib.class_name}}:
+    ) -> _HelloWasi:
         """
-        Instantiate the "{{lib.ident}}" library.
-
-        {%- if lib.wasi %}
+        Instantiate the "hello_wasi" library.
         :param env: A pre-initialized WASI environment. If not specified, a
                      default value will be used.
-        {%- endif %}
-        {%- for imp in lib.imports %}
-        :param {{imp.ident}}: An implementation of the "{{imp.interface_name}}" interface.
-        {%- endfor %}
         :param module: A user-specified WebAssembly module to use instead of the
                        one bundled with this package.
         """
 
-        filename = "{{lib.ident}}/{{lib.module_filename}}"
+        filename = "hello_wasi/hello-wasi.wasm"
         if not module:
             module = self._get_module(filename)
 
@@ -71,20 +56,13 @@ class Bindings:
         def get_export(item_name: str):
             assert wrapper is not None
             return getattr(wrapper.instance.exports, item_name)
-
-        {%- for imp in lib.imports %}
-        _{{lib.ident}}__add_{{imp.ident}}_to_imports(self._store, imports, {{imp.ident}}, get_export)
-        {%- endfor %}
-
-        {%- if lib.wasi %}
         version = wasi.get_version(module, strict=True)
         assert version is not None, f'"{filename}" is not a valid WASI executable'
         if not env:
-            env = wasi.StateBuilder("{{lib.ident}}").finalize()
+            env = wasi.StateBuilder("hello_wasi").finalize()
         wasi_imports = env.generate_imports(self._store, version)
         imports.update(wasi_imports)
-        {%- endif %}
 
-        wrapper = _{{lib.class_name}}(self._store, imports, module)
+        wrapper = _HelloWasi(self._store, imports, module)
         return wrapper
-    {% endfor %}
+    

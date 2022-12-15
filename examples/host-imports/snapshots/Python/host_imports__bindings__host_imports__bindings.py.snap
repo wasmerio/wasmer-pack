@@ -1,0 +1,243 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: examples/host-imports/generated_bindings/Python/host_imports/bindings/host_imports/bindings.py
+---
+from abc import abstractmethod
+from typing import Any, Callable
+import wasmer # type: ignore
+
+try:
+    from typing import Protocol
+except ImportError:
+    class Protocol: # type: ignore
+        pass
+
+class HostImports:
+    instance: wasmer.Instance
+    _start: wasmer.Function
+    def __init__(self, store: wasmer.Store, imports: dict[str, dict[str, Any]], module: wasmer.Module):
+        self.instance = wasmer.Instance(module, imports)
+        
+        start = self.instance.exports.__getattribute__('start')
+        assert(isinstance(start, wasmer.Function))
+        self._start = start
+    def start(self) -> None:
+        self._start()
+        return None
+from abc import abstractmethod
+from typing import Any, Callable, Tuple, cast
+import wasmer # type: ignore
+
+try:
+    from typing import Protocol
+except ImportError:
+    class Protocol: # type: ignore
+        pass
+
+
+def _store(make_view: Callable[[], Any], mem: wasmer.Memory, base: int, offset: int, val: Any) -> None:
+    ptr = (base & 0xffffffff) + offset
+    view = make_view()
+    if ptr + view.bytes_per_element > mem.data_size:
+        raise IndexError('out-of-bounds store')
+    view_ptr = ptr // view.bytes_per_element
+    view[view_ptr] = val
+
+def _decode_utf8(mem: wasmer.Memory, ptr: int, len: int) -> str:
+    ptr = ptr & 0xffffffff
+    len = len & 0xffffffff
+    if ptr + len > mem.data_size:
+        raise IndexError('string out of bounds')
+    view = mem.uint8_view()
+    bytes = bytearray(view[ptr:ptr+len])
+    x = bytes.decode('utf8')
+    return x
+
+def _encode_utf8(val: str, realloc: wasmer.Function, mem: wasmer.Memory) -> Tuple[int, int]:
+    bytes = val.encode('utf8')
+    ptr = realloc(0, 0, 1, len(bytes))
+    assert(isinstance(ptr, int))
+    ptr = ptr & 0xffffffff
+    if ptr + len(bytes) > mem.data_size:
+        raise IndexError('string out of bounds')
+    view = mem.uint8_view()
+    view[ptr:ptr+len(bytes)] = bytes
+    return (ptr, len(bytes))
+from abc import abstractmethod
+from typing import Any, Callable
+import wasmer # type: ignore
+
+try:
+    from typing import Protocol
+except ImportError:
+    class Protocol: # type: ignore
+        pass
+
+class HostImports:
+    instance: wasmer.Instance
+    _start: wasmer.Function
+    def __init__(self, store: wasmer.Store, imports: dict[str, dict[str, Any]], module: wasmer.Module):
+        self.instance = wasmer.Instance(module, imports)
+        
+        start = self.instance.exports.__getattribute__('start')
+        assert(isinstance(start, wasmer.Function))
+        self._start = start
+    def start(self) -> None:
+        self._start()
+        return None
+class Fs(Protocol):
+    @abstractmethod
+    def read_file(self, path: str) -> str:
+        raise NotImplementedError
+
+def add_fs_to_imports(store: wasmer.Store, imports: dict[str, dict[str, Any]], host: Fs, get_export: Callable[[str], Any]) -> None:
+    ty = wasmer.FunctionType([wasmer.Type.I32, wasmer.Type.I32, wasmer.Type.I32], [])
+    def read_file(arg0: int, arg1: int, arg2: int) -> None:
+        m = get_export("memory")
+        assert(isinstance(m, wasmer.Memory))
+        memory = cast(wasmer.Memory, m)
+        realloc = get_export("canonical_abi_realloc")
+        assert(isinstance(realloc, wasmer.Function))
+        ptr = arg0
+        len0 = arg1
+        ret = host.read_file(_decode_utf8(memory, ptr, len0))
+        ptr1, len2 = _encode_utf8(ret, realloc, memory)
+        _store(memory.uint32_view, memory, arg2, 4, len2)
+        _store(memory.uint32_view, memory, arg2, 0, ptr1)
+    imports.setdefault('fs', {})['read-file'] = wasmer.Function(store, read_file, ty)
+from abc import abstractmethod
+from typing import Any, Callable, Tuple, cast
+import wasmer # type: ignore
+
+try:
+    from typing import Protocol
+except ImportError:
+    class Protocol: # type: ignore
+        pass
+
+
+def _store(make_view: Callable[[], Any], mem: wasmer.Memory, base: int, offset: int, val: Any) -> None:
+    ptr = (base & 0xffffffff) + offset
+    view = make_view()
+    if ptr + view.bytes_per_element > mem.data_size:
+        raise IndexError('out-of-bounds store')
+    view_ptr = ptr // view.bytes_per_element
+    view[view_ptr] = val
+
+def _decode_utf8(mem: wasmer.Memory, ptr: int, len: int) -> str:
+    ptr = ptr & 0xffffffff
+    len = len & 0xffffffff
+    if ptr + len > mem.data_size:
+        raise IndexError('string out of bounds')
+    view = mem.uint8_view()
+    bytes = bytearray(view[ptr:ptr+len])
+    x = bytes.decode('utf8')
+    return x
+
+def _encode_utf8(val: str, realloc: wasmer.Function, mem: wasmer.Memory) -> Tuple[int, int]:
+    bytes = val.encode('utf8')
+    ptr = realloc(0, 0, 1, len(bytes))
+    assert(isinstance(ptr, int))
+    ptr = ptr & 0xffffffff
+    if ptr + len(bytes) > mem.data_size:
+        raise IndexError('string out of bounds')
+    view = mem.uint8_view()
+    view[ptr:ptr+len(bytes)] = bytes
+    return (ptr, len(bytes))
+from abc import abstractmethod
+from typing import Any, Callable, Tuple, cast
+import wasmer # type: ignore
+
+try:
+    from typing import Protocol
+except ImportError:
+    class Protocol: # type: ignore
+        pass
+
+
+def _store(make_view: Callable[[], Any], mem: wasmer.Memory, base: int, offset: int, val: Any) -> None:
+    ptr = (base & 0xffffffff) + offset
+    view = make_view()
+    if ptr + view.bytes_per_element > mem.data_size:
+        raise IndexError('out-of-bounds store')
+    view_ptr = ptr // view.bytes_per_element
+    view[view_ptr] = val
+
+def _decode_utf8(mem: wasmer.Memory, ptr: int, len: int) -> str:
+    ptr = ptr & 0xffffffff
+    len = len & 0xffffffff
+    if ptr + len > mem.data_size:
+        raise IndexError('string out of bounds')
+    view = mem.uint8_view()
+    bytes = bytearray(view[ptr:ptr+len])
+    x = bytes.decode('utf8')
+    return x
+
+def _encode_utf8(val: str, realloc: wasmer.Function, mem: wasmer.Memory) -> Tuple[int, int]:
+    bytes = val.encode('utf8')
+    ptr = realloc(0, 0, 1, len(bytes))
+    assert(isinstance(ptr, int))
+    ptr = ptr & 0xffffffff
+    if ptr + len(bytes) > mem.data_size:
+        raise IndexError('string out of bounds')
+    view = mem.uint8_view()
+    view[ptr:ptr+len(bytes)] = bytes
+    return (ptr, len(bytes))
+from abc import abstractmethod
+from typing import Any, Callable
+import wasmer # type: ignore
+
+try:
+    from typing import Protocol
+except ImportError:
+    class Protocol: # type: ignore
+        pass
+
+class HostImports:
+    instance: wasmer.Instance
+    _start: wasmer.Function
+    def __init__(self, store: wasmer.Store, imports: dict[str, dict[str, Any]], module: wasmer.Module):
+        self.instance = wasmer.Instance(module, imports)
+        
+        start = self.instance.exports.__getattribute__('start')
+        assert(isinstance(start, wasmer.Function))
+        self._start = start
+    def start(self) -> None:
+        self._start()
+        return None
+class Fs(Protocol):
+    @abstractmethod
+    def read_file(self, path: str) -> str:
+        raise NotImplementedError
+
+def add_fs_to_imports(store: wasmer.Store, imports: dict[str, dict[str, Any]], host: Fs, get_export: Callable[[str], Any]) -> None:
+    ty = wasmer.FunctionType([wasmer.Type.I32, wasmer.Type.I32, wasmer.Type.I32], [])
+    def read_file(arg0: int, arg1: int, arg2: int) -> None:
+        m = get_export("memory")
+        assert(isinstance(m, wasmer.Memory))
+        memory = cast(wasmer.Memory, m)
+        realloc = get_export("canonical_abi_realloc")
+        assert(isinstance(realloc, wasmer.Function))
+        ptr = arg0
+        len0 = arg1
+        ret = host.read_file(_decode_utf8(memory, ptr, len0))
+        ptr1, len2 = _encode_utf8(ret, realloc, memory)
+        _store(memory.uint32_view, memory, arg2, 4, len2)
+        _store(memory.uint32_view, memory, arg2, 0, ptr1)
+    imports.setdefault('fs', {})['read-file'] = wasmer.Function(store, read_file, ty)
+class Logging(Protocol):
+    @abstractmethod
+    def log(self, message: str) -> None:
+        raise NotImplementedError
+
+def add_logging_to_imports(store: wasmer.Store, imports: dict[str, dict[str, Any]], host: Logging, get_export: Callable[[str], Any]) -> None:
+    ty = wasmer.FunctionType([wasmer.Type.I32, wasmer.Type.I32], [])
+    def log(arg0: int, arg1: int) -> None:
+        m = get_export("memory")
+        assert(isinstance(m, wasmer.Memory))
+        memory = cast(wasmer.Memory, m)
+        ptr = arg0
+        len0 = arg1
+        host.log(_decode_utf8(memory, ptr, len0))
+    imports.setdefault('logging', {})['log'] = wasmer.Function(store, log, ty)
+

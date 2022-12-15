@@ -1,6 +1,6 @@
 ---
-source: crates/wasmer-pack/src/py/mod.rs
-expression: "files[\"wasmer_pack/bindings/__init__.py\"].utf8_contents().unwrap()"
+source: crates/testing/src/autodiscover.rs
+input_file: examples/host-imports/generated_bindings/Python/host_imports/bindings/__init__.py
 ---
 '''
 Bindings to the  library.
@@ -10,10 +10,12 @@ from pathlib import Path
 from typing import Optional, Any
 
 from wasmer import Store, Module, wasi # type: ignore
-from .wasmer_pack.bindings import (
-    WasmerPack as _WasmerPack,
-    add_browser_to_imports as _wasmer_pack__add_browser_to_imports,
-    Browser as _wasmer_pack__Browser,
+from .host_imports.bindings import (
+    HostImports as _HostImports,
+    add_fs_to_imports as _host_imports__add_fs_to_imports,
+    Fs as _host_imports__Fs,
+    add_logging_to_imports as _host_imports__add_logging_to_imports,
+    Logging as _host_imports__Logging,
 )
 
 class Bindings:
@@ -34,19 +36,21 @@ class Bindings:
         self._cache[filename] = module
         return module
 
-    def wasmer_pack(
+    def host_imports(
         self,
-        browser: _wasmer_pack__Browser,
+        fs: _host_imports__Fs,
+        logging: _host_imports__Logging,
         module: Optional[Module] = None,
-    ) -> _WasmerPack:
+    ) -> _HostImports:
         """
-        Instantiate the "wasmer_pack" library.
-        :param browser: An implementation of the "browser" interface.
+        Instantiate the "host_imports" library.
+        :param fs: An implementation of the "fs" interface.
+        :param logging: An implementation of the "logging" interface.
         :param module: A user-specified WebAssembly module to use instead of the
                        one bundled with this package.
         """
 
-        filename = "wasmer_pack/wasmer_pack_wasm.wasm"
+        filename = "host_imports/host-imports.wasm"
         if not module:
             module = self._get_module(filename)
 
@@ -57,8 +61,9 @@ class Bindings:
         def get_export(item_name: str):
             assert wrapper is not None
             return getattr(wrapper.instance.exports, item_name)
-        _wasmer_pack__add_browser_to_imports(self._store, imports, browser, get_export)
+        _host_imports__add_fs_to_imports(self._store, imports, fs, get_export)
+        _host_imports__add_logging_to_imports(self._store, imports, logging, get_export)
 
-        wrapper = _WasmerPack(self._store, imports, module)
+        wrapper = _HostImports(self._store, imports, module)
         return wrapper
     

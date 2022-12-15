@@ -11,6 +11,7 @@ env:
   RUST_BACKTRACE: 1
   CARGO_NET_GIT_FETCH_WITH_CLI: true
   MDBOOK_VERSION: v0.4.21
+  RUST_LOG: info
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,13 +29,18 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: "1.2.2"
       - name: Install Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: "3.10"
+          cache: poetry
+          cache-dependency-path: "**/poetry.lock"
       - name: Install Pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python3
-      - run: yarn --version
+        run: pip install --user pipenv
       - name: Setup Wasmer
         uses: wasmerio/setup-wasmer@v1
       - name: Install cargo-wapm
