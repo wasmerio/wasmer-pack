@@ -15,6 +15,13 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- Generated JavaScript packages can now import host functions
+  ([#109](https://github.com/wasmerio/wasmer-pack/pull/109))
+- Generated Python packages can now import host functions
+  ([#113](https://github.com/wasmerio/wasmer-pack/pull/113))
+
 ### Changed
 
 - Renamed `wasmer-pack`'s sub-commands to be called `javascript` and `python`,
