@@ -29,20 +29,20 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-      - name: Install Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.9"
-          cache: poetry
-          cache-dependency-path: "**/poetry.lock"
-      - name: Install Python Dependencies
-        run: pip install --user pipenv
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           version: "1.2.2"
           virtualenvs-create: true
           virtualenvs-in-project: true
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: poetry
+          cache-dependency-path: "**/poetry.lock"
+      - name: Install Pipenv
+        run: pip install --user pipenv
       - name: Setup Wasmer
         uses: wasmerio/setup-wasmer@v1
       - name: Install cargo-wapm
