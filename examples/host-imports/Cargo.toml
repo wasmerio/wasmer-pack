@@ -19,7 +19,7 @@ imports = ["fs.import.wai", "logging.import.wai"]
 crate-type = ["cdylib"]
 
 [[test]]
-name = "host-import-tests"
+name = "host-import-integration-tests"
 harness = false
 
 [dependencies]
@@ -27,7 +27,5 @@ wai-bindgen-rust = "0.2.1"
 
 [dev-dependencies]
 anyhow = "1.0.66"
-tempfile = "3.3.0"
-tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
 wasmer-pack-testing = { path = "../../crates/testing" }

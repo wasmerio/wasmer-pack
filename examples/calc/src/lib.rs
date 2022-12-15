@@ -1,4 +1,4 @@
-wai_bindgen_rust::export!("calc.export.wai");
+wai_bindgen_rust::export!("calc.exports.wai");
 
 struct Calc;
 

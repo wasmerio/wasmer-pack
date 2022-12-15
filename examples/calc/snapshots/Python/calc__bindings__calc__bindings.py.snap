@@ -1,0 +1,28 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: examples/calc/generated_bindings/Python/calc/bindings/calc/bindings.py
+---
+from abc import abstractmethod
+from typing import Any, Callable
+import wasmer # type: ignore
+
+try:
+    from typing import Protocol
+except ImportError:
+    class Protocol: # type: ignore
+        pass
+
+class Calc:
+    instance: wasmer.Instance
+    _add: wasmer.Function
+    def __init__(self, store: wasmer.Store, imports: dict[str, dict[str, Any]], module: wasmer.Module):
+        self.instance = wasmer.Instance(module, imports)
+        
+        add = self.instance.exports.__getattribute__('add')
+        assert(isinstance(add, wasmer.Function))
+        self._add = add
+    def add(self, a: float, b: float) -> float:
+        ret = self._add(a, b)
+        assert(isinstance(ret, float))
+        return ret
+

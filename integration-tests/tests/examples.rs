@@ -15,21 +15,6 @@ fn initialize_logging() {
 }
 
 #[test]
-fn hello_wasi_python() {
-    initialize_logging();
-
-    let hello_wasi_dir = project_root().join("examples").join("hello-wasi");
-    let cargo_toml = hello_wasi_dir.join("Cargo.toml");
-
-    let env = TestEnvironment::for_crate(cargo_toml, env!("CARGO_TARGET_TMPDIR"))
-        .context("Unable to initialize the test environment")
-        .unwrap();
-    env.python(hello_wasi_dir.join("test.py"))
-        .context("Python test")
-        .unwrap();
-}
-
-#[test]
 #[ignore = "JavaScript tests aren't fully implemented yet"]
 fn hello_wasi_javascript() {
     initialize_logging();

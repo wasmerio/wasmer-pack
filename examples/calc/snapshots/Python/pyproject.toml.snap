@@ -1,0 +1,14 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: examples/calc/generated_bindings/Python/pyproject.toml
+---
+[project]
+name = "calc"
+version = "0.0.0"
+keywords = []
+dependencies = ["wasmer", "wasmer_compiler_cranelift"]
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
