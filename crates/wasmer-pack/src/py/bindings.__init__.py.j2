@@ -64,7 +64,7 @@ class Bindings:
         if not module:
             module = self._get_module(filename)
 
-        imports = {}
+        imports: dict[str, Any] = {}
 
         wrapper = None
 

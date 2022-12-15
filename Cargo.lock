@@ -716,6 +716,8 @@ name = "host-imports"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "tempfile",
+ "tracing",
  "wai-bindgen-rust",
  "wasmer-pack-testing",
 ]
