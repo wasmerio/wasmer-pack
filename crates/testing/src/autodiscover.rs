@@ -2,6 +2,7 @@ use std::{
     collections::{BTreeSet, HashSet},
     path::Path,
     process::{Command, Stdio},
+    time::Instant,
 };
 
 use anyhow::{Context, Error};
@@ -10,26 +11,28 @@ use insta::Settings;
 use wasmer_pack_cli::Language;
 
 pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
+    let start = Instant::now();
+
     let crate_dir = crate_dir.as_ref();
     tracing::info!(dir = %crate_dir.display(), "Looking for tests");
 
     let manifest_path = crate_dir.join("Cargo.toml");
     let temp = tempfile::tempdir().context("Unable to create a temporary directory")?;
 
-    tracing::debug!("Compiling the crate and generating a WAPM package");
+    tracing::info!("Compiling the crate and generating a WAPM package");
     let wapm_package = crate::compile_rust_to_wapm_package(&manifest_path, temp.path())?;
 
     let generated_bindings = crate_dir.join("generated_bindings");
 
     if generated_bindings.exists() {
-        tracing::debug!("Deleting bindings from a previous run");
+        tracing::info!("Deleting bindings from a previous run");
         std::fs::remove_dir_all(&generated_bindings)
             .context("Unable to delete the old generated bindings")?;
     }
 
     for language in detected_languages(crate_dir) {
         let bindings = generated_bindings.join(language.name());
-        tracing::debug!(
+        tracing::info!(
             bindings_dir = %bindings.display(),
             "Generating bindings",
         );
@@ -45,6 +48,8 @@ pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
 
         snapshot_generated_bindings(crate_dir, &bindings, language)?;
     }
+
+    tracing::info!(duration = ?start.elapsed(), "Testing complete");
 
     Ok(())
 }
@@ -95,7 +100,9 @@ fn snapshot_generated_bindings(
 
         let mut settings = Settings::clone_current();
         let simplified_path = path.strip_prefix(package_dir)?;
-        settings.set_input_file(simplified_path);
+        settings.set_input_file(&path);
+        let _guard = settings.bind_to_scope();
+
         let snapshot_name = simplified_path.display().to_string();
         insta::assert_display_snapshot!(snapshot_name, &contents);
     }
@@ -136,7 +143,7 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
 
     let mut cmd = Command::new("poetry");
     cmd.arg("init").arg("--name=tests").arg("--no-interaction");
-    tracing::debug!(?cmd, "Initializing the Python package");
+    tracing::info!(?cmd, "Initializing the Python package");
     let status = cmd
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
@@ -148,7 +155,7 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
 
     let mut cmd = Command::new("poetry");
     cmd.arg("add").arg("--no-interaction").arg("pytest");
-    tracing::debug!(?cmd, "Adding pytest as a dependency");
+    tracing::info!(?cmd, "Adding pytest as a dependency");
     let status = cmd
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
@@ -163,7 +170,7 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
         .arg("--no-interaction")
         .arg("--editable")
         .arg(generated_bindings);
-    tracing::debug!(?cmd, "Adding the generated bindings as a dependency");
+    tracing::info!(?cmd, "Adding the generated bindings as a dependency");
     let status = cmd
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
@@ -182,7 +189,7 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
 fn run_pytest(crate_dir: &Path) -> Result<(), Error> {
     let mut cmd = Command::new("poetry");
     cmd.arg("run").arg("pytest").arg("--verbose");
-    tracing::debug!(?cmd, "Running pytest");
+    tracing::info!(?cmd, "Running pytest");
     let status = cmd
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())

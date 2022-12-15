@@ -1,6 +1,6 @@
 ---
 source: crates/testing/src/autodiscover.rs
-input_file: examples/host-imports/generated_bindings/Python
+input_file: examples/host-imports/generated_bindings/Python/host_imports/bindings/__init__.py
 ---
 '''
 Bindings to the  library.
