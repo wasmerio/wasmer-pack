@@ -1,0 +1,69 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: examples/host-imports/generated_bindings/Python
+---
+'''
+Bindings to the  library.
+'''
+
+from pathlib import Path
+from typing import Optional, Any
+
+from wasmer import Store, Module, wasi # type: ignore
+from .host_imports.bindings import (
+    HostImports as _HostImports,
+    add_fs_to_imports as _host_imports__add_fs_to_imports,
+    Fs as _host_imports__Fs,
+    add_logging_to_imports as _host_imports__add_logging_to_imports,
+    Logging as _host_imports__Logging,
+)
+
+class Bindings:
+    """
+    Instantiate bindings to the various libraries in this package.
+    """
+
+    def __init__(self, store: Store):
+        self._store = store
+        self._cache: dict[str, Module] = {}
+
+    def _get_module(self, filename: str) -> Module:
+        if filename in self._cache:
+            return self._cache[filename]
+
+        wasm = Path(__file__).parent.joinpath(filename).read_bytes()
+        module = Module(self._store, wasm)
+        self._cache[filename] = module
+        return module
+
+    def host_imports(
+        self,
+        fs: _host_imports__Fs,
+        logging: _host_imports__Logging,
+        module: Optional[Module] = None,
+    ) -> _HostImports:
+        """
+        Instantiate the "host_imports" library.
+        :param fs: An implementation of the "fs" interface.
+        :param logging: An implementation of the "logging" interface.
+        :param module: A user-specified WebAssembly module to use instead of the
+                       one bundled with this package.
+        """
+
+        filename = "host_imports/host-imports.wasm"
+        if not module:
+            module = self._get_module(filename)
+
+        imports: dict[str, Any] = {}
+
+        wrapper = None
+
+        def get_export(item_name: str):
+            assert wrapper is not None
+            return getattr(wrapper.instance.exports, item_name)
+        _host_imports__add_fs_to_imports(self._store, imports, fs, get_export)
+        _host_imports__add_logging_to_imports(self._store, imports, logging, get_export)
+
+        wrapper = _HostImports(self._store, imports, module)
+        return wrapper
+    

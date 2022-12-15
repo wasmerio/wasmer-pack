@@ -1,0 +1,14 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: examples/host-imports/generated_bindings/Python
+---
+[project]
+name = "host_imports"
+version = "0.0.0"
+keywords = []
+dependencies = ["wasmer", "wasmer_compiler_cranelift"]
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+

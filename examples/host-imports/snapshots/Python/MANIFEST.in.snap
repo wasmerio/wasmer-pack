@@ -1,0 +1,6 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: examples/host-imports/generated_bindings/Python
+---
+include host_imports/py.typed
+include host_imports/bindings/host_imports/*.wasm

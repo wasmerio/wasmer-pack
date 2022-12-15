@@ -1,11 +1,12 @@
 use std::{
-    collections::HashSet,
+    collections::{BTreeSet, HashSet},
     path::Path,
     process::{Command, Stdio},
 };
 
 use anyhow::{Context, Error};
-use ignore::Walk;
+use ignore::{overrides::OverrideBuilder, Walk, WalkBuilder};
+use insta::Settings;
 use wasmer_pack_cli::Language;
 
 pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
@@ -41,6 +42,8 @@ pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
                 run_pytest(crate_dir)?;
             }
         }
+
+        snapshot_generated_bindings(crate_dir, &bindings, language)?;
     }
 
     Ok(())
@@ -62,6 +65,63 @@ fn detected_languages(crate_dir: &Path) -> HashSet<Language> {
     }
 
     languages
+}
+
+fn snapshot_generated_bindings(
+    crate_dir: &Path,
+    package_dir: &Path,
+    language: Language,
+) -> Result<(), Error> {
+    let snapshot_files: BTreeSet<_> = language_specific_matches(package_dir, language)?
+        .filter_map(|entry| entry.ok())
+        .filter(|entry| entry.path().is_file())
+        .map(|entry| entry.into_path())
+        .collect();
+
+    let mut settings = Settings::clone_current();
+    settings.set_snapshot_path(crate_dir.join("snapshots").join(language.name()));
+    settings.set_prepend_module_to_snapshot(false);
+    settings.set_input_file(package_dir);
+    settings.set_omit_expression(true);
+    settings.add_filter(r"wasmer-pack v\d+\.\d+\.\d+", "wasmer-pack vX.Y.Z");
+
+    let _guard = settings.bind_to_scope();
+
+    insta::assert_debug_snapshot!("all files", &snapshot_files);
+
+    for path in snapshot_files {
+        let contents = std::fs::read_to_string(&path)
+            .with_context(|| format!("Unable to read \"{}\"", path.display()))?;
+
+        let mut settings = Settings::clone_current();
+        let simplified_path = path.strip_prefix(package_dir)?;
+        settings.set_input_file(simplified_path);
+        let snapshot_name = simplified_path.display().to_string();
+        insta::assert_display_snapshot!(snapshot_name, &contents);
+    }
+
+    Ok(())
+}
+
+fn language_specific_matches(package_dir: &Path, language: Language) -> Result<Walk, Error> {
+    let mut builder = OverrideBuilder::new(package_dir);
+
+    let overrides = match language {
+        Language::JavaScript => todo!(),
+        Language::Python => builder
+            .add("*.py")?
+            .add("*.toml")?
+            .add("*.in")?
+            .add("py.typed")?
+            .build()?,
+    };
+
+    let walk = WalkBuilder::new(package_dir)
+        .parents(false)
+        .overrides(overrides)
+        .build();
+
+    Ok(walk)
 }
 
 fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error> {
