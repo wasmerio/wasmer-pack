@@ -155,6 +155,7 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
         cmd.arg("install")
             .arg("--sync")
             .arg("--no-interaction")
+            .arg("--quiet")
             .arg("--no-root");
         tracing::info!(?cmd, "Installing dependencies");
         let status = cmd

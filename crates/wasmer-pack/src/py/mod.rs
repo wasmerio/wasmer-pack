@@ -13,26 +13,12 @@ use crate::{
 };
 
 static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
-    let mut env = Environment::new();
-    env.add_template(
+    compile_templates!(
         "bindings.__init__.py",
-        include_str!("bindings.__init__.py.j2"),
-    )
-    .unwrap();
-    env.add_template(
         "top_level.__init__.py",
-        include_str!("top_level.__init__.py.j2"),
-    )
-    .unwrap();
-    env.add_template("MANIFEST.in", include_str!("MANIFEST.in.j2"))
-        .unwrap();
-    env.add_template(
+        "MANIFEST.in",
         "commands.__init__.py",
-        include_str!("commands.__init__.py.j2"),
     )
-    .unwrap();
-
-    env
 });
 
 /// Generate Python bindings.
