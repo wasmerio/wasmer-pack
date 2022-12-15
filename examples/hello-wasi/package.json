@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "dependencies": {
-    "@michael-f-bryan/hello-wasi": "/home/consulting/Documents/wasmer/wasmer-pack/target/tmp/javascript/package"
+  "devDependencies": {
+    "jest": "^29.3.1"
   }
 }

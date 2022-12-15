@@ -60,10 +60,16 @@ impl Display for CommandFailed {
 
 #[derive(Debug)]
 pub enum TestFailure {
+    InitializingYarnLink(CommandFailed),
+    TestFileExecution(CommandFailed),
+    YarnPackageLink(CommandFailed),
+    InitializingYarnUnlink(CommandFailed),
+    YarnPackageUnlink(CommandFailed),
     InitializingJavascriptEnvironment(CommandFailed),
     BindingsGeneration(wasmer_pack_cli::Error),
     DeterminingScriptDirectory,
     DeterminingScriptFilename,
+    FailedToReadPackageJson,
     InstallingDependencies(CommandFailed),
     CreatingVirtualEnvironment {
         venv_dir: PathBuf,
@@ -80,9 +86,14 @@ impl std::error::Error for TestFailure {
             | TestFailure::CreatingVirtualEnvironment { error: e, .. }
             | TestFailure::TestScript(e) => Some(e),
             TestFailure::InitializingJavascriptEnvironment(e) => Some(e),
-            TestFailure::DeterminingScriptDirectory | TestFailure::DeterminingScriptFilename => {
-                None
-            }
+            TestFailure::InitializingYarnLink(e) => Some(e),
+            TestFailure::YarnPackageLink(e) => Some(e),
+            TestFailure::InitializingYarnUnlink(e) => Some(e),
+            TestFailure::YarnPackageUnlink(e) => Some(e),
+            TestFailure::DeterminingScriptDirectory
+            | TestFailure::DeterminingScriptFilename
+            | TestFailure::FailedToReadPackageJson => None,
+            TestFailure::TestFileExecution(e) => Some(e),
         }
     }
 }
@@ -106,6 +117,24 @@ impl Display for TestFailure {
             TestFailure::TestScript(_) => write!(f, "The tests failed"),
             TestFailure::InitializingJavascriptEnvironment(_) => {
                 write!(f, "Unable to initialize the JavaScript environment")
+            }
+            TestFailure::InitializingYarnLink(_) => {
+                write!(f, "Failed to initialize yarn link")
+            }
+            TestFailure::YarnPackageLink(_) => {
+                write!(f, "Failed to yarn link the bindings to the main package")
+            }
+            TestFailure::InitializingYarnUnlink(_) => {
+                write!(f, "Failed to initialize yarn unlink")
+            }
+            TestFailure::YarnPackageUnlink(_) => {
+                write!(f, "Failed to yarn unlink the packages")
+            }
+            TestFailure::TestFileExecution(_) => {
+                write!(f, "Failed to execute test file")
+            }
+            TestFailure::FailedToReadPackageJson => {
+                write!(f, "Failed to read package.json")
             }
         }
     }

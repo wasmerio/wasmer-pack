@@ -1,11 +1,16 @@
 use std::{
     collections::{BTreeSet, HashSet},
+    ffi::OsStr,
+    fs::File,
+    io::BufReader,
     path::Path,
     process::{Command, Stdio},
     time::Instant,
 };
 
-use anyhow::{Context, Error};
+use serde::Deserialize;
+
+use anyhow::{Context, Error, Ok};
 use ignore::{overrides::OverrideBuilder, Walk, WalkBuilder};
 use insta::Settings;
 use wasmer_pack_cli::Language;
@@ -40,7 +45,10 @@ pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
         crate::generate_bindings(&bindings, &wapm_package, language)?;
 
         match language {
-            Language::JavaScript => todo!(),
+            Language::JavaScript => {
+                setup_javascript(crate_dir, &bindings)?;
+                run_jest(crate_dir)?;
+            }
             Language::Python => {
                 setup_python(crate_dir, &bindings)?;
                 run_pytest(crate_dir)?;
@@ -63,7 +71,7 @@ fn detected_languages(crate_dir: &Path) -> HashSet<Language> {
             Some("py") => {
                 languages.insert(Language::Python);
             }
-            Some("js") | Some("ts") => {
+            Some("mjs") | Some("js") | Some("ts") => {
                 languages.insert(Language::JavaScript);
             }
             _ => {}
@@ -221,5 +229,129 @@ fn run_pytest(crate_dir: &Path) -> Result<(), Error> {
         .context("Unable to run poetry. Is it installed?")?;
     anyhow::ensure!(status.success(), "pytest failed");
 
+    Ok(())
+}
+
+#[derive(Deserialize, Debug)]
+struct PackageJson {
+    name: String,
+}
+fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error> {
+    tracing::info!("Initializing the JavaScript package");
+
+    let mut cmd = Command::new("yarn");
+    cmd.arg("init").arg("--yes").current_dir(crate_dir);
+    tracing::info!(?cmd, "Initializing the Javascript package");
+
+    let status = cmd
+        .stdin(Stdio::null())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .current_dir(crate_dir)
+        .status()
+        .context("Unable to run yarn. Is it installed?")?;
+    anyhow::ensure!(
+        status.success(),
+        "Unable to initialize the JavaScript package"
+    );
+
+    // install jest to crate dir
+    let mut cmd = Command::new("yarn");
+    cmd.arg("add")
+        .arg("--dev")
+        .arg("jest")
+        .current_dir(crate_dir);
+    tracing::info!(?cmd, "Installing the Jest testing library");
+
+    let status = cmd
+        .stdin(Stdio::null())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .current_dir(crate_dir)
+        .status()
+        .context("Unable to run yarn. Is it installed?")?;
+    anyhow::ensure!(status.success(), "Unable to install jest testing library");
+
+    // reading the package and getting the namespace and name of the javascript created package
+    let package_path = generated_bindings.join("package");
+    tracing::info!(?package_path, "package_path for generated hello-wasi");
+    let package_json_path = package_path.join("package.json");
+
+    anyhow::ensure!(
+        package_json_path.is_file(),
+        "Package Json file for generated package not found"
+    );
+
+    let mut cmd = Command::new("yarn");
+    cmd.current_dir(&package_path);
+
+    tracing::info!(?cmd, "Installing dependencies for generated bindings");
+    let status = cmd
+        .stdin(Stdio::null())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .current_dir(&package_path)
+        .status()
+        .context("Unable to run yarn. Is it installed?")?;
+    anyhow::ensure!(
+        status.success(),
+        "Unable to install dependencies for generated bindings"
+    );
+
+    let file = File::open(package_json_path).unwrap();
+    let reader = BufReader::new(file);
+
+    let package_json: PackageJson = serde_json::from_reader(reader).unwrap();
+
+    let package_name = package_json.name;
+
+    let mut cmd = Command::new("yarn");
+    cmd.arg("link").current_dir(&package_path);
+
+    tracing::info!(?cmd, "Linking the generated bindings as a `Yarn link`");
+    let status = cmd
+        .stdin(Stdio::null())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .current_dir(&package_path)
+        .status()
+        .context("Unable to run yarn. Is it installed?")?;
+    anyhow::ensure!(
+        status.success(),
+        "Unable to perform yarn link on generated bindings"
+    );
+
+    let mut cmd = Command::new("yarn");
+    cmd.arg("link").arg(package_name).current_dir(crate_dir);
+
+    tracing::info!(?cmd, "Linking the testing package to generated bindings");
+    let status = cmd
+        .stdin(Stdio::null())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .current_dir(crate_dir)
+        .status()
+        .context("Unable to run yarn. Is it installed?")?;
+    anyhow::ensure!(
+        status.success(),
+        "Unable to initialize a link to the generated bindings from testing crate"
+    );
+
+    Ok(())
+}
+
+fn run_jest(crate_dir: &Path) -> Result<(), Error> {
+    let mut cmd = Command::new("yarn");
+    cmd.arg("jest").current_dir(crate_dir);
+
+    tracing::info!(?cmd, "Running Jest tests");
+    let status = cmd
+        .stdin(Stdio::null())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .current_dir(crate_dir)
+        .status()
+        .context("Unable to run yarn. Is it installed?")?;
+    anyhow::ensure!(status.success(), "jest failed");
     Ok(())
 }

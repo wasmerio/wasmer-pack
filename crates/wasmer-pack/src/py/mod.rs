@@ -197,7 +197,7 @@ fn command_bindings(ctx: &Context) -> Result<Files, Error> {
         TEMPLATES
             .get_template("commands.__init__.py")
             .unwrap()
-            .render(&ctx)?
+            .render(ctx)?
             .into(),
     );
 
@@ -216,7 +216,7 @@ fn library_bindings(ctx: &Context) -> Result<Files, Error> {
     let dunder_init = TEMPLATES
         .get_template("bindings.__init__.py")
         .unwrap()
-        .render(&ctx)?;
+        .render(ctx)?;
     files.insert("__init__.py", dunder_init.into());
 
     Ok(files)
