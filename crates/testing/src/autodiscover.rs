@@ -142,7 +142,24 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
     let pyproject = crate_dir.join("pyproject.toml");
 
     if pyproject.exists() {
-        // Assume everything has been set up correctly
+        // Assume everything has been set up correctly. Now, we just need to
+        // make sure the dependencies are available.
+
+        let mut cmd = Command::new("poetry");
+        cmd.arg("install")
+            .arg("--sync")
+            .arg("--no-interaction")
+            .arg("--no-root");
+        tracing::info!(?cmd, "Installing dependencies");
+        let status = cmd
+            .stdin(Stdio::null())
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .current_dir(crate_dir)
+            .status()
+            .context("Unable to run poetry. Is it installed?")?;
+        anyhow::ensure!(status.success(), "Unable to install Python dependencies");
+
         return Ok(());
     }
 
