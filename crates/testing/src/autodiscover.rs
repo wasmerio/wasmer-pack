@@ -1,6 +1,5 @@
 use std::{
     collections::{BTreeSet, HashSet},
-    ffi::OsStr,
     fs::File,
     io::BufReader,
     path::Path,
