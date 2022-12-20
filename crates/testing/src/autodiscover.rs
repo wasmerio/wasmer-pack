@@ -1,8 +1,10 @@
 use std::{
     collections::{BTreeSet, HashSet},
-    fs::File,
+    env,
+    fs::copy,
+    fs::{self, File},
     io::BufReader,
-    path::Path,
+    path::{Path, PathBuf},
     process::{Command, Stdio},
     time::Instant,
 };
@@ -46,11 +48,11 @@ pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
         match language {
             Language::JavaScript => {
                 setup_javascript(crate_dir, &bindings)?;
-                run_jest(crate_dir)?;
+                run_jest(crate_dir, &bindings)?;
             }
             Language::Python => {
-                setup_python(crate_dir, &bindings)?;
-                run_pytest(crate_dir)?;
+                // setup_python(crate_dir, &bindings)?;
+                // run_pytest(crate_dir)?;
             }
         }
 
@@ -134,7 +136,7 @@ fn language_specific_matches(package_dir: &Path, language: Language) -> Result<W
     let mut builder = OverrideBuilder::new(package_dir);
 
     let overrides = match language {
-        Language::JavaScript => todo!(),
+        Language::JavaScript => builder.add("*.js")?.add("*.test.js")?.build()?,
         Language::Python => builder
             .add("*.py")?
             .add("*.toml")?
@@ -235,6 +237,10 @@ fn run_pytest(crate_dir: &Path) -> Result<(), Error> {
 struct PackageJson {
     name: String,
 }
+struct YarnConfig<'a> {
+    crate_dir: &'a Path,
+    generated_bindings: &'a Path,
+}
 fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error> {
     tracing::info!("Initializing the JavaScript package");
 
@@ -271,15 +277,22 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
         .context("Unable to run yarn. Is it installed?")?;
     anyhow::ensure!(status.success(), "Unable to install jest testing library");
 
+    let jest_file_name = "jest.config.js";
+    let jest_config_file = crate_dir.join(jest_file_name);
+
+    let config_content = r#"/** @type {import('jest').Config} */
+const config = {
+    verbose: true,
+    testPathIgnorePatterns: ["node_modules", "snapshots"],
+};
+module.exports = config;"#;
+
+    fs::write(&jest_config_file, config_content)?;
+    anyhow::ensure!(crate_dir.join(&jest_config_file).exists());
+
     // reading the package and getting the namespace and name of the javascript created package
     let package_path = generated_bindings.join("package");
     tracing::info!(?package_path, "package_path for generated hello-wasi");
-    let package_json_path = package_path.join("package.json");
-
-    anyhow::ensure!(
-        package_json_path.is_file(),
-        "Package Json file for generated package not found"
-    );
 
     let mut cmd = Command::new("yarn");
     cmd.current_dir(&package_path);
@@ -297,12 +310,7 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
         "Unable to install dependencies for generated bindings"
     );
 
-    let file = File::open(package_json_path).unwrap();
-    let reader = BufReader::new(file);
-
-    let package_json: PackageJson = serde_json::from_reader(reader).unwrap();
-
-    let package_name = package_json.name;
+    let package_name = get_package_name(&package_path)?;
 
     let mut cmd = Command::new("yarn");
     cmd.arg("link").current_dir(&package_path);
@@ -321,7 +329,7 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
     );
 
     let mut cmd = Command::new("yarn");
-    cmd.arg("link").arg(package_name).current_dir(crate_dir);
+    cmd.arg("link").arg(&package_name).current_dir(crate_dir);
 
     tracing::info!(?cmd, "Linking the testing package to generated bindings");
     let status = cmd
@@ -335,11 +343,10 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
         status.success(),
         "Unable to initialize a link to the generated bindings from testing crate"
     );
-
     Ok(())
 }
 
-fn run_jest(crate_dir: &Path) -> Result<(), Error> {
+fn run_jest(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error> {
     let mut cmd = Command::new("yarn");
     cmd.arg("jest").current_dir(crate_dir);
 
@@ -352,5 +359,71 @@ fn run_jest(crate_dir: &Path) -> Result<(), Error> {
         .status()
         .context("Unable to run yarn. Is it installed?")?;
     anyhow::ensure!(status.success(), "jest failed");
+
+    let _ = YarnConfig {
+        crate_dir,
+        generated_bindings,
+    };
     Ok(())
+}
+
+impl Drop for YarnConfig<'_> {
+    fn drop(&mut self) {
+        let package_path = self.generated_bindings.join("package");
+        let package_name = get_package_name(&package_path).unwrap();
+
+        let mut cmd = Command::new("yarn");
+        cmd.arg("unlink").arg(&package_name);
+        tracing::info!(
+            ?cmd,
+            "Unlinking the dependency {:?} from the package",
+            &package_name
+        );
+
+        let status = cmd
+            .stdin(Stdio::null())
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .current_dir(self.crate_dir)
+            .status()
+            .context("Unable to run yarn. Is it installed?")
+            .unwrap();
+        assert!(
+            status.success(),
+            "Unlinked the dependency {:?} from the package",
+            package_name
+        );
+
+        let mut cmd = Command::new("yarn");
+        cmd.arg("unlink");
+        tracing::info!(?cmd, "Unlinking the dependency from yarn link");
+
+        let status = cmd
+            .stdin(Stdio::null())
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .current_dir(package_path)
+            .status()
+            .context("Unable to run yarn. Is it installed?")
+            .unwrap();
+
+        assert!(
+            status.success(),
+            "Unlinked the dependency from the yarn link",
+        );
+    }
+}
+
+fn get_package_name(package_path: &Path) -> Result<String, Error> {
+    let package_json_path = package_path.join("package.json");
+
+    anyhow::ensure!(
+        package_json_path.is_file(),
+        "Package Json file for generated package not found"
+    );
+
+    let file = File::open(package_json_path).unwrap();
+    let reader = BufReader::new(file);
+    let package_json: PackageJson = serde_json::from_reader(reader).unwrap();
+    Ok(package_json.name)
 }

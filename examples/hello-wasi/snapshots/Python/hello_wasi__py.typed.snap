@@ -1,5 +1,0 @@
----
-source: crates/testing/src/autodiscover.rs
-input_file: examples/hello-wasi/generated_bindings/Python/hello_wasi/py.typed
----
-
