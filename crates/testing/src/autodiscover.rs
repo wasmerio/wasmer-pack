@@ -51,8 +51,8 @@ pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
                 run_jest(crate_dir, &bindings)?;
             }
             Language::Python => {
-                // setup_python(crate_dir, &bindings)?;
-                // run_pytest(crate_dir)?;
+                setup_python(crate_dir, &bindings)?;
+                run_pytest(crate_dir)?;
             }
         }
 
@@ -242,23 +242,27 @@ struct YarnConfig<'a> {
     generated_bindings: &'a Path,
 }
 fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error> {
-    tracing::info!("Initializing the JavaScript package");
+    let yarn_project = crate_dir.join("yarn.lock");
 
-    let mut cmd = Command::new("yarn");
-    cmd.arg("init").arg("--yes").current_dir(crate_dir);
-    tracing::info!(?cmd, "Initializing the Javascript package");
+    if !yarn_project.exists() {
+        tracing::info!("Initializing the JavaScript package");
 
-    let status = cmd
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .current_dir(crate_dir)
-        .status()
-        .context("Unable to run yarn. Is it installed?")?;
-    anyhow::ensure!(
-        status.success(),
-        "Unable to initialize the JavaScript package"
-    );
+        let mut cmd = Command::new("yarn");
+        cmd.arg("init").arg("--yes").current_dir(crate_dir);
+        tracing::info!(?cmd, "Initializing the Javascript package");
+
+        let status = cmd
+            .stdin(Stdio::null())
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .current_dir(crate_dir)
+            .status()
+            .context("Unable to run yarn. Is it installed?")?;
+        anyhow::ensure!(
+            status.success(),
+            "Unable to initialize the JavaScript package"
+        );
+    }
 
     // install jest to crate dir
     let mut cmd = Command::new("yarn");
