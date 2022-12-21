@@ -137,10 +137,10 @@ fn language_specific_matches(package_dir: &Path, language: Language) -> Result<W
     let overrides = match language {
         Language::JavaScript => builder
             .add("!node_modules")?
-            // .add("*.ts")?
-            // .add("*.test.ts")?
-            // .add("*.mjs")?
-            // .add("*.test.mjs")?
+            .add("*.ts")?
+            .add("*.test.ts")?
+            .add("*.mjs")?
+            .add("*.test.mjs")?
             .add("*.js")?
             .add("*.test.js")?
             .build()?,
