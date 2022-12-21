@@ -1,0 +1,13 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: examples/hello-wasi/generated_bindings/JavaScript
+---
+[
+    "generated_bindings/JavaScript/package/src/bindings/hello-wasi/hello-wasi.d.ts",
+    "generated_bindings/JavaScript/package/src/bindings/hello-wasi/hello-wasi.js",
+    "generated_bindings/JavaScript/package/src/bindings/hello-wasi/intrinsics.js",
+    "generated_bindings/JavaScript/package/src/bindings/index.d.ts",
+    "generated_bindings/JavaScript/package/src/bindings/index.js",
+    "generated_bindings/JavaScript/package/src/index.d.ts",
+    "generated_bindings/JavaScript/package/src/index.js",
+]

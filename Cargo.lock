@@ -915,15 +915,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "integration-tests"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "tracing-subscriber",
- "wasmer-pack-testing",
-]
-
-[[package]]
 name = "io-lifetimes"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2443,6 +2434,8 @@ dependencies = [
  "anyhow",
  "ignore",
  "insta",
+ "serde",
+ "serde_json",
  "tempfile",
  "tracing",
  "wasmer-pack-cli",

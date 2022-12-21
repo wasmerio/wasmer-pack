@@ -60,6 +60,8 @@ impl TestEnvironment {
         let manifest_path = manifest_path.as_ref();
         let temp_dir = temp_dir.as_ref();
 
+        // println!("{:?}", manifest_path);
+
         let wapm_dir = utils::compile_rust_to_wapm_package(manifest_path, temp_dir.join("target"))?;
 
         Ok(TestEnvironment {

@@ -1,9 +1,0 @@
-{
-  "name": "hello-wasi",
-  "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
-  "dependencies": {
-    "@michael-f-bryan/hello-wasi": "/home/consulting/Documents/wasmer/wasmer-pack/target/tmp/javascript/package"
-  }
-}
