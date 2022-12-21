@@ -50,8 +50,8 @@ pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
                 run_jest(crate_dir)?;
             }
             Language::Python => {
-                // setup_python(crate_dir, &bindings)?;
-                // run_pytest(crate_dir)?;
+                setup_python(crate_dir, &bindings)?;
+                run_pytest(crate_dir)?;
             }
         }
 
