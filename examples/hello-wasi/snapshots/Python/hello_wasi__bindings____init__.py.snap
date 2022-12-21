@@ -1,0 +1,68 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: examples/hello-wasi/generated_bindings/Python/hello_wasi/bindings/__init__.py
+---
+'''
+Bindings to the  library.
+'''
+
+from pathlib import Path
+from typing import Optional, Any
+
+from wasmer import Store, Module, wasi # type: ignore
+from .hello_wasi.bindings import (
+    HelloWasi as _HelloWasi,
+)
+
+class Bindings:
+    """
+    Instantiate bindings to the various libraries in this package.
+    """
+
+    def __init__(self, store: Store):
+        self._store = store
+        self._cache: dict[str, Module] = {}
+
+    def _get_module(self, filename: str) -> Module:
+        if filename in self._cache:
+            return self._cache[filename]
+
+        wasm = Path(__file__).parent.joinpath(filename).read_bytes()
+        module = Module(self._store, wasm)
+        self._cache[filename] = module
+        return module
+
+    def hello_wasi(
+        self,
+        env: Optional[wasi.Environment] = None,
+        module: Optional[Module] = None,
+    ) -> _HelloWasi:
+        """
+        Instantiate the "hello_wasi" library.
+        :param env: A pre-initialized WASI environment. If not specified, a
+                     default value will be used.
+        :param module: A user-specified WebAssembly module to use instead of the
+                       one bundled with this package.
+        """
+
+        filename = "hello_wasi/hello-wasi.wasm"
+        if not module:
+            module = self._get_module(filename)
+
+        imports: dict[str, Any] = {}
+
+        wrapper = None
+
+        def get_export(item_name: str):
+            assert wrapper is not None
+            return getattr(wrapper.instance.exports, item_name)
+        version = wasi.get_version(module, strict=True)
+        assert version is not None, f'"{filename}" is not a valid WASI executable'
+        if not env:
+            env = wasi.StateBuilder("hello_wasi").finalize()
+        wasi_imports = env.generate_imports(self._store, version)
+        imports.update(wasi_imports)
+
+        wrapper = _HelloWasi(self._store, imports, module)
+        return wrapper
+    

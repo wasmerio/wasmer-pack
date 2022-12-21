@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "tests"
+version = "0.1.0"
+description = "Python integration tests"
+authors = ["Rudra <r82941037@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pytest = "^7.2.0"
+hello-wasi = {path = "generated_bindings/Python", develop = true}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
