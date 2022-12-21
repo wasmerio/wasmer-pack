@@ -248,49 +248,49 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
     // reading the package and getting the namespace and name of the javascript created package
     let package_path = generated_bindings.join("package");
     let generated_package_name = get_package_name(&package_path)?;
-    let package_json = crate_dir.join("package.json");
+    let yarn_lock = crate_dir.join("yarn.lock");
 
-    if package_json.exists() {
-        //need to install dependencies for generated package as yarn link doesn't resolves the dependencies on it own
-        let mut cmd = Command::new("yarn");
-        cmd.current_dir(&package_path);
-        tracing::info!(
-            ?cmd,
-            "Installing the Javascript Dependencies for generated package"
-        );
+    // if yarn_lock.exists() {
+    //     //need to install dependencies for generated package as yarn link doesn't resolves the dependencies on it own
+    //     let mut cmd = Command::new("yarn");
+    //     cmd.current_dir(&package_path);
+    //     tracing::info!(
+    //         ?cmd,
+    //         "Installing the Javascript Dependencies for generated package"
+    //     );
 
-        let status = cmd
-            .stdin(Stdio::null())
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .current_dir(&package_path)
-            .status()
-            .context("Unable to run yarn. Is it installed?")?;
-        anyhow::ensure!(
-            status.success(),
-            "Unable to install JavaScript Dependencies for generated package"
-        );
+    //     let status = cmd
+    //         .stdin(Stdio::null())
+    //         .stdout(Stdio::inherit())
+    //         .stderr(Stdio::inherit())
+    //         .current_dir(&package_path)
+    //         .status()
+    //         .context("Unable to run yarn. Is it installed?")?;
+    //     anyhow::ensure!(
+    //         status.success(),
+    //         "Unable to install JavaScript Dependencies for generated package"
+    //     );
 
-        let mut cmd = Command::new("yarn");
-        cmd.current_dir(crate_dir);
-        tracing::info!(
-            ?cmd,
-            "Found `yarn-lock`. Installing the Javascript Dependencies"
-        );
+    //     let mut cmd = Command::new("yarn");
+    //     cmd.current_dir(crate_dir);
+    //     tracing::info!(
+    //         ?cmd,
+    //         "Found `yarn-lock`. Installing the Javascript Dependencies"
+    //     );
 
-        let status = cmd
-            .stdin(Stdio::null())
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .current_dir(crate_dir)
-            .status()
-            .context("Unable to run yarn. Is it installed?")?;
-        anyhow::ensure!(
-            status.success(),
-            "Unable to install JavaScript Dependencies"
-        );
-        return Ok(());
-    }
+    //     let status = cmd
+    //         .stdin(Stdio::null())
+    //         .stdout(Stdio::inherit())
+    //         .stderr(Stdio::inherit())
+    //         .current_dir(crate_dir)
+    //         .status()
+    //         .context("Unable to run yarn. Is it installed?")?;
+    //     anyhow::ensure!(
+    //         status.success(),
+    //         "Unable to install JavaScript Dependencies"
+    //     );
+    //     return Ok(());
+    // }
 
     let mut cmd = Command::new("yarn");
     cmd.arg("init").arg("--yes").current_dir(crate_dir);
