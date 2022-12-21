@@ -50,8 +50,8 @@ pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
                 run_jest(crate_dir)?;
             }
             Language::Python => {
-                setup_python(crate_dir, &bindings)?;
-                run_pytest(crate_dir)?;
+                // setup_python(crate_dir, &bindings)?;
+                // run_pytest(crate_dir)?;
             }
         }
 
@@ -135,7 +135,15 @@ fn language_specific_matches(package_dir: &Path, language: Language) -> Result<W
     let mut builder = OverrideBuilder::new(package_dir);
 
     let overrides = match language {
-        Language::JavaScript => builder.add("*.js")?.add("*.test.js")?.build()?,
+        Language::JavaScript => builder
+            .add("!node_modules")?
+            .add("*.ts")?
+            .add("*.test.ts")?
+            .add("*.mjs")?
+            .add("*.test.mjs")?
+            .add("*.js")?
+            .add("*.test.js")?
+            .build()?,
         Language::Python => builder
             .add("*.py")?
             .add("*.toml")?
@@ -243,6 +251,7 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
     let package_json = crate_dir.join("package.json");
 
     if package_json.exists() {
+        //need to install dependencies for generated package as yarn link doesn't resolves the dependencies on it own
         let mut cmd = Command::new("yarn");
         cmd.current_dir(&package_path);
         tracing::info!(
