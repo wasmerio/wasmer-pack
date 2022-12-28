@@ -15,10 +15,14 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+## [0.6.0] - 2022-12-28
+
 ### Added
 
 - Generated JavaScript packages can now import host functions
   ([#109](https://github.com/wasmerio/wasmer-pack/pull/109))
+- Introduce the `wasmer-pack-testing` crate for testing generated bindings
+  ([#112](https://github.com/wasmerio/wasmer-pack/pull/112))
 - Generated Python packages can now import host functions
   ([#113](https://github.com/wasmerio/wasmer-pack/pull/113))
 
@@ -146,7 +150,7 @@ change, where applicable.
   - Populated the `CHANGELOG.md`
   - Wrote up `CONTRIBUTING.md`
   - Rewrote the `README.md` walkthrough
-- Added a *"Time Reporter"* task to CI so we can keep an eye on CI times ([#25](https://github.com/wasmerio/wasmer_pack/pull/25))
+- Added a _"Time Reporter"_ task to CI so we can keep an eye on CI times ([#25](https://github.com/wasmerio/wasmer_pack/pull/25))
 - Generate wrappers for calling WASI executables from JavaScript
   ([#26](https://github.com/wasmerio/wasmer_pack/pull/26))
 - Generate wrappers for calling WASI executables from Python
@@ -195,7 +199,9 @@ change, where applicable.
 
 - The `wit-pack` CLI now takes a Pirita file as its only input
   ([#20](https://github.com/wasmerio/wasmer_pack/pull/20))
+
   - This means the commandline interface has changed
+
     ```console
     # Instead of this
     $ wit-pack js --exports exports.wit --name hello_world --version 0.1.1 --module wit.wasm -o=wit-js --abi=none
@@ -225,9 +231,9 @@ change, where applicable.
 
 ## [0.1.2] - 2022-08-24
 
-
 <!-- next-url -->
-[Unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.3...HEAD
+[Unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.3...v0.6.0
 [0.5.3]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.0...v0.5.1

@@ -15,6 +15,9 @@ wai-version = "0.2.0"
 exports = "host-imports.export.wai"
 imports = ["fs.import.wai", "logging.import.wai"]
 
+[package.metadata.release]
+release = false
+
 [lib]
 crate-type = ["cdylib"]
 

@@ -38,7 +38,7 @@ fn webc_from_dir(path: &Path) -> Result<Vec<u8>, Error> {
         );
     }
 
-    let mut files = BTreeMap::new();
+    let mut files: BTreeMap<webc::DirOrFile, Vec<u8>> = BTreeMap::new();
 
     fn read_dir(
         files: &mut BTreeMap<DirOrFile, Vec<u8>>,
@@ -210,7 +210,7 @@ fn get_file_from_volume<'webc>(
 
         let path = DirOrFile::File(exports_path.into());
         if let Some(entry) = volume
-            .get_all_file_entries()
+            .get_all_file_and_dir_entries()
             .ok()
             .and_then(|entries| entries.get(&path).cloned())
         {

@@ -9,6 +9,7 @@ on:
 env:
   RUST_BACKTRACE: 1
   CARGO_NET_GIT_FETCH_WITH_CLI: true
+  RUST_LOG: info,xtask=debug
 
 jobs:
   publish-to-wapm:
@@ -32,7 +33,8 @@ jobs:
           wapm config set registry.url https://registry.wapm.dev
           wapm login ${{ secrets.WAPM_DEV_TOKEN }}
       - name: Publish to wapm.dev
-        run: cargo wapm --workspace
+        run: cargo wapm
+        working-directory: crates/wasm
         continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
       - name: Update the bindings generator on wapm.dev
         uses: actions-rs/cargo@v1
@@ -43,7 +45,6 @@ jobs:
           REGISTRY: https://registry.wapm.dev/graphql
           TOKEN: ${{ secrets.WAPM_DEV_TOKEN }}
           VERSION: latest
-          RUST_LOG: info,xtask=debug
         continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
 
       - name: Login to wapm.io
@@ -51,7 +52,8 @@ jobs:
           wapm config set registry.url https://registry.wapm.io
           wapm login ${{ secrets.WAPM_PROD_TOKEN }}
       - name: Publish to wapm.io
-        run: cargo wapm --workspace
+        run: cargo wapm
+        working-directory: crates/wasm
         continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
       - name: Update the bindings generator on wapm.io
         uses: actions-rs/cargo@v1
@@ -63,5 +65,4 @@ jobs:
           TOKEN: ${{ secrets.WAPM_PROD_TOKEN }}
           VERSION: latest
           COMMAND: wasmer-pack
-          RUST_LOG: info,xtask=debug
         continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
