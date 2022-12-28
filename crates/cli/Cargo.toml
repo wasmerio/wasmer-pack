@@ -28,7 +28,7 @@ serde_json = "1.0.85"
 wapm-targz-to-pirita = "0.1.4"
 wapm-toml = "0.3.0"
 wasmer-pack = { version = "0.6.0", path = "../wasmer-pack" }
-webc = "0.4.0"
+webc = "4.0.0"
 
 [dev-dependencies]
 assert_cmd = "2.0.6"
