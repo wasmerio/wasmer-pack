@@ -2231,9 +2231,9 @@ dependencies = [
 
 [[package]]
 name = "wapm-targz-to-pirita"
-version = "0.1.4"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ad031631b17ef2c8aaba9c97deccc91d2f795d03d635e02a5c914989bcbcbf5"
+checksum = "fec2f117e0a24e68fe4447d89f3f69b84498ff099a271dcf45a2ea8b6f481bba"
 dependencies = [
  "anyhow",
  "base64",
@@ -2252,7 +2252,7 @@ dependencies = [
  "validator",
  "wapm-toml 0.4.0",
  "wasmer-registry",
- "webc 0.4.0",
+ "webc 4.0.0",
 ]
 
 [[package]]
@@ -2268,22 +2268,6 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "serde_yaml 0.8.26",
- "thiserror",
- "toml",
-]
-
-[[package]]
-name = "wapm-toml"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bde48580008d83994e59db51dc23d200d91c06d6b82f59a955717d589dac29b5"
-dependencies = [
- "anyhow",
- "semver",
- "serde",
- "serde_cbor",
- "serde_json",
- "serde_yaml 0.9.14",
  "thiserror",
  "toml",
 ]
@@ -2422,7 +2406,7 @@ dependencies = [
  "ureq",
  "url",
  "wapm-targz-to-pirita",
- "wapm-toml 0.3.3",
+ "wapm-toml 0.4.0",
  "wasmer-pack",
  "webc 4.0.0",
 ]
@@ -2487,28 +2471,6 @@ checksum = "bcda906d8be16e728fd5adc5b729afad4e444e106ab28cd1c7256e54fa61510f"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "webc"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0849eec95d551513bcb3a0da02616627458c0c8d45dc3929a07154cff03a5fc3"
-dependencies = [
- "anyhow",
- "base64",
- "indexmap",
- "leb128",
- "lexical-sort",
- "memchr",
- "path-clean",
- "rand 0.8.5",
- "serde",
- "serde_cbor",
- "serde_json",
- "sha2",
- "url",
- "walkdir",
 ]
 
 [[package]]

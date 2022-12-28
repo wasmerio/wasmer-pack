@@ -38,7 +38,7 @@ fn webc_from_dir(path: &Path) -> Result<Vec<u8>, Error> {
         );
     }
 
-    let mut files = BTreeMap::new();
+    let mut files: BTreeMap<webc::DirOrFile, Vec<u8>> = BTreeMap::new();
 
     fn read_dir(
         files: &mut BTreeMap<DirOrFile, Vec<u8>>,
