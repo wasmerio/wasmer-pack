@@ -230,7 +230,6 @@ change, where applicable.
 ## [0.1.2] - 2022-08-24
 
 <!-- next-url -->
-
 [unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.3...HEAD
 [0.5.3]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.1...v0.5.2
