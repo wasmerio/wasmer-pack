@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":[["OPERATION_NAME",""],["QUERY",""]],"struct":[["GetPackageByCommandQueryGetCommand",""],["GetPackageByCommandQueryGetCommandPackageVersion",""],["GetPackageByCommandQueryGetCommandPackageVersionDistribution",""],["GetPackageByCommandQueryGetCommandPackageVersionPackage",""],["ResponseData",""],["Variables",""]]};

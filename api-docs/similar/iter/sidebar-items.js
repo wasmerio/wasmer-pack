@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["AllChangesIter","Iterator for `TextDiff::iter_all_changes`."],["ChangesIter","Iterator for [`DiffOp::iter_changes`]."]]};

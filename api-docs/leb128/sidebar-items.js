@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":[["read","A module for reading LEB128-encoded signed and unsigned integers."],["write","A module for writing LEB128-encoded signed and unsigned integers."]]};

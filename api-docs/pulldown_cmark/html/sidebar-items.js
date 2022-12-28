@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["push_html","Iterate over an `Iterator` of `Event`s, generate HTML for each `Event`, and push it to a `String`."],["write_html","Iterate over an `Iterator` of `Event`s, generate HTML for each `Event`, and write it out to a writable stream."]]};

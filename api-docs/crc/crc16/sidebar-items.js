@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":[["USB",""],["USB_TABLE",""],["X25",""],["X25_TABLE",""]],"fn":[["checksum_usb",""],["checksum_x25",""],["make_table",""],["update",""]],"struct":[["Digest",""]],"trait":[["Hasher16",""]]};

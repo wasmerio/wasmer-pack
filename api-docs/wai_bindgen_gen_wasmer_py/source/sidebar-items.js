@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Source","A [Source] represents some unit of Python code and keeps track of its indent."],["SourceBuilder","[SourceBuilder] combines together a [Source] with other contextual information and state."]]};

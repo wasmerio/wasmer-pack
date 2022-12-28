@@ -1,0 +1,151 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="MiniJinja is a powerful but minimal dependency template engine for Rust which is based on the syntax and behavior of the Jinja2 template engine for Python.  It’s implemented on top of [`serde`].  The goal is to be able to render a large chunk of the Jinja2 template ecosystem from Rust with a minimal engine and to leverage an already existing ecosystem of editor integrations."><meta name="keywords" content="rust, rustlang, rust-lang, minijinja"><title>minijinja - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../dark.css" disabled><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script defer src="../crates.js"></script><script defer src="../main.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../minijinja/index.html"><div class="logo-container"><img src="https://github.com/mitsuhiko/minijinja/raw/main/artwork/logo-square.png" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../minijinja/index.html"><div class="logo-container">
+                    <img src="https://github.com/mitsuhiko/minijinja/raw/main/artwork/logo-square.png" alt="logo"></div></a><h2 class="location"><a href="#">Crate minijinja</a></h2><div class="sidebar-elems"><div class="block"><ul><li class="version">Version 0.23.0</li><li><a id="all-types" href="all.html">All Items</a></li></ul></div><section><div class="block"><ul><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#functions">Functions</a></li></ul></div></section></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../minijinja/index.html">
+                        <img src="https://github.com/mitsuhiko/minijinja/raw/main/artwork/logo-square.png" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">minijinja</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/minijinja/lib.rs.html#1-232">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><div align=center>
+  <img src="https://github.com/mitsuhiko/minijinja/raw/main/artwork/logo.png" alt="" width=320>
+  <p><strong>MiniJinja: a powerful template engine for Rust with minimal dependencies</strong></p>
+</div>
+<p>MiniJinja is a powerful but minimal dependency template engine for Rust which
+is based on the syntax and behavior of the
+<a href="https://jinja.palletsprojects.com/">Jinja2</a> template engine for Python.  It’s
+implemented on top of <a href="../serde/index.html" title="serde"><code>serde</code></a>.  The goal is to be able to render a large
+chunk of the Jinja2 template ecosystem from Rust with a minimal engine and to
+leverage an already existing ecosystem of editor integrations.</p>
+<div class="example-wrap"><pre class="language-jinja"><code>{% for user in users %}
+  &lt;li&gt;{{ user.name }}&lt;/li&gt;
+{% endfor %}</code></pre></div><h2 id="why-minijinja"><a href="#why-minijinja">Why MiniJinja</a></h2>
+<p>MiniJinja by its name wants to be a good default choice if you need a little
+bit of templating with minimal dependencies.  It has the following goals:</p>
+<ul>
+<li>Well documented, compact API</li>
+<li>Minimal dependencies, reasonable compile times and decent runtime performance</li>
+<li>Stay close as possible to Jinja2</li>
+<li>Support for expression evaluation</li>
+<li>Support for all <code>serde</code> compatible types</li>
+<li>Excellent test coverage</li>
+<li>Support for dynamic runtime objects with methods and dynamic attributes</li>
+</ul>
+<h2 id="template-usage"><a href="#template-usage">Template Usage</a></h2>
+<p>To use MiniJinja one needs to create an <a href="struct.Environment.html" title="Environment"><code>Environment</code></a> and populate it with
+templates.  Afterwards templates can be loaded and rendered.  To pass data
+one can pass any serde serializable value.  The <a href="macro.context.html" title="context!"><code>context!</code></a> macro can be
+used to quickly construct a template context:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">minijinja</span>::{<span class="ident">Environment</span>, <span class="ident">context</span>};
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">env</span> <span class="op">=</span> <span class="ident">Environment::new</span>();
+<span class="ident">env</span>.<span class="ident">add_template</span>(<span class="string">&quot;hello&quot;</span>, <span class="string">&quot;Hello {{ name }}!&quot;</span>).<span class="ident">unwrap</span>();
+<span class="kw">let</span> <span class="ident">tmpl</span> <span class="op">=</span> <span class="ident">env</span>.<span class="ident">get_template</span>(<span class="string">&quot;hello&quot;</span>).<span class="ident">unwrap</span>();
+<span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">tmpl</span>.<span class="ident">render</span>(<span class="macro">context!</span>(<span class="ident">name</span> =&gt; <span class="string">&quot;John&quot;</span>)).<span class="ident">unwrap</span>());</code></pre></div>
+<div class="example-wrap"><pre class="language-plain"><code>Hello John!</code></pre></div>
+<p>For super trivial cases where you need to render a string once, you can
+also use the <a href="macro.render.html" title="render!"><code>render!</code></a> macro which acts a bit like a replacement
+for the <a href="https://doc.rust-lang.org/1.64.0/alloc/macro.format.html" title="format!"><code>format!</code></a> macro.</p>
+<h2 id="expression-usage"><a href="#expression-usage">Expression Usage</a></h2>
+<p>MiniJinja — like Jinja2 — allows to be used as expression language.  This can be
+useful to express logic in configuration files or similar things.  For this
+purpose the <a href="struct.Environment.html#method.compile_expression" title="Environment::compile_expression"><code>Environment::compile_expression</code></a> method can be used.  It returns
+an expression object that can then be evaluated, returning the result:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">minijinja</span>::{<span class="ident">Environment</span>, <span class="ident">context</span>};
+
+<span class="kw">let</span> <span class="ident">env</span> <span class="op">=</span> <span class="ident">Environment::new</span>();
+<span class="kw">let</span> <span class="ident">expr</span> <span class="op">=</span> <span class="ident">env</span>.<span class="ident">compile_expression</span>(<span class="string">&quot;number &lt; 42&quot;</span>).<span class="ident">unwrap</span>();
+<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">expr</span>.<span class="ident">eval</span>(<span class="macro">context!</span>(<span class="ident">number</span> =&gt; <span class="number">23</span>)).<span class="ident">unwrap</span>();
+<span class="macro">assert_eq!</span>(<span class="ident">result</span>.<span class="ident">is_true</span>(), <span class="bool-val">true</span>);</code></pre></div>
+<p>This becomes particularly powerful when <a href="value/trait.Object.html">dynamic objects</a> are
+exposed to templates.</p>
+<h2 id="custom-filters"><a href="#custom-filters">Custom Filters</a></h2>
+<p>MiniJinja lets you register functions as filter functions (see
+<a href="filters/trait.Filter.html"><code>Filter</code></a>) with the engine.  These can then be
+invoked directly from the template:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">minijinja</span>::{<span class="ident">Environment</span>, <span class="ident">context</span>};
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">env</span> <span class="op">=</span> <span class="ident">Environment::new</span>();
+<span class="ident">env</span>.<span class="ident">add_filter</span>(<span class="string">&quot;repeat&quot;</span>, <span class="ident">str::repeat</span>);
+<span class="ident">env</span>.<span class="ident">add_template</span>(<span class="string">&quot;hello&quot;</span>, <span class="string">&quot;{{ &#39;Na &#39;|repeat(3) }} {{ name }}!&quot;</span>).<span class="ident">unwrap</span>();
+<span class="kw">let</span> <span class="ident">tmpl</span> <span class="op">=</span> <span class="ident">env</span>.<span class="ident">get_template</span>(<span class="string">&quot;hello&quot;</span>).<span class="ident">unwrap</span>();
+<span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">tmpl</span>.<span class="ident">render</span>(<span class="macro">context!</span>(<span class="ident">name</span> =&gt; <span class="string">&quot;Batman&quot;</span>)).<span class="ident">unwrap</span>());</code></pre></div>
+<div class="example-wrap"><pre class="language-plain"><code>Na Na Na Batman!</code></pre></div><h2 id="learn-more"><a href="#learn-more">Learn more</a></h2>
+<ul>
+<li><a href="struct.Environment.html" title="Environment"><code>Environment</code></a>: the main API entry point.  Teaches you how to configure the environment.</li>
+<li><a href="struct.Template.html" title="Template"><code>Template</code></a>: the template object API.  Shows you how templates can be rendered.</li>
+<li><a href="syntax/index.html" title="syntax"><code>syntax</code></a>: provides documentation of the template engine syntax.</li>
+<li><a href="filters/index.html" title="filters"><code>filters</code></a>: teaches you how to write custom filters and to see the list of built-in filters.</li>
+<li><a href="tests/index.html" title="tests"><code>tests</code></a>: teaches you how to write custom test functions and to see the list of built-in tests.</li>
+<li><a href="functions/index.html" title="functions"><code>functions</code></a>: teaches how to write custom functions and to see the list of built-in functions.</li>
+<li>For auto reloading use the <a href="https://docs.rs/minijinja-autoreload"><code>minijinja-autoreload</code></a> crate.</li>
+</ul>
+<p>Additionally there is an <a href="https://github.com/mitsuhiko/minijinja/tree/main/examples">list of examples</a>
+with many different small example programs on GitHub to explore.</p>
+<h2 id="error-handling"><a href="#error-handling">Error Handling</a></h2>
+<p>MiniJinja tries to give you good errors out of the box.  However if you use includes or
+template inheritance your experience will improve greatly if you ensure to render chained
+errors.  For more information see <a href="struct.Error.html" title="Error"><code>Error</code></a> with an example.</p>
+<h2 id="size-and-compile-times"><a href="#size-and-compile-times">Size and Compile Times</a></h2>
+<p>MiniJinja attempts to compile fast so it can be used as a sensible template engine choice
+when compile times matter.  Because of this it’s internally modular so unnecessary bits and
+pieces can be removed.  The default set of features tries to strike a balance but in
+situations where only a subset is needed (eg: <code>build.rs</code>) all default features can be
+be disabled.</p>
+<h2 id="optional-features"><a href="#optional-features">Optional Features</a></h2>
+<p>MiniJinja comes with a lot of optional features, some of which are turned on by
+default.  If you plan on using MiniJinja in a library, please consider turning
+off all default features and to opt-in explicitly into the ones you actually
+need.</p>
+<details><summary><strong style="cursor: pointer">Configurable Features</strong></summary>
+<p>To cut down on size of the engine some default functionality can be removed:</p>
+<ul>
+<li>
+<p><strong>Engine Features:</strong></p>
+<ul>
+<li><code>builtins</code>: if this feature is removed the default filters, tests and
+functions are not implemented.</li>
+<li><code>macros</code>: when removed the <code>{% macro %}</code> tag is not included.</li>
+<li><code>multi-template</code>: when removed the templates related to imports and extends
+are removed (<code>{% from %}</code>, <code>{% import %}</code>, <code>{% include %}</code>, and <code>{% extends %}</code>).</li>
+</ul>
+</li>
+<li>
+<p><strong>Rust Functionality:</strong></p>
+<ul>
+<li><code>debug</code>: if this feature is removed some debug functionality of the engine is
+removed as well.  This mainly affects the quality of error reporting.</li>
+<li><code>key_interning</code>: if this feature is removed the automatic string interning in
+the value type is disabled.  The default behavior can cut down on the memory
+consumption of the value type by interning all string keys used in values.</li>
+<li><code>deserialization</code>: when removed this disables deserialization support for
+the <a href="value/struct.Value.html"><code>Value</code></a> type.</li>
+</ul>
+</li>
+</ul>
+<p>There are some additional features that can be enabled:</p>
+<ul>
+<li><code>source</code>: enables the <code>Source</code> type which helps with dynamic loading of templates.</li>
+<li><code>speedups</code>: enables all speedups, in particular it turns on the <code>v_htmlescape</code> dependency
+for faster HTML escapling.  This also turns on <code>key_interning</code> automatically.</li>
+<li><code>json</code>: When enabled the <code>tojson</code> filter is added as builtin filter as well as
+the ability to auto escape via <code>AutoEscape::Json</code>.</li>
+<li><code>urlencode</code>: When enabled the <code>urlencode</code> filter is added as builtin filter.</li>
+<li><code>preserve_order</code>: When enable the internal value implementation uses an indexmap
+which preserves the original order of maps and structs.</li>
+</ul>
+</details></div></details><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="filters/index.html" title="minijinja::filters mod">filters</a></div><div class="item-right docblock-short"><p>Filter functions and abstractions.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="functions/index.html" title="minijinja::functions mod">functions</a></div><div class="item-right docblock-short"><p>Global functions and abstractions.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="syntax/index.html" title="minijinja::syntax mod">syntax</a></div><div class="item-right docblock-short"><p>Documents the syntax for templates.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="tests/index.html" title="minijinja::tests mod">tests</a></div><div class="item-right docblock-short"><p>Test functions and abstractions.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="value/index.html" title="minijinja::value mod">value</a></div><div class="item-right docblock-short"><p>Provides a dynamic value type abstraction.</p>
+</div></div></div><h2 id="macros" class="small-section-header"><a href="#macros">Macros</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="macro" href="macro.context.html" title="minijinja::context macro">context</a></div><div class="item-right docblock-short"><p>Creates a template context with keys and values.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="macro" href="macro.render.html" title="minijinja::render macro">render</a></div><div class="item-right docblock-short"><p>A macro similar to <a href="https://doc.rust-lang.org/1.64.0/alloc/macro.format.html" title="format!"><code>format!</code></a> but that uses MiniJinja for rendering.</p>
+</div></div></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Environment.html" title="minijinja::Environment struct">Environment</a></div><div class="item-right docblock-short"><p>An abstraction that holds the engine configuration.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Error.html" title="minijinja::Error struct">Error</a></div><div class="item-right docblock-short"><p>Represents template errors.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Expression.html" title="minijinja::Expression struct">Expression</a></div><div class="item-right docblock-short"><p>A handle to a compiled expression.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.HtmlEscape.html" title="minijinja::HtmlEscape struct">HtmlEscape</a></div><div class="item-right docblock-short"><p>Helper to HTML escape a string.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Output.html" title="minijinja::Output struct">Output</a></div><div class="item-right docblock-short"><p>An abstraction over <a href="https://doc.rust-lang.org/1.64.0/core/fmt/trait.Write.html"><code>Write</code></a> for the rendering.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.State.html" title="minijinja::State struct">State</a></div><div class="item-right docblock-short"><p>Provides access to the current execution state of the engine.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Template.html" title="minijinja::Template struct">Template</a></div><div class="item-right docblock-short"><p>Represents a handle to a template.</p>
+</div></div></div><h2 id="enums" class="small-section-header"><a href="#enums">Enums</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.AutoEscape.html" title="minijinja::AutoEscape enum">AutoEscape</a></div><div class="item-right docblock-short"><p>Controls the autoescaping behavior.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.ErrorKind.html" title="minijinja::ErrorKind enum">ErrorKind</a></div><div class="item-right docblock-short"><p>An enum describing the error kind.</p>
+</div></div></div><h2 id="functions" class="small-section-header"><a href="#functions">Functions</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.default_auto_escape_callback.html" title="minijinja::default_auto_escape_callback fn">default_auto_escape_callback</a></div><div class="item-right docblock-short"><p>The default logic for auto escaping based on file extension.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.escape_formatter.html" title="minijinja::escape_formatter fn">escape_formatter</a></div><div class="item-right docblock-short"><p>The default formatter.</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="minijinja" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["Value","The `Value` enum, a loosely typed way of representing any valid CBOR value."]],"fn":[["from_value","Convert a `serde_cbor::Value` into a type `T`"],["to_value","Convert a `T` into `serde_cbor::Value` which is an enum that can represent any valid CBOR data."]]};

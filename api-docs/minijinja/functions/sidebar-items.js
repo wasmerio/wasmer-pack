@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["debug","Outputs the current context stringified."],["dict","Creates a dictionary."],["range","Returns a range."]],"trait":[["Function","A utility trait that represents global functions."]]};

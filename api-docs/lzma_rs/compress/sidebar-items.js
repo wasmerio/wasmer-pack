@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["UnpackedSize","Alternatives for handling unpacked size"]],"struct":[["Options","Options for the `lzma_compress` function"]]};

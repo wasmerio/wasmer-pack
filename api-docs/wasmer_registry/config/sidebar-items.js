@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["Registries",""],["UpdateRegistry",""]],"fn":[["format_graphql",""],["wax_default_cooldown",""]],"struct":[["MultiRegistry",""],["PartialWapmConfig",""],["Proxy",""],["Registry",""],["Telemetry",""],["UpdateNotifications",""]]};

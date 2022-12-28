@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["Error","Library errors."]],"type":[["Result","Library result alias."]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Dependencies","Tracks all of the import and intrinsics that a given codegen requires and how to generate them when needed."]]};

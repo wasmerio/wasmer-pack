@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["diff","Myers’ diff algorithm."],["diff_deadline","Myers’ diff algorithm with deadline."]]};

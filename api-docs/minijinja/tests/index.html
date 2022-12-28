@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Test functions and abstractions."><meta name="keywords" content="rust, rustlang, rust-lang, tests"><title>minijinja::tests - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../minijinja/index.html"><div class="logo-container"><img src="https://github.com/mitsuhiko/minijinja/raw/main/artwork/logo-square.png" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../minijinja/index.html"><div class="logo-container">
+                    <img src="https://github.com/mitsuhiko/minijinja/raw/main/artwork/logo-square.png" alt="logo"></div></a><h2 class="location"><a href="#">Module tests</a></h2><div class="sidebar-elems"><section><div class="block"><ul><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li></ul></div></section></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../minijinja/index.html">
+                        <img src="https://github.com/mitsuhiko/minijinja/raw/main/artwork/logo-square.png" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">minijinja</a>::<wbr><a class="mod" href="#">tests</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/minijinja/tests.rs.html#1-285">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Test functions and abstractions.</p>
+<p>Test functions in MiniJinja are like <a href="../filters/index.html"><code>filters</code></a> but a
+different syntax is used to invoke them and they have to return boolean
+values.  For instance the expression <code>{% if foo is defined %}</code> invokes the
+<a href="fn.is_defined.html" title="is_defined"><code>is_defined</code></a> test to check if the value is indeed an odd number.</p>
+<p>MiniJinja comes with some built-in test functions that are listed below. To
+create a custom test write a function that takes at least a value argument
+that returns a boolean result, then register it with
+<a href="../struct.Environment.html#method.add_test"><code>add_filter</code></a>.</p>
+<h2 id="using-tests"><a href="#using-tests">Using Tests</a></h2>
+<p>Tests are useful to “test” a value in a specific way.  For instance if
+you want to assign different classes to alternating rows one way is
+using the <code>odd</code> test:</p>
+<div class="example-wrap"><pre class="language-jinja"><code>{% if seq is defined %}
+  &lt;ul&gt;
+  {% for item in seq %}
+    &lt;li class=&quot;{{ &#39;even&#39; if loop.index is even else &#39;odd&#39; }}&quot;&gt;{{ item }}&lt;/li&gt;
+  {% endfor %}
+  &lt;/ul&gt;
+{% endif %}</code></pre></div><h2 id="custom-tests"><a href="#custom-tests">Custom Tests</a></h2>
+<p>A custom test function is just a simple function which accepts its
+inputs as parameters and then returns a bool. For instance the following
+shows a test function which takes an input value and checks if it’s
+lowercase:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn</span> <span class="ident">is_lowercase</span>(<span class="ident">value</span>: <span class="ident">String</span>) -&gt; <span class="ident">bool</span> {
+    <span class="ident">value</span>.<span class="ident">chars</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">is_lowercase</span>())
+}
+
+<span class="ident">env</span>.<span class="ident">add_test</span>(<span class="string">&quot;lowercase&quot;</span>, <span class="ident">is_lowercase</span>);</code></pre></div>
+<p>MiniJinja will perform the necessary conversions automatically.  For more
+information see the <a href="trait.Test.html" title="Test"><code>Test</code></a> trait.</p>
+<h2 id="built-in-tests"><a href="#built-in-tests">Built-in Tests</a></h2>
+<p>When the <code>builtins</code> feature is enabled a range of built-in tests are
+automatically added to the environment.  These are also all provided in
+this module.  Note though that these functions are not to be
+called from Rust code as their exact interface (arguments and return types)
+might change from one MiniJinja version to another.</p>
+</div></details><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.Test.html" title="minijinja::tests::Test trait">Test</a></div><div class="item-right docblock-short"><p>A utility trait that represents test functions.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.TestResult.html" title="minijinja::tests::TestResult trait">TestResult</a></div><div class="item-right docblock-short"><p>A utility trait that represents the return value of filters.</p>
+</div></div></div><h2 id="functions" class="small-section-header"><a href="#functions">Functions</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.is_defined.html" title="minijinja::tests::is_defined fn">is_defined</a></div><div class="item-right docblock-short"><p>Checks if a value is defined.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.is_endingwith.html" title="minijinja::tests::is_endingwith fn">is_endingwith</a></div><div class="item-right docblock-short"><p>Checks if the value is ending with a string.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.is_even.html" title="minijinja::tests::is_even fn">is_even</a></div><div class="item-right docblock-short"><p>Checks if a value is even.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.is_mapping.html" title="minijinja::tests::is_mapping fn">is_mapping</a></div><div class="item-right docblock-short"><p>Checks if this value is a mapping</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.is_number.html" title="minijinja::tests::is_number fn">is_number</a></div><div class="item-right docblock-short"><p>Checks if this value is a number.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.is_odd.html" title="minijinja::tests::is_odd fn">is_odd</a></div><div class="item-right docblock-short"><p>Checks if a value is odd.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.is_sequence.html" title="minijinja::tests::is_sequence fn">is_sequence</a></div><div class="item-right docblock-short"><p>Checks if this value is a sequence</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.is_startingwith.html" title="minijinja::tests::is_startingwith fn">is_startingwith</a></div><div class="item-right docblock-short"><p>Checks if the value is starting with a string.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.is_string.html" title="minijinja::tests::is_string fn">is_string</a></div><div class="item-right docblock-short"><p>Checks if this value is a string.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.is_undefined.html" title="minijinja::tests::is_undefined fn">is_undefined</a></div><div class="item-right docblock-short"><p>Checks if a value is undefined.</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="minijinja" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>

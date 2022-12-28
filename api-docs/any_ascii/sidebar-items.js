@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["any_ascii","Transliterates a Unicode String into ASCII."],["any_ascii_char","Transliterates a Unicode char into ASCII."]]};

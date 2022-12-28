@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["CommandFailed",""],["Language",""],["LoadError",""],["TestFailure",""]],"fn":[["autodiscover",""],["compile_rust_to_wapm_package",""],["generate_bindings",""]],"struct":[["TestEnvironment",""]]};

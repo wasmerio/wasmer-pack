@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["nuke_dir","Deletes a directory by removing all files and subdirectories first, then deleting the top-level directory"]]};
