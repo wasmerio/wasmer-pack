@@ -17,6 +17,8 @@ change, where applicable.
 
 ## [0.6.0] - 2022-12-28
 
+## [0.6.0] - 2022-12-28
+
 ### Added
 
 - Generated JavaScript packages can now import host functions
@@ -233,6 +235,7 @@ change, where applicable.
 
 <!-- next-url -->
 [Unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/wasmerio/wasmer-pack/compare/v0.6.0...v0.6.0
 [unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.3...v0.6.0
 [0.5.3]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.1...v0.5.2
