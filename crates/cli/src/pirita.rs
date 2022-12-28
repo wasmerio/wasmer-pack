@@ -210,7 +210,7 @@ fn get_file_from_volume<'webc>(
 
         let path = DirOrFile::File(exports_path.into());
         if let Some(entry) = volume
-            .get_all_file_entries()
+            .get_all_file_and_dir_entries()
             .ok()
             .and_then(|entries| entries.get(&path).cloned())
         {
