@@ -11,6 +11,9 @@ publish = false
 namespace = "Michael-F-Bryan"
 abi = "wasi"
 
+[package.metadata.release]
+release = false
+
 [[test]]
 name = "wasi-executable-integration-tests"
 harness = false
