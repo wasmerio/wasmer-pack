@@ -69,7 +69,7 @@ describe("wasmer-pack bindings", () => {
 
         expect(JSON.parse(packageJson)).toEqual(
             jasmine.objectContaining({
-                name: "@wasmer/wasmer-pack",
+                name: "@wasmer-package/wasmer__wasmer-pack",
             })
         );
     });

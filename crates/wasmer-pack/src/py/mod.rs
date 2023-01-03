@@ -358,15 +358,15 @@ mod tests {
         let expected: BTreeSet<&Path> = [
             "MANIFEST.in",
             "pyproject.toml",
-            "wasmer_pack/__init__.py",
-            "wasmer_pack/py.typed",
-            "wasmer_pack/commands/__init__.py",
-            "wasmer_pack/commands/first.wasm",
-            "wasmer_pack/commands/second_with_dashes.wasm",
-            "wasmer_pack/bindings/__init__.py",
-            "wasmer_pack/bindings/wasmer_pack/__init__.py",
-            "wasmer_pack/bindings/wasmer_pack/bindings.py",
-            "wasmer_pack/bindings/wasmer_pack/wasmer_pack_wasm.wasm",
+            "wasmer_package__wasmer__wasmer_pack/__init__.py",
+            "wasmer_package__wasmer__wasmer_pack/py.typed",
+            "wasmer_package__wasmer__wasmer_pack/commands/__init__.py",
+            "wasmer_package__wasmer__wasmer_pack/commands/first.wasm",
+            "wasmer_package__wasmer__wasmer_pack/commands/second_with_dashes.wasm",
+            "wasmer_package__wasmer__wasmer_pack/bindings/__init__.py",
+            "wasmer_package__wasmer__wasmer_pack/bindings/wasmer_pack/__init__.py",
+            "wasmer_package__wasmer__wasmer_pack/bindings/wasmer_pack/bindings.py",
+            "wasmer_package__wasmer__wasmer_pack/bindings/wasmer_pack/wasmer_pack_wasm.wasm",
         ]
         .iter()
         .map(Path::new)
@@ -406,18 +406,23 @@ mod tests {
         settings.bind(|| {
             insta::assert_display_snapshot!(files["pyproject.toml"].utf8_contents().unwrap());
             insta::assert_display_snapshot!(files["MANIFEST.in"].utf8_contents().unwrap());
-            insta::assert_display_snapshot!(files["wasmer_pack/__init__.py"]
+            insta::assert_display_snapshot!(files
+                ["wasmer_package__wasmer__wasmer_pack/__init__.py"]
                 .utf8_contents()
                 .unwrap()
                 .replace(crate::GENERATOR, "XXX"));
-            insta::assert_display_snapshot!(files["wasmer_pack/bindings/__init__.py"]
+            insta::assert_display_snapshot!(files
+                ["wasmer_package__wasmer__wasmer_pack/bindings/__init__.py"]
                 .utf8_contents()
                 .unwrap());
-            insta::assert_display_snapshot!(files["wasmer_pack/commands/__init__.py"]
+            insta::assert_display_snapshot!(files
+                ["wasmer_package__wasmer__wasmer_pack/commands/__init__.py"]
                 .utf8_contents()
                 .unwrap());
         });
-        insta::assert_display_snapshot!(files["wasmer_pack/py.typed"].utf8_contents().unwrap());
+        insta::assert_display_snapshot!(files["wasmer_package__wasmer__wasmer_pack/py.typed"]
+            .utf8_contents()
+            .unwrap());
 
         let actual_files: BTreeSet<_> = files.iter().map(|(p, _)| p).collect();
         assert_eq!(actual_files, expected);
