@@ -40,6 +40,9 @@
 #[cfg(test)]
 extern crate pretty_assertions;
 
+#[macro_use]
+mod macros;
+
 mod files;
 mod js;
 mod py;

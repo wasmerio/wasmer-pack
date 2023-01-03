@@ -1,5 +1,6 @@
 [package]
-name = "wasi-executable"
+# Note: We use "_" instead of "-" to test https://github.com/wasmerio/wasmer-pack/issues/98
+name = "wasi_executable"
 version = "0.0.0"
 description = "A basic WASI executable."
 edition = "2021"

@@ -17,27 +17,14 @@ use crate::{types::Command, Files, Library, Metadata, Package, SourceFile};
 const WASMER_WASI_VERSION: &str = "^1.2.2";
 
 static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
-    let mut env = Environment::new();
-    env.add_template("bindings.index.js", include_str!("bindings.index.js.j2"))
-        .unwrap();
-    env.add_template(
+    compile_templates!(
+        "bindings.index.js",
         "bindings.index.d.ts",
-        include_str!("bindings.index.d.ts.j2"),
-    )
-    .unwrap();
-    env.add_template("command.d.ts", include_str!("command.d.ts.j2"))
-        .unwrap();
-    env.add_template("command.js", include_str!("command.js.j2"))
-        .unwrap();
-    env.add_template("top-level.index.js", include_str!("top-level.index.js.j2"))
-        .unwrap();
-    env.add_template(
         "top-level.index.d.ts",
-        include_str!("top-level.index.d.ts.j2"),
+        "command.d.ts",
+        "command.js",
+        "top-level.index.js",
     )
-    .unwrap();
-
-    env
 });
 
 /// Generate JavaScript bindings for a package.
