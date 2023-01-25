@@ -1,3 +1,25 @@
+/// A package to generate bindings for.
+resource package {
+    /// Construct a new package from its components.
+    ///
+    /// This is a fairly low-level constructor. Users should prefer the various
+    /// "fromXXX()" constructors instead.
+    static new: func(metadata: metadata, libraries: list<library>, commands: list<command>) -> package
+
+    /// Load a package from a WEBC binary.
+    static from-webc: func(bytes: list<u8>) -> expected<package, error>
+
+    /// Load a package from a WAPM package's tarball.
+    static from-wapm-tarball: func(tarball: list<u8>) -> expected<package, error>
+
+    /// Generate a JavaScript project that can be used to access the provided
+    /// package.
+    generate-javascript: func() -> expected<list<file>, error>
+
+    /// Generate a Python project that can be used to access the provided package.
+    generate-python: func() -> expected<list<file>, error>
+}
+
 /// Metadata describing a package.
 resource metadata {
     /// Create a new metadata object with all the required fields.
@@ -9,13 +31,6 @@ resource metadata {
 
     /// A 1-sentence description of what the package does.
     set-description: func(description: string)
-}
-
-/// A package to generate bindings for.
-record package {
-    metadata: metadata,
-    libraries: list<library>,
-    commands: list<command>,
 }
 
 /// A WASI executable.
@@ -75,10 +90,3 @@ record file {
     /// The file's contents.
     contents: list<u8>,
 }
-
-/// Generate a JavaScript project that can be used to access the provided
-/// package.
-generate-javascript: func(pkg: package) -> expected<list<file>, error>
-
-/// Generate a Python project that can be used to access the provided package.
-generate-python: func(pkg: package) -> expected<list<file>, error>

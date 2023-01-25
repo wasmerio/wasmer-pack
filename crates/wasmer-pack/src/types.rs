@@ -46,7 +46,7 @@ impl Package {
     }
 
     /// Load a [`Package`] from a WAPM package tarball.
-    pub fn from_tarball(bytes: impl Into<Vec<u8>>) -> Result<Self, Error> {
+    pub fn from_wapm_tarball(bytes: impl Into<Vec<u8>>) -> Result<Self, Error> {
         let bytes = bytes.into();
         let webc = crate::pirita::webc_from_tarball(bytes)?;
         Package::from_webc(&webc)
