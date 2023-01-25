@@ -45,6 +45,7 @@ mod js;
 mod py;
 mod types;
 mod versions;
+mod pirita;
 
 pub use crate::{
     files::{Files, SourceFile},

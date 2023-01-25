@@ -3,24 +3,29 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::Error;
-use anyhow::Context;
+use anyhow::{Context, Error};
 use wapm_targz_to_pirita::{generate_webc_file, TransformManifestFunctions};
-use wasmer_pack::{Command, Interface, Library, Metadata, Module, Package};
-use webc::{DirOrFile, Manifest, ParseOptions, WebC, WebCOwned};
+use webc::{DirOrFile, Manifest, ParseOptions, WebC};
 
-pub(crate) fn load(path: &Path) -> Result<Package, Error> {
+use crate::{Abi, Command, Interface, Library, Metadata, Module, Package};
+
+pub(crate) fn load_from_disk(path: &Path) -> Result<Package, Error> {
     let raw_webc: Vec<u8> = if path.is_dir() {
         webc_from_dir(path)?
     } else if path.extension() == Some("webc".as_ref()) {
         std::fs::read(path).with_context(|| format!("Unable to read \"{}\"", path.display()))?
     } else {
-        webc_from_tarball(path)?
+        let tarball = std::fs::read(path)
+            .with_context(|| format!("Unable to read \"{}\"", path.display()))?;
+        webc_from_tarball(tarball)?
     };
 
+    load_webc_binary(&raw_webc)
+}
+
+pub(crate) fn load_webc_binary(raw_webc: &[u8]) -> Result<Package, Error> {
     let options = ParseOptions::default();
-    let webc = WebCOwned::parse(raw_webc, &options)
-        .with_context(|| format!("Unable to parse \"{}\" as a WEBC file", path.display()))?;
+    let webc = WebC::parse(raw_webc, &options)?;
 
     let fully_qualified_package_name = webc.get_package_name();
     let metadata = metadata(&fully_qualified_package_name)?;
@@ -78,9 +83,7 @@ fn webc_from_dir(path: &Path) -> Result<Vec<u8>, Error> {
     Ok(tarball)
 }
 
-fn webc_from_tarball(path: &Path) -> Result<Vec<u8>, Error> {
-    let tarball =
-        std::fs::read(path).with_context(|| format!("Unable to read \"{}\"", path.display()))?;
+pub(crate) fn webc_from_tarball(tarball: Vec<u8>) -> Result<Vec<u8>, Error> {
     let files =
         wapm_targz_to_pirita::unpack_tar_gz(tarball).context("Unable to unpack the tarball")?;
 
@@ -223,12 +226,12 @@ fn get_file_from_volume<'webc>(
     result
 }
 
-fn wasm_abi(module: &[u8]) -> wasmer_pack::Abi {
+fn wasm_abi(module: &[u8]) -> Abi {
     // TODO: use a proper method to guess the ABI
     if bytes_contain(module, b"wasi_snapshot_preview") {
-        wasmer_pack::Abi::Wasi
+        Abi::Wasi
     } else {
-        wasmer_pack::Abi::None
+        Abi::None
     }
 }
 

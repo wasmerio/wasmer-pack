@@ -1,5 +1,4 @@
 mod codegen;
-mod pirita;
 mod show;
 
 pub use crate::{

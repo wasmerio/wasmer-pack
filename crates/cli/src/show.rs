@@ -22,7 +22,9 @@ pub struct Show {
 
 impl Show {
     pub fn run(self) -> Result<(), Error> {
-        let pkg = crate::pirita::load(&self.input).context("Unable to load the package")?;
+        let pkg = Package::from_disk(&self.input).with_context(|| {
+            format!("Unable to load a package from \"{}\"", self.input.display())
+        })?;
 
         let summary: Summary = summarize(&pkg);
 
