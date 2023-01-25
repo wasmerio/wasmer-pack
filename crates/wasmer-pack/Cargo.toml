@@ -24,7 +24,6 @@ wai-bindgen-gen-core = "0.2.1"
 wai-bindgen-gen-js = "0.2.1"
 wai-bindgen-gen-wasmer-py = "0.2.1"
 wai-parser = "0.2.1"
-wapm-targz-to-pirita = "0.1.6"
 webc = "4.0.0"
 
 [dev-dependencies]

@@ -3,7 +3,6 @@ use std::path::PathBuf;
 use crate::Error;
 use anyhow::Context;
 use clap::Parser;
-use wasmer_pack::Package;
 
 #[derive(Debug, Parser)]
 pub struct Codegen {
@@ -19,7 +18,7 @@ impl Codegen {
     pub fn run(self, language: Language) -> Result<(), Error> {
         let Codegen { out_dir, input } = self;
 
-        let pkg = Package::from_disk(&input)
+        let pkg = crate::pirita::load_from_disk(&input)
             .with_context(|| format!("Unable to load the package from \"{}\"", input.display()))?;
 
         let files = match language {

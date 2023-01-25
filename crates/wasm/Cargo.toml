@@ -24,5 +24,6 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 anyhow = "1.0.62"
-wai-bindgen-rust = "0.2.1"
+getrandom = { version = "0.2.8", features = ["custom"] }
 original = { package = "wasmer-pack", version = "0.6.0", path = "../wasmer-pack" }
+wai-bindgen-rust = "0.2.1"

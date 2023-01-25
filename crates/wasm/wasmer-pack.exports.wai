@@ -2,15 +2,12 @@
 resource package {
     /// Construct a new package from its components.
     ///
-    /// This is a fairly low-level constructor. Users should prefer the various
-    /// "fromXXX()" constructors instead.
+    /// This is a fairly low-level constructor. Users should prefer the
+    /// appropriate "fromXXX()" constructor instead.
     static new: func(metadata: metadata, libraries: list<library>, commands: list<command>) -> package
 
     /// Load a package from a WEBC binary.
     static from-webc: func(bytes: list<u8>) -> expected<package, error>
-
-    /// Load a package from a WAPM package's tarball.
-    static from-wapm-tarball: func(tarball: list<u8>) -> expected<package, error>
 
     /// Generate a JavaScript project that can be used to access the provided
     /// package.

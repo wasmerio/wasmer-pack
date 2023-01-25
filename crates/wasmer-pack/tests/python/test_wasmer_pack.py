@@ -2,22 +2,18 @@
 
 from pathlib import Path
 from typing import Union
+import urllib.request
 from wasmer_pack import bindings
 from wasmer_pack.bindings.wasmer_pack import (
-    Abi,
-    Command,
     Err,
     Error,
-    Interface,
-    Library,
-    Metadata,
     Ok,
     Package,
     T,
-    WasmerPack,
 )
 
 
+WIT_PACK_TARBALL = "https://registry-cdn.wapm.dev/packages/wasmer/wit-pack/wit-pack-0.3.0-beta.tar.gz"
 project_root = Path(__file__).parents[4]
 
 
@@ -35,35 +31,17 @@ def unwrap(value: Union[Ok[T], Err[Error]]) -> T:
         return value.value
 
 
-def load_bindings(wasmer_pack: WasmerPack) -> Package:
-    metadata = unwrap(Metadata.new(wasmer_pack, "wasmer/wasmer-pack", "1.2.3"))
-
-    exports_wit = project_root.joinpath("crates", "wasm", "wasmer-pack.exports.wai")
-    name = str(exports_wit)
-    contents = exports_wit.read_text()
-    exports = unwrap(Interface.from_wit(wasmer_pack, name, contents))
-    imports = [
-        unwrap(Interface.from_wit(wasmer_pack, "browser.wit", "hello-world: func()"))
-    ]
-
-    wasmer_pack_wasm = project_root.joinpath(
-        "target", "wasm32-unknown-unknown", "debug", "wasmer_pack_wasm.wasm"
-    )
-    libraries = [
-        Library(exports, imports, Abi.NONE, wasmer_pack_wasm.read_bytes()),
-    ]
-    # Note: we need to provide a dummy command because of a bug in wit-bindgen
-    commands = [Command("dummy", b"")]
-
-    return Package(metadata, libraries, commands)
-
-
 def test_generate_bindings_for_wasmer_pack():
     wasmer_pack = bindings.wasmer_pack()
-    pkg = load_bindings(wasmer_pack)
+
+    webc = []
+    with urllib.request.urlopen(WIT_PACK_TARBALL) as f:
+        webc.extend(f.read())
+
+    pkg = unwrap(Package.from_webc(wasmer_pack, webc))
 
     try:
-        files = unwrap(wasmer_pack.generate_python(pkg))
+        files = unwrap(pkg.generate_python(wasmer_pack))
 
         expected = {
             "MANIFEST.in",
@@ -84,8 +62,4 @@ def test_generate_bindings_for_wasmer_pack():
         assert filenames == expected
 
     finally:
-        pkg.metadata.drop()
-        for lib in pkg.libraries:
-            lib.exports.drop()
-            for import_ in lib.imports:
-                import_.drop()
+        pkg.drop()

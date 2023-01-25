@@ -22,7 +22,7 @@ pub struct Show {
 
 impl Show {
     pub fn run(self) -> Result<(), Error> {
-        let pkg = Package::from_disk(&self.input).with_context(|| {
+        let pkg = crate::pirita::load_from_disk(&self.input).with_context(|| {
             format!("Unable to load a package from \"{}\"", self.input.display())
         })?;
 

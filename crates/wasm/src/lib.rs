@@ -1,4 +1,7 @@
-use std::cell::RefCell;
+use std::{
+    cell::RefCell,
+    sync::atomic::{AtomicU8, Ordering},
+};
 
 use anyhow::Error;
 use original::SourceFile;
@@ -28,11 +31,6 @@ impl crate::wasmer_pack::Package for Package {
 
     fn from_webc(bytes: Vec<u8>) -> Result<Handle<crate::Package>, wasmer_pack::Error> {
         let pkg = original::Package::from_webc(&bytes)?;
-        Ok(Handle::new(Package(pkg)))
-    }
-
-    fn from_wapm_tarball(tarball: Vec<u8>) -> Result<Handle<crate::Package>, wasmer_pack::Error> {
-        let pkg = original::Package::from_wapm_tarball(tarball)?;
         Ok(Handle::new(Package(pkg)))
     }
 
@@ -132,4 +130,18 @@ impl From<wasmer_pack::Command> for original::Command {
         let wasmer_pack::Command { name, wasm } = cmd;
         original::Command { name, wasm }
     }
+}
+
+// Something requires a RNG, so we provide our own dummy implementation
+getrandom::register_custom_getrandom!(rand);
+
+fn rand(buf: &mut [u8]) -> Result<(), getrandom::Error> {
+    static NEXT: AtomicU8 = AtomicU8::new(0);
+
+    for dest in buf {
+        // Note: atomics wrap on overflow
+        *dest = NEXT.fetch_add(1, Ordering::Relaxed);
+    }
+
+    Ok(())
 }

@@ -31,25 +31,9 @@ impl Package {
         }
     }
 
-    /// Try to load a [`Package`] from well-known on-disk representations.
-    ///
-    /// Normally, this would be a `*.webc` file, but if the path points to a
-    /// directory or `*.tar.gz` file, it will be treated as a WAPM package and
-    /// automatically converted to the WEBC format.
-    pub fn from_disk(path: &Path) -> Result<Self, Error> {
-        crate::pirita::load_from_disk(path)
-    }
-
     /// Load a [`Package`] from a WEBC binary.
     pub fn from_webc(bytes: &[u8]) -> Result<Self, Error> {
         crate::pirita::load_webc_binary(bytes)
-    }
-
-    /// Load a [`Package`] from a WAPM package tarball.
-    pub fn from_wapm_tarball(bytes: impl Into<Vec<u8>>) -> Result<Self, Error> {
-        let bytes = bytes.into();
-        let webc = crate::pirita::webc_from_tarball(bytes)?;
-        Package::from_webc(&webc)
     }
 
     pub fn metadata(&self) -> &Metadata {

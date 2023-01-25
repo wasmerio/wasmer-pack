@@ -2418,7 +2418,6 @@ dependencies = [
  "wai-bindgen-gen-js",
  "wai-bindgen-gen-wasmer-py",
  "wai-parser",
- "wapm-targz-to-pirita",
  "webc 4.1.1",
 ]
 
@@ -2437,8 +2436,10 @@ dependencies = [
  "tempfile",
  "ureq",
  "url",
+ "wapm-targz-to-pirita",
  "wapm-toml 0.4.0",
  "wasmer-pack",
+ "webc 4.1.1",
 ]
 
 [[package]]
@@ -2460,6 +2461,7 @@ name = "wasmer-pack-wasm"
 version = "0.6.0"
 dependencies = [
  "anyhow",
+ "getrandom",
  "wai-bindgen-rust",
  "wasmer-pack",
 ]
