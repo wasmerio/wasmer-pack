@@ -1,6 +1,6 @@
 mod codegen;
-mod show;
 mod pirita;
+mod show;
 
 pub use crate::{
     codegen::{Codegen, Language},
