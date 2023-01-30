@@ -1,0 +1,782 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: crates/wasm/generated_bindings/Python/wasmer_pack/bindings/wasmer_pack/bindings.py
+---
+from abc import abstractmethod
+import ctypes
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Callable, Generic, List, Optional, Tuple, TypeVar, Union, cast, runtime_checkable
+import wasmer # type: ignore
+
+try:
+    from typing import Protocol
+except ImportError:
+    class Protocol: # type: ignore
+        pass
+
+T = TypeVar('T')
+
+def _store(make_view: Callable[[], Any], mem: wasmer.Memory, base: int, offset: int, val: Any) -> None:
+    ptr = (base & 0xffffffff) + offset
+    view = make_view()
+    if ptr + view.bytes_per_element > mem.data_size:
+        raise IndexError('out-of-bounds store')
+    view_ptr = ptr // view.bytes_per_element
+    view[view_ptr] = val
+
+def _load(make_view: Callable[[], Any], mem: wasmer.Memory, base: int, offset: int) -> Any:
+    ptr = (base & 0xffffffff) + offset
+    view = make_view()
+    if ptr + view.bytes_per_element > mem.data_size:
+        raise IndexError('out-of-bounds load')
+    view_ptr = ptr // view.bytes_per_element
+    return view[view_ptr]
+
+@dataclass
+class Ok(Generic[T]):
+    value: T
+E = TypeVar('E')
+@dataclass
+class Err(Generic[E]):
+    value: E
+
+Expected = Union[Ok[T], Err[E]]
+
+def _decode_utf8(mem: wasmer.Memory, ptr: int, len: int) -> str:
+    ptr = ptr & 0xffffffff
+    len = len & 0xffffffff
+    if ptr + len > mem.data_size:
+        raise IndexError('string out of bounds')
+    view = mem.uint8_view()
+    bytes = bytearray(view[ptr:ptr+len])
+    x = bytes.decode('utf8')
+    return x
+
+def _encode_utf8(val: str, realloc: wasmer.Function, mem: wasmer.Memory) -> Tuple[int, int]:
+    bytes = val.encode('utf8')
+    ptr = realloc(0, 0, 1, len(bytes))
+    assert(isinstance(ptr, int))
+    ptr = ptr & 0xffffffff
+    if ptr + len(bytes) > mem.data_size:
+        raise IndexError('string out of bounds')
+    view = mem.uint8_view()
+    view[ptr:ptr+len(bytes)] = bytes
+    return (ptr, len(bytes))
+
+def _list_canon_lift(ptr: int, len: int, size: int, make_view: Callable[[], Any], mem: wasmer.Memory) -> Any:
+    ptr = ptr & 0xffffffff
+    len = len & 0xffffffff
+    if ptr + len * size > mem.data_size:
+        raise IndexError('list out of bounds')
+    view = make_view()
+    assert(size == view.bytes_per_element)
+    view_ptr = ptr // view.bytes_per_element
+    if isinstance(view, wasmer.Uint8Array):
+        return bytearray(view[view_ptr:view_ptr+len])
+    return view[view_ptr:view_ptr + len]
+
+def _list_canon_lower(list: Any, make_view: Callable[[], Any], size: int, align: int, realloc: wasmer.Function, mem: wasmer.Memory) -> Tuple[int, int]:
+    total_size = size * len(list)
+    ptr = realloc(0, 0, align, total_size)
+    assert(isinstance(ptr, int))
+    ptr = ptr & 0xffffffff
+    if ptr + total_size > mem.data_size:
+        raise IndexError('list realloc return of bounds')
+    view = make_view()
+    assert(size == view.bytes_per_element)
+    view_ptr = ptr // view.bytes_per_element
+    view[view_ptr:view_ptr + len(list)] = list
+    return (ptr, len(list))
+
+@dataclass
+class SlabEntry(Generic[T]):
+    next: int
+    val: Optional[T]
+
+class Slab(Generic[T]):
+    head: int
+    list: List[SlabEntry[T]]
+
+    def __init__(self) -> None:
+        self.list = []
+        self.head = 0
+
+    def insert(self, val: T) -> int:
+        if self.head >= len(self.list):
+            self.list.append(SlabEntry(next = len(self.list) + 1, val = None))
+        ret = self.head
+        slot = self.list[ret]
+        self.head = slot.next
+        slot.next = -1
+        slot.val = val
+        return ret
+
+    def get(self, idx: int) -> T:
+        if idx >= len(self.list):
+            raise IndexError('handle index not valid')
+        slot = self.list[idx]
+        if slot.next == -1:
+            assert(slot.val is not None)
+            return slot.val
+        raise IndexError('handle index not valid')
+
+    def remove(self, idx: int) -> T:
+        ret = self.get(idx)
+        slot = self.list[idx]
+        slot.val = None
+        slot.next = self.head
+        self.head = idx
+        return ret
+class Package:
+    
+    _wasm_val: int
+    _refcnt: int
+    _obj: 'WasmerPack'
+    _destroyed: bool
+    
+    def __init__(self, val: int, obj: 'WasmerPack') -> None:
+        self._wasm_val = val
+        self._refcnt = 1
+        self._obj = obj
+        self._destroyed = False
+    
+    def clone(self) -> 'Package':
+        self._refcnt += 1
+        return self
+    
+    def drop(self) -> None:
+        self._refcnt -= 1;
+        if self._refcnt != 0:
+            return
+        assert(not self._destroyed)
+        self._destroyed = True
+        self._obj._canonical_abi_drop_package(self._wasm_val)
+    
+    def __del__(self) -> None:
+        if not self._destroyed:
+            raise RuntimeError('wasm object not dropped')
+    @classmethod
+    def new(cls, obj: 'WasmerPack', metadata: 'Metadata', libraries: List['Library'], commands: List['Command']) -> 'Package':
+        memory = obj._memory;
+        realloc = obj._canonical_abi_realloc
+        obj = metadata
+        vec11 = libraries
+        len13 = len(vec11)
+        result12 = realloc(0, 0, 4, len13 * 24)
+        assert(isinstance(result12, int))
+        for i14 in range(0, len13):
+            e = vec11[i14]
+            base0 = result12 + i14 * 24
+            record = e
+            field = record.exports
+            field1 = record.imports
+            field2 = record.abi
+            field3 = record.wasm
+            obj4 = field
+            _store(memory.uint32_view, memory, base0, 0, obj._resource2_slab.insert(obj4.clone()))
+            vec = field1
+            len8 = len(vec)
+            result = realloc(0, 0, 4, len8 * 4)
+            assert(isinstance(result, int))
+            for i9 in range(0, len8):
+                e5 = vec[i9]
+                base6 = result + i9 * 4
+                obj7 = e5
+                _store(memory.uint32_view, memory, base6, 0, obj._resource2_slab.insert(obj7.clone()))
+            _store(memory.uint32_view, memory, base0, 8, len8)
+            _store(memory.uint32_view, memory, base0, 4, result)
+            _store(memory.uint8_view, memory, base0, 12, (field2).value)
+            ptr, len10 = _list_canon_lower(field3, memory.uint8_view, 1, 1, realloc, memory)
+            _store(memory.uint32_view, memory, base0, 20, len10)
+            _store(memory.uint32_view, memory, base0, 16, ptr)
+        vec24 = commands
+        len26 = len(vec24)
+        result25 = realloc(0, 0, 4, len26 * 16)
+        assert(isinstance(result25, int))
+        for i27 in range(0, len26):
+            e15 = vec24[i27]
+            base16 = result25 + i27 * 16
+            record17 = e15
+            field18 = record17.name
+            field19 = record17.wasm
+            ptr20, len21 = _encode_utf8(field18, realloc, memory)
+            _store(memory.uint32_view, memory, base16, 4, len21)
+            _store(memory.uint32_view, memory, base16, 0, ptr20)
+            ptr22, len23 = _list_canon_lower(field19, memory.uint8_view, 1, 1, realloc, memory)
+            _store(memory.uint32_view, memory, base16, 12, len23)
+            _store(memory.uint32_view, memory, base16, 8, ptr22)
+        ret = obj._package_new(obj._resource1_slab.insert(obj.clone()), result12, len13, result25, len26)
+        assert(isinstance(ret, int))
+        return obj._resource0_slab.remove(ret)
+    @classmethod
+    def from_webc(cls, obj: 'WasmerPack', bytes: bytes) -> Expected['Package', 'Error']:
+        memory = obj._memory;
+        realloc = obj._canonical_abi_realloc
+        free = obj._canonical_abi_free
+        ptr, len0 = _list_canon_lower(bytes, memory.uint8_view, 1, 1, realloc, memory)
+        ret = obj._package_from_webc(ptr, len0)
+        assert(isinstance(ret, int))
+        load = _load(memory.uint8_view, memory, ret, 0)
+        expected: Expected['Package', 'Error']
+        if load == 0:
+            load1 = _load(memory.int32_view, memory, ret, 4)
+            expected = Ok(obj._resource0_slab.remove(load1))
+        elif load == 1:
+            load2 = _load(memory.int32_view, memory, ret, 4)
+            load3 = _load(memory.int32_view, memory, ret, 8)
+            ptr4 = load2
+            len5 = load3
+            list = _decode_utf8(memory, ptr4, len5)
+            free(ptr4, len5, 1)
+            load6 = _load(memory.int32_view, memory, ret, 12)
+            load7 = _load(memory.int32_view, memory, ret, 16)
+            ptr8 = load6
+            len9 = load7
+            list10 = _decode_utf8(memory, ptr8, len9)
+            free(ptr8, len9, 1)
+            load11 = _load(memory.int32_view, memory, ret, 20)
+            load12 = _load(memory.int32_view, memory, ret, 24)
+            ptr19 = load11
+            len20 = load12
+            result: List[str] = []
+            for i21 in range(0, len20):
+                base13 = ptr19 + i21 * 8
+                load14 = _load(memory.int32_view, memory, base13, 0)
+                load15 = _load(memory.int32_view, memory, base13, 4)
+                ptr16 = load14
+                len17 = load15
+                list18 = _decode_utf8(memory, ptr16, len17)
+                free(ptr16, len17, 1)
+                result.append(list18)
+            free(ptr19, len20 * 8, 4)
+            expected = Err(Error(list, list10, result))
+        else:
+            raise TypeError("invalid variant discriminant for expected")
+        return expected
+    def generate_javascript(self) -> Expected[List['File'], 'Error']:
+        memory = self._obj._memory;
+        free = self._obj._canonical_abi_free
+        obj = self
+        ret = self._obj._package_generate_javascript(self._obj._resource0_slab.insert(obj.clone()))
+        assert(isinstance(ret, int))
+        load = _load(memory.uint8_view, memory, ret, 0)
+        expected: Expected[List['File'], 'Error']
+        if load == 0:
+            load0 = _load(memory.int32_view, memory, ret, 4)
+            load1 = _load(memory.int32_view, memory, ret, 8)
+            ptr11 = load0
+            len12 = load1
+            result: List['File'] = []
+            for i13 in range(0, len12):
+                base2 = ptr11 + i13 * 16
+                load3 = _load(memory.int32_view, memory, base2, 0)
+                load4 = _load(memory.int32_view, memory, base2, 4)
+                ptr = load3
+                len5 = load4
+                list = _decode_utf8(memory, ptr, len5)
+                free(ptr, len5, 1)
+                load6 = _load(memory.int32_view, memory, base2, 8)
+                load7 = _load(memory.int32_view, memory, base2, 12)
+                ptr8 = load6
+                len9 = load7
+                list10 = cast(bytes, _list_canon_lift(ptr8, len9, 1, memory.uint8_view, memory))
+                free(ptr8, len9, 1)
+                result.append(File(list, list10))
+            free(ptr11, len12 * 16, 4)
+            expected = Ok(result)
+        elif load == 1:
+            load14 = _load(memory.int32_view, memory, ret, 4)
+            load15 = _load(memory.int32_view, memory, ret, 8)
+            ptr16 = load14
+            len17 = load15
+            list18 = _decode_utf8(memory, ptr16, len17)
+            free(ptr16, len17, 1)
+            load19 = _load(memory.int32_view, memory, ret, 12)
+            load20 = _load(memory.int32_view, memory, ret, 16)
+            ptr21 = load19
+            len22 = load20
+            list23 = _decode_utf8(memory, ptr21, len22)
+            free(ptr21, len22, 1)
+            load24 = _load(memory.int32_view, memory, ret, 20)
+            load25 = _load(memory.int32_view, memory, ret, 24)
+            ptr32 = load24
+            len33 = load25
+            result34: List[str] = []
+            for i35 in range(0, len33):
+                base26 = ptr32 + i35 * 8
+                load27 = _load(memory.int32_view, memory, base26, 0)
+                load28 = _load(memory.int32_view, memory, base26, 4)
+                ptr29 = load27
+                len30 = load28
+                list31 = _decode_utf8(memory, ptr29, len30)
+                free(ptr29, len30, 1)
+                result34.append(list31)
+            free(ptr32, len33 * 8, 4)
+            expected = Err(Error(list18, list23, result34))
+        else:
+            raise TypeError("invalid variant discriminant for expected")
+        return expected
+    def generate_python(self) -> Expected[List['File'], 'Error']:
+        memory = self._obj._memory;
+        free = self._obj._canonical_abi_free
+        obj = self
+        ret = self._obj._package_generate_python(self._obj._resource0_slab.insert(obj.clone()))
+        assert(isinstance(ret, int))
+        load = _load(memory.uint8_view, memory, ret, 0)
+        expected: Expected[List['File'], 'Error']
+        if load == 0:
+            load0 = _load(memory.int32_view, memory, ret, 4)
+            load1 = _load(memory.int32_view, memory, ret, 8)
+            ptr11 = load0
+            len12 = load1
+            result: List['File'] = []
+            for i13 in range(0, len12):
+                base2 = ptr11 + i13 * 16
+                load3 = _load(memory.int32_view, memory, base2, 0)
+                load4 = _load(memory.int32_view, memory, base2, 4)
+                ptr = load3
+                len5 = load4
+                list = _decode_utf8(memory, ptr, len5)
+                free(ptr, len5, 1)
+                load6 = _load(memory.int32_view, memory, base2, 8)
+                load7 = _load(memory.int32_view, memory, base2, 12)
+                ptr8 = load6
+                len9 = load7
+                list10 = cast(bytes, _list_canon_lift(ptr8, len9, 1, memory.uint8_view, memory))
+                free(ptr8, len9, 1)
+                result.append(File(list, list10))
+            free(ptr11, len12 * 16, 4)
+            expected = Ok(result)
+        elif load == 1:
+            load14 = _load(memory.int32_view, memory, ret, 4)
+            load15 = _load(memory.int32_view, memory, ret, 8)
+            ptr16 = load14
+            len17 = load15
+            list18 = _decode_utf8(memory, ptr16, len17)
+            free(ptr16, len17, 1)
+            load19 = _load(memory.int32_view, memory, ret, 12)
+            load20 = _load(memory.int32_view, memory, ret, 16)
+            ptr21 = load19
+            len22 = load20
+            list23 = _decode_utf8(memory, ptr21, len22)
+            free(ptr21, len22, 1)
+            load24 = _load(memory.int32_view, memory, ret, 20)
+            load25 = _load(memory.int32_view, memory, ret, 24)
+            ptr32 = load24
+            len33 = load25
+            result34: List[str] = []
+            for i35 in range(0, len33):
+                base26 = ptr32 + i35 * 8
+                load27 = _load(memory.int32_view, memory, base26, 0)
+                load28 = _load(memory.int32_view, memory, base26, 4)
+                ptr29 = load27
+                len30 = load28
+                list31 = _decode_utf8(memory, ptr29, len30)
+                free(ptr29, len30, 1)
+                result34.append(list31)
+            free(ptr32, len33 * 8, 4)
+            expected = Err(Error(list18, list23, result34))
+        else:
+            raise TypeError("invalid variant discriminant for expected")
+        return expected
+class Metadata:
+    
+    _wasm_val: int
+    _refcnt: int
+    _obj: 'WasmerPack'
+    _destroyed: bool
+    
+    def __init__(self, val: int, obj: 'WasmerPack') -> None:
+        self._wasm_val = val
+        self._refcnt = 1
+        self._obj = obj
+        self._destroyed = False
+    
+    def clone(self) -> 'Metadata':
+        self._refcnt += 1
+        return self
+    
+    def drop(self) -> None:
+        self._refcnt -= 1;
+        if self._refcnt != 0:
+            return
+        assert(not self._destroyed)
+        self._destroyed = True
+        self._obj._canonical_abi_drop_metadata(self._wasm_val)
+    
+    def __del__(self) -> None:
+        if not self._destroyed:
+            raise RuntimeError('wasm object not dropped')
+    @classmethod
+    def new(cls, obj: 'WasmerPack', package_name: str, version: str) -> Expected['Metadata', 'Error']:
+        memory = obj._memory;
+        realloc = obj._canonical_abi_realloc
+        free = obj._canonical_abi_free
+        ptr, len0 = _encode_utf8(package_name, realloc, memory)
+        ptr1, len2 = _encode_utf8(version, realloc, memory)
+        ret = obj._metadata_new(ptr, len0, ptr1, len2)
+        assert(isinstance(ret, int))
+        load = _load(memory.uint8_view, memory, ret, 0)
+        expected: Expected['Metadata', 'Error']
+        if load == 0:
+            load3 = _load(memory.int32_view, memory, ret, 4)
+            expected = Ok(obj._resource1_slab.remove(load3))
+        elif load == 1:
+            load4 = _load(memory.int32_view, memory, ret, 4)
+            load5 = _load(memory.int32_view, memory, ret, 8)
+            ptr6 = load4
+            len7 = load5
+            list = _decode_utf8(memory, ptr6, len7)
+            free(ptr6, len7, 1)
+            load8 = _load(memory.int32_view, memory, ret, 12)
+            load9 = _load(memory.int32_view, memory, ret, 16)
+            ptr10 = load8
+            len11 = load9
+            list12 = _decode_utf8(memory, ptr10, len11)
+            free(ptr10, len11, 1)
+            load13 = _load(memory.int32_view, memory, ret, 20)
+            load14 = _load(memory.int32_view, memory, ret, 24)
+            ptr21 = load13
+            len22 = load14
+            result: List[str] = []
+            for i23 in range(0, len22):
+                base15 = ptr21 + i23 * 8
+                load16 = _load(memory.int32_view, memory, base15, 0)
+                load17 = _load(memory.int32_view, memory, base15, 4)
+                ptr18 = load16
+                len19 = load17
+                list20 = _decode_utf8(memory, ptr18, len19)
+                free(ptr18, len19, 1)
+                result.append(list20)
+            free(ptr21, len22 * 8, 4)
+            expected = Err(Error(list, list12, result))
+        else:
+            raise TypeError("invalid variant discriminant for expected")
+        return expected
+    def set_description(self, description: str) -> None:
+        memory = self._obj._memory;
+        realloc = self._obj._canonical_abi_realloc
+        obj = self
+        ptr, len0 = _encode_utf8(description, realloc, memory)
+        self._obj._metadata_set_description(self._obj._resource1_slab.insert(obj.clone()), ptr, len0)
+        return None
+class Interface:
+    
+    _wasm_val: int
+    _refcnt: int
+    _obj: 'WasmerPack'
+    _destroyed: bool
+    
+    def __init__(self, val: int, obj: 'WasmerPack') -> None:
+        self._wasm_val = val
+        self._refcnt = 1
+        self._obj = obj
+        self._destroyed = False
+    
+    def clone(self) -> 'Interface':
+        self._refcnt += 1
+        return self
+    
+    def drop(self) -> None:
+        self._refcnt -= 1;
+        if self._refcnt != 0:
+            return
+        assert(not self._destroyed)
+        self._destroyed = True
+        self._obj._canonical_abi_drop_interface(self._wasm_val)
+    
+    def __del__(self) -> None:
+        if not self._destroyed:
+            raise RuntimeError('wasm object not dropped')
+    @classmethod
+    def from_wit(cls, obj: 'WasmerPack', name: str, contents: str) -> Expected['Interface', 'Error']:
+        memory = obj._memory;
+        realloc = obj._canonical_abi_realloc
+        free = obj._canonical_abi_free
+        ptr, len0 = _encode_utf8(name, realloc, memory)
+        ptr1, len2 = _encode_utf8(contents, realloc, memory)
+        ret = obj._interface_from_wit(ptr, len0, ptr1, len2)
+        assert(isinstance(ret, int))
+        load = _load(memory.uint8_view, memory, ret, 0)
+        expected: Expected['Interface', 'Error']
+        if load == 0:
+            load3 = _load(memory.int32_view, memory, ret, 4)
+            expected = Ok(obj._resource2_slab.remove(load3))
+        elif load == 1:
+            load4 = _load(memory.int32_view, memory, ret, 4)
+            load5 = _load(memory.int32_view, memory, ret, 8)
+            ptr6 = load4
+            len7 = load5
+            list = _decode_utf8(memory, ptr6, len7)
+            free(ptr6, len7, 1)
+            load8 = _load(memory.int32_view, memory, ret, 12)
+            load9 = _load(memory.int32_view, memory, ret, 16)
+            ptr10 = load8
+            len11 = load9
+            list12 = _decode_utf8(memory, ptr10, len11)
+            free(ptr10, len11, 1)
+            load13 = _load(memory.int32_view, memory, ret, 20)
+            load14 = _load(memory.int32_view, memory, ret, 24)
+            ptr21 = load13
+            len22 = load14
+            result: List[str] = []
+            for i23 in range(0, len22):
+                base15 = ptr21 + i23 * 8
+                load16 = _load(memory.int32_view, memory, base15, 0)
+                load17 = _load(memory.int32_view, memory, base15, 4)
+                ptr18 = load16
+                len19 = load17
+                list20 = _decode_utf8(memory, ptr18, len19)
+                free(ptr18, len19, 1)
+                result.append(list20)
+            free(ptr21, len22 * 8, 4)
+            expected = Err(Error(list, list12, result))
+        else:
+            raise TypeError("invalid variant discriminant for expected")
+        return expected
+    @classmethod
+    def from_path(cls, obj: 'WasmerPack', path: str) -> Expected['Interface', 'Error']:
+        memory = obj._memory;
+        realloc = obj._canonical_abi_realloc
+        free = obj._canonical_abi_free
+        ptr, len0 = _encode_utf8(path, realloc, memory)
+        ret = obj._interface_from_path(ptr, len0)
+        assert(isinstance(ret, int))
+        load = _load(memory.uint8_view, memory, ret, 0)
+        expected: Expected['Interface', 'Error']
+        if load == 0:
+            load1 = _load(memory.int32_view, memory, ret, 4)
+            expected = Ok(obj._resource2_slab.remove(load1))
+        elif load == 1:
+            load2 = _load(memory.int32_view, memory, ret, 4)
+            load3 = _load(memory.int32_view, memory, ret, 8)
+            ptr4 = load2
+            len5 = load3
+            list = _decode_utf8(memory, ptr4, len5)
+            free(ptr4, len5, 1)
+            load6 = _load(memory.int32_view, memory, ret, 12)
+            load7 = _load(memory.int32_view, memory, ret, 16)
+            ptr8 = load6
+            len9 = load7
+            list10 = _decode_utf8(memory, ptr8, len9)
+            free(ptr8, len9, 1)
+            load11 = _load(memory.int32_view, memory, ret, 20)
+            load12 = _load(memory.int32_view, memory, ret, 24)
+            ptr19 = load11
+            len20 = load12
+            result: List[str] = []
+            for i21 in range(0, len20):
+                base13 = ptr19 + i21 * 8
+                load14 = _load(memory.int32_view, memory, base13, 0)
+                load15 = _load(memory.int32_view, memory, base13, 4)
+                ptr16 = load14
+                len17 = load15
+                list18 = _decode_utf8(memory, ptr16, len17)
+                free(ptr16, len17, 1)
+                result.append(list18)
+            free(ptr19, len20 * 8, 4)
+            expected = Err(Error(list, list10, result))
+        else:
+            raise TypeError("invalid variant discriminant for expected")
+        return expected
+@dataclass
+class Command:
+    """
+    A WASI executable.
+    """
+    # The executable's name (must be a valid identifier).
+    name: str
+    # The WebAssembly bytecode for this executable.
+    wasm: bytes
+
+@dataclass
+class Library:
+    """
+    A library that we should generate bindings for.
+    """
+    # The interface exposed by this library.
+    exports: 'Interface'
+    # Zero or more interfaces the host will provide to the guest.
+    imports: List['Interface']
+    abi: 'Abi'
+    # The WebAssembly bytecode for this library.
+    wasm: bytes
+
+class Abi(Enum):
+    """
+    The ABI a library has been compiled against.
+    """
+    # No ABI.
+    # 
+    # This corresponds Rust's `wasm32-unknown-unknown` target.
+    NONE = 0
+    # The WebAssembly Systems Interface.
+    # 
+    # This corresponds Rust's `wasm32-wasi` target.
+    WASI = 1
+
+@dataclass
+class Error:
+    """
+    An error that may occur.
+    """
+    # The error message.
+    message: str
+    # An extended error message, possibly including a backtrace and the list
+    # of errors which led to this one.
+    verbose: str
+    # The chain of source errors.
+    causes: List[str]
+
+@dataclass
+class File:
+    """
+    Information about a file.
+    """
+    # The file's path.
+    filename: str
+    # The file's contents.
+    contents: bytes
+
+class WasmerPack:
+    instance: wasmer.Instance
+    _canonical_abi_free: wasmer.Function
+    _canonical_abi_realloc: wasmer.Function
+    _interface_from_path: wasmer.Function
+    _interface_from_wit: wasmer.Function
+    _memory: wasmer.Memory
+    _metadata_new: wasmer.Function
+    _metadata_set_description: wasmer.Function
+    _package_from_webc: wasmer.Function
+    _package_generate_javascript: wasmer.Function
+    _package_generate_python: wasmer.Function
+    _package_new: wasmer.Function
+    _resource0_slab: Slab[Package]
+    _canonical_abi_drop_package: wasmer.Function
+    _resource1_slab: Slab[Metadata]
+    _canonical_abi_drop_metadata: wasmer.Function
+    _resource2_slab: Slab[Interface]
+    _canonical_abi_drop_interface: wasmer.Function
+    def __init__(self, store: wasmer.Store, imports: dict[str, dict[str, Any]], module: wasmer.Module):
+        
+        ty1 = wasmer.FunctionType([wasmer.Type.I32], [])
+        ty2 = wasmer.FunctionType([wasmer.Type.I32], [wasmer.Type.I32])
+        def drop_package(idx: int) -> None:
+             self._resource0_slab.remove(idx).drop();
+        imports.setdefault('canonical_abi', {})['resource_drop_package'] = wasmer.Function(store, drop_package, ty1)
+        
+        def clone_package(idx: int) -> int:
+             obj = self._resource0_slab.get(idx)
+             return self._resource0_slab.insert(obj.clone())
+        imports.setdefault('canonical_abi', {})['resource_clone_package'] = wasmer.Function(store, clone_package, ty2)
+        
+        def get_package(idx: int) -> int:
+             obj = self._resource0_slab.get(idx)
+             return obj._wasm_val
+        imports.setdefault('canonical_abi', {})['resource_get_package'] = wasmer.Function(store, get_package, ty2)
+        
+        def new_package(val: int) -> int:
+             return self._resource0_slab.insert(Package(val, self))
+        imports.setdefault('canonical_abi', {})['resource_new_package'] = wasmer.Function(store, new_package, ty2)
+        
+        ty1 = wasmer.FunctionType([wasmer.Type.I32], [])
+        ty2 = wasmer.FunctionType([wasmer.Type.I32], [wasmer.Type.I32])
+        def drop_metadata(idx: int) -> None:
+             self._resource1_slab.remove(idx).drop();
+        imports.setdefault('canonical_abi', {})['resource_drop_metadata'] = wasmer.Function(store, drop_metadata, ty1)
+        
+        def clone_metadata(idx: int) -> int:
+             obj = self._resource1_slab.get(idx)
+             return self._resource1_slab.insert(obj.clone())
+        imports.setdefault('canonical_abi', {})['resource_clone_metadata'] = wasmer.Function(store, clone_metadata, ty2)
+        
+        def get_metadata(idx: int) -> int:
+             obj = self._resource1_slab.get(idx)
+             return obj._wasm_val
+        imports.setdefault('canonical_abi', {})['resource_get_metadata'] = wasmer.Function(store, get_metadata, ty2)
+        
+        def new_metadata(val: int) -> int:
+             return self._resource1_slab.insert(Metadata(val, self))
+        imports.setdefault('canonical_abi', {})['resource_new_metadata'] = wasmer.Function(store, new_metadata, ty2)
+        
+        ty1 = wasmer.FunctionType([wasmer.Type.I32], [])
+        ty2 = wasmer.FunctionType([wasmer.Type.I32], [wasmer.Type.I32])
+        def drop_interface(idx: int) -> None:
+             self._resource2_slab.remove(idx).drop();
+        imports.setdefault('canonical_abi', {})['resource_drop_interface'] = wasmer.Function(store, drop_interface, ty1)
+        
+        def clone_interface(idx: int) -> int:
+             obj = self._resource2_slab.get(idx)
+             return self._resource2_slab.insert(obj.clone())
+        imports.setdefault('canonical_abi', {})['resource_clone_interface'] = wasmer.Function(store, clone_interface, ty2)
+        
+        def get_interface(idx: int) -> int:
+             obj = self._resource2_slab.get(idx)
+             return obj._wasm_val
+        imports.setdefault('canonical_abi', {})['resource_get_interface'] = wasmer.Function(store, get_interface, ty2)
+        
+        def new_interface(val: int) -> int:
+             return self._resource2_slab.insert(Interface(val, self))
+        imports.setdefault('canonical_abi', {})['resource_new_interface'] = wasmer.Function(store, new_interface, ty2)
+        self.instance = wasmer.Instance(module, imports)
+        
+        canonical_abi_free = self.instance.exports.__getattribute__('canonical_abi_free')
+        assert(isinstance(canonical_abi_free, wasmer.Function))
+        self._canonical_abi_free = canonical_abi_free
+        
+        canonical_abi_realloc = self.instance.exports.__getattribute__('canonical_abi_realloc')
+        assert(isinstance(canonical_abi_realloc, wasmer.Function))
+        self._canonical_abi_realloc = canonical_abi_realloc
+        
+        interface_from_path = self.instance.exports.__getattribute__('interface::from-path')
+        assert(isinstance(interface_from_path, wasmer.Function))
+        self._interface_from_path = interface_from_path
+        
+        interface_from_wit = self.instance.exports.__getattribute__('interface::from-wit')
+        assert(isinstance(interface_from_wit, wasmer.Function))
+        self._interface_from_wit = interface_from_wit
+        
+        memory = self.instance.exports.__getattribute__('memory')
+        assert(isinstance(memory, wasmer.Memory))
+        self._memory = memory
+        
+        metadata_new = self.instance.exports.__getattribute__('metadata::new')
+        assert(isinstance(metadata_new, wasmer.Function))
+        self._metadata_new = metadata_new
+        
+        metadata_set_description = self.instance.exports.__getattribute__('metadata::set-description')
+        assert(isinstance(metadata_set_description, wasmer.Function))
+        self._metadata_set_description = metadata_set_description
+        
+        package_from_webc = self.instance.exports.__getattribute__('package::from-webc')
+        assert(isinstance(package_from_webc, wasmer.Function))
+        self._package_from_webc = package_from_webc
+        
+        package_generate_javascript = self.instance.exports.__getattribute__('package::generate-javascript')
+        assert(isinstance(package_generate_javascript, wasmer.Function))
+        self._package_generate_javascript = package_generate_javascript
+        
+        package_generate_python = self.instance.exports.__getattribute__('package::generate-python')
+        assert(isinstance(package_generate_python, wasmer.Function))
+        self._package_generate_python = package_generate_python
+        
+        package_new = self.instance.exports.__getattribute__('package::new')
+        assert(isinstance(package_new, wasmer.Function))
+        self._package_new = package_new
+        
+        self._resource0_slab = Slab()
+        canon_drop_package = self.instance.exports.__getattribute__('canonical_abi_drop_package')
+        assert(isinstance(canon_drop_package, wasmer.Function))
+        self._canonical_abi_drop_package = canon_drop_package
+        
+        self._resource1_slab = Slab()
+        canon_drop_metadata = self.instance.exports.__getattribute__('canonical_abi_drop_metadata')
+        assert(isinstance(canon_drop_metadata, wasmer.Function))
+        self._canonical_abi_drop_metadata = canon_drop_metadata
+        
+        self._resource2_slab = Slab()
+        canon_drop_interface = self.instance.exports.__getattribute__('canonical_abi_drop_interface')
+        assert(isinstance(canon_drop_interface, wasmer.Function))
+        self._canonical_abi_drop_interface = canon_drop_interface
+

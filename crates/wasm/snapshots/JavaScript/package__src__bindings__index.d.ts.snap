@@ -1,0 +1,31 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: crates/wasm/generated_bindings/JavaScript/package/src/bindings/index.d.ts
+---
+// @ts-ignore
+import type { WasiConfig } from "@wasmer/wasi";
+import { WasmerPack as _WasmerPack } from "./wasmer-pack/wasmer-pack";
+
+/**
+ * Options used when initializing the bindings.
+ */
+export type LoadOptions = {
+    /** Additional imports to be provided to the WebAssembly module */
+    imports: WebAssembly.Imports,
+    /**
+     * A user-specified WebAssembly module to use instead of the one bundled
+     * with this package.
+     */
+    module: WebAssembly.Module,
+};
+/**
+* Extended options used when loading a WASI library.
+ */
+export type WasiLoadOptions = LoadOptions & {
+    /** Configuration used to initialize the WASI environment. */
+    wasi: Partial<WasiConfig>,
+};
+
+export default class Bindings {
+    wasmer_pack(options?: Partial<WasiLoadOptions>): Promise<_WasmerPack>;
+}

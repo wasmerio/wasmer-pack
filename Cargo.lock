@@ -2462,8 +2462,10 @@ version = "0.6.0"
 dependencies = [
  "anyhow",
  "getrandom",
+ "tracing-subscriber",
  "wai-bindgen-rust",
  "wasmer-pack",
+ "wasmer-pack-testing",
 ]
 
 [[package]]

@@ -1,0 +1,9 @@
+{
+  "name": "hello-wasi",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.4.1"
+  }
+}

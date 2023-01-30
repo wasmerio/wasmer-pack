@@ -1,0 +1,13 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: crates/wasm/generated_bindings/JavaScript
+---
+[
+    "generated_bindings/JavaScript/package/src/bindings/index.d.ts",
+    "generated_bindings/JavaScript/package/src/bindings/index.js",
+    "generated_bindings/JavaScript/package/src/bindings/wasmer-pack/intrinsics.js",
+    "generated_bindings/JavaScript/package/src/bindings/wasmer-pack/wasmer-pack.d.ts",
+    "generated_bindings/JavaScript/package/src/bindings/wasmer-pack/wasmer-pack.js",
+    "generated_bindings/JavaScript/package/src/index.d.ts",
+    "generated_bindings/JavaScript/package/src/index.js",
+]

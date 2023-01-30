@@ -7,28 +7,6 @@ use std::{
 use wasmer_pack::{Abi, Interface, Library, Metadata, Module, Package};
 
 #[test]
-fn use_javascript_bindings() {
-    let pkg = wasmer_pack_fixture();
-    let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR"))
-        .join("wasmer-pack")
-        .join("javascript");
-    let _ = std::fs::remove_dir_all(&out_dir);
-
-    let js = wasmer_pack::generate_javascript(&pkg).unwrap();
-    js.save_to_disk(&out_dir).unwrap();
-
-    let js_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests")
-        .join("js");
-
-    let _ = std::fs::remove_dir_all(js_dir.join("node_modules"));
-
-    execute("yarn", &js_dir);
-    execute("yarn tsc --noEmit", &js_dir);
-    execute("yarn test", &js_dir);
-}
-
-#[test]
 fn use_wasi_javascript_bindings() {
     let pkg = wabt_fixture();
     let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR"))
@@ -48,33 +26,6 @@ fn use_wasi_javascript_bindings() {
     execute("yarn", &js_dir);
     execute("yarn tsc --noEmit", &js_dir);
     execute("yarn test", &js_dir);
-}
-
-#[test]
-#[cfg_attr(
-    all(target_os = "macos", target_arch = "aarch64"),
-    ignore = "Wasmer Python doesn't work on M1 MacOS"
-)]
-fn use_python_bindings() {
-    let pkg = wasmer_pack_fixture();
-    let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR"))
-        .join("wasmer-pack")
-        .join("python");
-    let _ = std::fs::remove_dir_all(&out_dir);
-
-    let py = wasmer_pack::generate_python(&pkg).unwrap();
-    py.save_to_disk(&out_dir).unwrap();
-
-    let python_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests")
-        .join("python");
-
-    execute("pipenv install", &python_dir);
-    execute("pipenv run pytest", &python_dir);
-    execute(
-        format!("pipenv run mypy {}", out_dir.join("wasmer_pack").display()),
-        &python_dir,
-    );
 }
 
 #[test]
@@ -102,36 +53,6 @@ fn use_wasi_python_bindings() {
         format!("pipenv run mypy {}", out_dir.join("wabt").display()),
         &python_dir,
     );
-}
-
-fn wasmer_pack_fixture() -> Package {
-    let project_root = project_root();
-
-    let exports = project_root
-        .join("crates")
-        .join("wasm")
-        .join("wasmer-pack.exports.wai");
-
-    execute(
-        "cargo build --target=wasm32-unknown-unknown --package=wasmer-pack-wasm",
-        &project_root,
-    );
-
-    let wasm = project_root
-        .join("target")
-        .join("wasm32-unknown-unknown")
-        .join("debug")
-        .join("wasmer_pack_wasm.wasm");
-
-    let metadata = Metadata::new("wasmer/wasmer-pack".parse().unwrap(), "0.0.0");
-    let libraries = vec![Library {
-        module: Module::from_path(wasm, Abi::None).unwrap(),
-        exports: Interface::from_path(exports).unwrap(),
-        imports: vec![],
-    }];
-    let commands = Vec::new();
-
-    Package::new(metadata, libraries, commands)
 }
 
 fn wabt_fixture() -> Package {

@@ -1,0 +1,14 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: crates/wasm/generated_bindings/Python/pyproject.toml
+---
+[project]
+name = "wasmer_pack"
+version = "0.6.0"
+keywords = []
+dependencies = ["wasmer", "wasmer_compiler_cranelift"]
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+

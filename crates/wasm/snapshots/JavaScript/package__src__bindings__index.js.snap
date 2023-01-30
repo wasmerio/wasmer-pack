@@ -1,0 +1,38 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: crates/wasm/generated_bindings/JavaScript/package/src/bindings/index.js
+---
+const fs = require("fs/promises");
+const { init: initWasi, WASI } = require("@wasmer/wasi");
+const { WasmerPack: _WasmerPack } = require("./wasmer-pack/wasmer-pack.js");
+
+class Bindings {
+    constructor() {
+        this._cache = {}
+    }
+
+    /** Lazily fetch and compile the WebAssembly module */
+    async _getModule(filename) {
+        if (filename in this._cache) {
+            return this._cache[filename];
+        }
+
+        const wasm = await fs.readFile(`${__dirname}/${filename}`);
+        this._cache[filename] = await WebAssembly.compile(wasm);
+        return this._cache[filename];
+    }
+    async wasmer_pack(options) {
+        const wrapper = new _WasmerPack();
+        await initWasi();
+        const module = options?.module || await this._getModule("wasmer-pack/wasmer-pack-wasm.wasm");
+        const wasi = options?.wasi || new WASI({}, module);
+        const imports = Object.assign({}, options?.imports, wasi.getImports(module));
+
+        await wrapper.instantiate(module, imports);
+        wasi.instantiate(wrapper.instance);
+
+        return wrapper;
+    }
+}
+
+module.exports = { Bindings };

@@ -1,0 +1,275 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: crates/wasm/generated_bindings/JavaScript/package/src/bindings/wasmer-pack/wasmer-pack.d.ts
+---
+export type Result<T, E> = { tag: "ok", val: T } | { tag: "err", val: E };
+/**
+* A WASI executable.
+*/
+export interface Command {
+  /**
+  * The executable's name (must be a valid identifier).
+  */
+  name: string,
+  /**
+  * The WebAssembly bytecode for this executable.
+  */
+  wasm: Uint8Array,
+}
+/**
+* A library that we should generate bindings for.
+*/
+export interface Library {
+  /**
+  * The interface exposed by this library.
+  */
+  exports: Interface,
+  /**
+  * Zero or more interfaces the host will provide to the guest.
+  */
+  imports: Interface[],
+  abi: Abi,
+  /**
+  * The WebAssembly bytecode for this library.
+  */
+  wasm: Uint8Array,
+}
+/**
+* The ABI a library has been compiled against.
+* 
+* # Variants
+* 
+* ## `"none"`
+* 
+* No ABI.
+* 
+* This corresponds Rust's `wasm32-unknown-unknown` target.
+* 
+* ## `"wasi"`
+* 
+* The WebAssembly Systems Interface.
+* 
+* This corresponds Rust's `wasm32-wasi` target.
+*/
+export type Abi = "none" | "wasi";
+/**
+* An error that may occur.
+*/
+export interface Error {
+  /**
+  * The error message.
+  */
+  message: string,
+  /**
+  * An extended error message, possibly including a backtrace and the list
+  * of errors which led to this one.
+  */
+  verbose: string,
+  /**
+  * The chain of source errors.
+  */
+  causes: string[],
+}
+/**
+* Information about a file.
+*/
+export interface File {
+  /**
+  * The file's path.
+  */
+  filename: string,
+  /**
+  * The file's contents.
+  */
+  contents: Uint8Array,
+}
+export class WasmerPack {
+  
+  /**
+  * The WebAssembly instance that this class is operating with.
+  * This is only available after the `instantiate` method has
+  * been called.
+  */
+  instance: WebAssembly.Instance;
+  
+  /**
+  * Constructs a new instance with internal state necessary to
+  * manage a wasm instance.
+  *
+  * Note that this does not actually instantiate the WebAssembly
+  * instance or module, you'll need to call the `instantiate`
+  * method below to "activate" this class.
+  */
+  constructor();
+  
+  /**
+  * This is a low-level method which can be used to add any
+  * intrinsics necessary for this instance to operate to an
+  * import object.
+  *
+  * The `import` object given here is expected to be used later
+  * to actually instantiate the module this class corresponds to.
+  * If the `instantiate` method below actually does the
+  * instantiation then there's no need to call this method, but
+  * if you're instantiating manually elsewhere then this can be
+  * used to prepare the import object for external instantiation.
+  */
+  addToImports(imports: any): void;
+  
+  /**
+  * Initializes this object with the provided WebAssembly
+  * module/instance.
+  *
+  * This is intended to be a flexible method of instantiating
+  * and completion of the initialization of this class. This
+  * method must be called before interacting with the
+  * WebAssembly object.
+  *
+  * The first argument to this method is where to get the
+  * wasm from. This can be a whole bunch of different types,
+  * for example:
+  *
+  * * A precompiled `WebAssembly.Module`
+  * * A typed array buffer containing the wasm bytecode.
+  * * A `Promise` of a `Response` which is used with
+  *   `instantiateStreaming`
+  * * A `Response` itself used with `instantiateStreaming`.
+  * * An already instantiated `WebAssembly.Instance`
+  *
+  * If necessary the module is compiled, and if necessary the
+  * module is instantiated. Whether or not it's necessary
+  * depends on the type of argument provided to
+  * instantiation.
+  *
+  * If instantiation is performed then the `imports` object
+  * passed here is the list of imports used to instantiate
+  * the instance. This method may add its own intrinsics to
+  * this `imports` object too.
+  */
+  instantiate(
+  module: WebAssembly.Module | BufferSource | Promise<Response> | Response | WebAssembly.Instance,
+  imports?: any,
+  ): Promise<void>;
+}
+
+export class Package {
+  // Creates a new strong reference count as a new
+  // object.  This is only required if you're also
+  // calling `drop` below and want to manually manage
+  // the reference count from JS.
+  //
+  // If you don't call `drop`, you don't need to call
+  // this and can simply use the object from JS.
+  clone(): Package;
+  
+  // Explicitly indicate that this JS object will no
+  // longer be used. If the internal reference count
+  // reaches zero then this will deterministically
+  // destroy the underlying wasm object.
+  //
+  // This is not required to be called from JS. Wasm
+  // destructors will be automatically called for you
+  // if this is not called using the JS
+  // `FinalizationRegistry`.
+  //
+  // Calling this method does not guarantee that the
+  // underlying wasm object is deallocated. Something
+  // else (including wasm) may be holding onto a
+  // strong reference count.
+  drop(): void;
+  /**
+  * Construct a new package from its components.
+  * 
+  * This is a fairly low-level constructor. Users should prefer the
+  * appropriate "fromXXX()" constructor instead.
+  */
+  static new(wasmerPack: WasmerPack, metadata: Metadata, libraries: Library[], commands: Command[]): Package;
+  /**
+  * Load a package from a WEBC binary.
+  */
+  static fromWebc(wasmerPack: WasmerPack, bytes: Uint8Array): Result<Package, Error>;
+  /**
+  * Generate a JavaScript project that can be used to access the provided
+  * package.
+  */
+  generateJavascript(): Result<File[], Error>;
+  /**
+  * Generate a Python project that can be used to access the provided package.
+  */
+  generatePython(): Result<File[], Error>;
+}
+
+export class Metadata {
+  // Creates a new strong reference count as a new
+  // object.  This is only required if you're also
+  // calling `drop` below and want to manually manage
+  // the reference count from JS.
+  //
+  // If you don't call `drop`, you don't need to call
+  // this and can simply use the object from JS.
+  clone(): Metadata;
+  
+  // Explicitly indicate that this JS object will no
+  // longer be used. If the internal reference count
+  // reaches zero then this will deterministically
+  // destroy the underlying wasm object.
+  //
+  // This is not required to be called from JS. Wasm
+  // destructors will be automatically called for you
+  // if this is not called using the JS
+  // `FinalizationRegistry`.
+  //
+  // Calling this method does not guarantee that the
+  // underlying wasm object is deallocated. Something
+  // else (including wasm) may be holding onto a
+  // strong reference count.
+  drop(): void;
+  /**
+  * Create a new metadata object with all the required fields.
+  * 
+  * The package name must be in the form `namespace/name`, where
+  * both the namespace and name can only contain ASCII numbers and letters,
+  * `-`, or `_`.
+  */
+  static new(wasmerPack: WasmerPack, packageName: string, version: string): Result<Metadata, Error>;
+  /**
+  * A 1-sentence description of what the package does.
+  */
+  setDescription(description: string): void;
+}
+
+export class Interface {
+  // Creates a new strong reference count as a new
+  // object.  This is only required if you're also
+  // calling `drop` below and want to manually manage
+  // the reference count from JS.
+  //
+  // If you don't call `drop`, you don't need to call
+  // this and can simply use the object from JS.
+  clone(): Interface;
+  
+  // Explicitly indicate that this JS object will no
+  // longer be used. If the internal reference count
+  // reaches zero then this will deterministically
+  // destroy the underlying wasm object.
+  //
+  // This is not required to be called from JS. Wasm
+  // destructors will be automatically called for you
+  // if this is not called using the JS
+  // `FinalizationRegistry`.
+  //
+  // Calling this method does not guarantee that the
+  // underlying wasm object is deallocated. Something
+  // else (including wasm) may be holding onto a
+  // strong reference count.
+  drop(): void;
+  /**
+  * Load a library's interface from it's WIT definition.
+  */
+  static fromWit(wasmerPack: WasmerPack, name: string, contents: string): Result<Interface, Error>;
+  /**
+  * Load a library's interface from the definition on disk.
+  */
+  static fromPath(wasmerPack: WasmerPack, path: string): Result<Interface, Error>;
+}
+
