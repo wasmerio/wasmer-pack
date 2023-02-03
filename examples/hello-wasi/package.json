@@ -5,5 +5,8 @@
   "license": "MIT",
   "devDependencies": {
     "jest": "^29.4.1"
+  },
+  "dependencies": {
+    "@michael-f-bryan/hello-wasi": "./generated_bindings/JavaScript/package"
   }
 }
