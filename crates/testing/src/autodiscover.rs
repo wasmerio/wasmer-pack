@@ -244,26 +244,15 @@ fn run_pytest(crate_dir: &Path) -> Result<(), Error> {
     Ok(())
 }
 
-struct PlatformIdpCommand {
-    inner: Command,
-}
-
-impl PlatformIdpCommand {
-    pub fn new() -> PlatformIdpCommand {
-        let cmd = match cfg!(target_os = "windows") {
-            true => Command::new("cmd"),
-            false => Command::new("sh"),
-        };
-
-        PlatformIdpCommand { inner: cmd }
-    }
-    pub fn eval_for_platform(&mut self) -> &mut Command {
-        if cfg!(target_os = "windows") {
-            self.inner.arg("/C");
-        } else {
-            self.inner.arg("-c");
-        }
-        &mut self.inner
+fn shell() -> Command {
+    if cfg!(target_os = "windows") {
+        let mut cmd = Command::new("cmd");
+        cmd.arg("/C");
+        cmd
+    } else {
+        let mut cmd = Command::new("sh");
+        cmd.arg("-c");
+        cmd
     }
 }
 
@@ -280,17 +269,14 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
     if yarn_lock.exists() {
         //need to install dependencies for generated package as yarn link doesn't resolves the dependencies on it own
 
-        let mut cmd = PlatformIdpCommand::new();
-        cmd.eval_for_platform()
-            .arg("yarn")
-            .current_dir(&package_path);
+        let mut cmd = shell();
+        cmd.arg("yarn").current_dir(&package_path);
         tracing::info!(
-            ?cmd.inner,
+            ?cmd,
             "Installing the Javascript Dependencies for generated package"
         );
 
         let status = cmd
-            .inner
             .stdin(Stdio::null())
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
@@ -302,15 +288,14 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
             "Unable to install JavaScript Dependencies for generated package"
         );
 
-        let mut cmd = PlatformIdpCommand::new();
-        cmd.eval_for_platform().arg("yarn").current_dir(crate_dir);
+        let mut cmd = shell();
+        cmd.arg("yarn").current_dir(crate_dir);
         tracing::info!(
-            ?cmd.inner,
+            ?cmd,
             "Found `yarn-lock`. Installing the Javascript Dependencies"
         );
 
         let status = cmd
-            .inner
             .stdin(Stdio::null())
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
@@ -324,16 +309,14 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
         return Ok(());
     }
 
-    let mut cmd = PlatformIdpCommand::new();
-    cmd.eval_for_platform()
-        .arg("yarn")
+    let mut cmd = shell();
+    cmd.arg("yarn")
         .arg("init")
         .arg("--yes")
         .current_dir(crate_dir);
-    tracing::info!(?cmd.inner, "Initializing the Javascript package");
+    tracing::info!(?cmd, "Initializing the Javascript package");
 
     let status = cmd
-        .inner
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -347,17 +330,15 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
 
     // install jest to crate dir
 
-    let mut cmd = PlatformIdpCommand::new();
-    cmd.eval_for_platform()
-        .arg("yarn")
+    let mut cmd = shell();
+    cmd.arg("yarn")
         .arg("add")
         .arg("--dev")
         .arg("jest")
         .current_dir(crate_dir);
-    tracing::info!(?cmd.inner, "Installing the Jest testing library");
+    tracing::info!(?cmd, "Installing the Jest testing library");
 
     let status = cmd
-        .inner
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -374,14 +355,11 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
     fs::write(&jest_config_file, JEST_CONFIG)?;
     anyhow::ensure!(crate_dir.join(&jest_config_file).exists());
 
-    let mut cmd = PlatformIdpCommand::new();
-    cmd.eval_for_platform()
-        .arg("yarn")
-        .current_dir(&package_path);
+    let mut cmd = shell();
+    cmd.arg("yarn").current_dir(&package_path);
 
-    tracing::info!(?cmd.inner, "Installing dependencies for generated bindings");
+    tracing::info!(?cmd, "Installing dependencies for generated bindings");
     let status = cmd
-        .inner
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -393,15 +371,11 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
         "Unable to install dependencies for generated bindings"
     );
 
-    let mut cmd = PlatformIdpCommand::new();
-    cmd.eval_for_platform()
-        .arg("yarn")
-        .arg("link")
-        .current_dir(&package_path);
+    let mut cmd = shell();
+    cmd.arg("yarn").arg("link").current_dir(&package_path);
 
-    tracing::info!(?cmd.inner, "Linking the generated bindings as a `Yarn link`");
+    tracing::info!(?cmd, "Linking the generated bindings as a `Yarn link`");
     let status = cmd
-        .inner
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -413,16 +387,14 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
         "Unable to perform yarn link on generated bindings"
     );
 
-    let mut cmd = PlatformIdpCommand::new();
-    cmd.eval_for_platform()
-        .arg("yarn")
+    let mut cmd = shell();
+    cmd.arg("yarn")
         .arg("link")
         .arg(&generated_package_name)
         .current_dir(crate_dir);
 
-    tracing::info!(?cmd.inner, "Linking the testing package to generated bindings");
+    tracing::info!(?cmd, "Linking the testing package to generated bindings");
     let status = cmd
-        .inner
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -437,16 +409,12 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
 }
 
 fn run_jest(crate_dir: &Path) -> Result<(), Error> {
-    let mut cmd = PlatformIdpCommand::new();
+    let mut cmd = shell();
 
-    cmd.eval_for_platform()
-        .current_dir(crate_dir)
-        .arg("yarn")
-        .arg("jest");
-    tracing::info!(?cmd.inner,"Running the jest tests");
+    cmd.current_dir(crate_dir).arg("yarn").arg("jest");
+    tracing::info!(?cmd, "Running the jest tests");
 
     let status = cmd
-        .inner
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
