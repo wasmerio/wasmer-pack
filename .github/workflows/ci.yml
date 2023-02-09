@@ -31,6 +31,7 @@ jobs:
           path: |
             **/generated_bindings/
             **/node_modules/
+          key: non-rust-cache
       - name: Install Node
         uses: actions/setup-node@v3
         with:
