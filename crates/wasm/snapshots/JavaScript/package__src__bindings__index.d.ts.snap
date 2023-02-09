@@ -3,7 +3,6 @@ source: crates/testing/src/autodiscover.rs
 input_file: crates/wasm/generated_bindings/JavaScript/package/src/bindings/index.d.ts
 ---
 // @ts-ignore
-import type { WasiConfig } from "@wasmer/wasi";
 import { WasmerPack as _WasmerPack } from "./wasmer-pack/wasmer-pack";
 
 /**
@@ -18,14 +17,7 @@ export type LoadOptions = {
      */
     module: WebAssembly.Module,
 };
-/**
-* Extended options used when loading a WASI library.
- */
-export type WasiLoadOptions = LoadOptions & {
-    /** Configuration used to initialize the WASI environment. */
-    wasi: Partial<WasiConfig>,
-};
 
 export default class Bindings {
-    wasmer_pack(options?: Partial<WasiLoadOptions>): Promise<_WasmerPack>;
+    wasmer_pack(options?: Partial<LoadOptions>): Promise<_WasmerPack>;
 }

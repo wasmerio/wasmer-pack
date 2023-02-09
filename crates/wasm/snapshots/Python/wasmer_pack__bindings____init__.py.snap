@@ -34,13 +34,10 @@ class Bindings:
 
     def wasmer_pack(
         self,
-        env: Optional[wasi.Environment] = None,
         module: Optional[Module] = None,
     ) -> _WasmerPack:
         """
         Instantiate the "wasmer_pack" library.
-        :param env: A pre-initialized WASI environment. If not specified, a
-                     default value will be used.
         :param module: A user-specified WebAssembly module to use instead of the
                        one bundled with this package.
         """
@@ -56,12 +53,6 @@ class Bindings:
         def get_export(item_name: str):
             assert wrapper is not None
             return getattr(wrapper.instance.exports, item_name)
-        version = wasi.get_version(module, strict=True)
-        assert version is not None, f'"{filename}" is not a valid WASI executable'
-        if not env:
-            env = wasi.StateBuilder("wasmer_pack").finalize()
-        wasi_imports = env.generate_imports(self._store, version)
-        imports.update(wasi_imports)
 
         wrapper = _WasmerPack(self._store, imports, module)
         return wrapper

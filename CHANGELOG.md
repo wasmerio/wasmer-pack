@@ -15,7 +15,10 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### 💥 Breaking Changed 💥
+
 - Restructured the `wasmer/wasmer-pack` WAPM package's API
+  ([#118](https://github.com/wasmerio/wasmer-pack/pull/118))
   - The `Package` type has been changed from a `record` to a `resource` with
     methods
   - There are now convenience functions for loading a `Package` from known
@@ -27,6 +30,11 @@ change, where applicable.
   of `wasmer-pack-cli` crate into the main `wasmer-pack` crate
   ([#118](https://github.com/wasmerio/wasmer-pack/pull/118))
 
+### Fixed
+
+- Replaced the naive ABI detection routine with something that properly checks
+  which namespaces are imported by a module
+  ([#118](https://github.com/wasmerio/wasmer-pack/pull/118))
 
 ## [0.6.0] - 2022-12-28
 

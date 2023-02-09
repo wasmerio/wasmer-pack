@@ -3,7 +3,6 @@ source: crates/testing/src/autodiscover.rs
 input_file: crates/wasm/generated_bindings/JavaScript/package/src/bindings/index.js
 ---
 const fs = require("fs/promises");
-const { init: initWasi, WASI } = require("@wasmer/wasi");
 const { WasmerPack: _WasmerPack } = require("./wasmer-pack/wasmer-pack.js");
 
 class Bindings {
@@ -23,13 +22,10 @@ class Bindings {
     }
     async wasmer_pack(options) {
         const wrapper = new _WasmerPack();
-        await initWasi();
-        const module = options?.module || await this._getModule("wasmer-pack/wasmer-pack-wasm.wasm");
-        const wasi = options?.wasi || new WASI({}, module);
-        const imports = Object.assign({}, options?.imports, wasi.getImports(module));
+        const module = await this._getModule("wasmer-pack/wasmer-pack-wasm.wasm");
+        const imports = options?.imports || {};
 
         await wrapper.instantiate(module, imports);
-        wasi.instantiate(wrapper.instance);
 
         return wrapper;
     }

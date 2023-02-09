@@ -2418,6 +2418,7 @@ dependencies = [
  "wai-bindgen-gen-js",
  "wai-bindgen-gen-wasmer-py",
  "wai-parser",
+ "wasmparser",
  "webc 4.1.1",
 ]
 
@@ -2499,6 +2500,16 @@ dependencies = [
  "wapm-toml 0.2.2",
  "webc 3.0.1",
  "whoami",
+]
+
+[[package]]
+name = "wasmparser"
+version = "0.99.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ef3b717afc67f848f412d4f02c127dd3e35a0eecd58c684580414df4fde01d3"
+dependencies = [
+ "indexmap",
+ "url",
 ]
 
 [[package]]

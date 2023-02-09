@@ -148,17 +148,25 @@ fn get_file_from_volume<'webc>(
     result
 }
 
+/// Try to automatically detec the ABI for a WebAssembly module based in its
+/// imports.
 fn wasm_abi(module: &[u8]) -> Abi {
-    // TODO: use a proper method to guess the ABI
-    if bytes_contain(module, b"wasi_snapshot_preview") {
-        Abi::Wasi
-    } else {
-        Abi::None
-    }
-}
+    let wasi_namespaces = &["wasi_unstable", "wasi_snapshot_preview1"];
 
-fn bytes_contain(haystack: &[u8], needle: &[u8]) -> bool {
-    haystack
-        .windows(needle.len())
-        .any(|window| window == needle)
+    let imported_modules = wasmparser::Parser::new(0)
+        .parse_all(module)
+        .filter_map(|p| match p {
+            Ok(wasmparser::Payload::ImportSection(imports)) => Some(imports),
+            _ => None,
+        })
+        .flat_map(|s| s.into_iter().filter_map(|result| result.ok()))
+        .map(|import| import.module);
+
+    for imported_module in imported_modules {
+        if wasi_namespaces.contains(&imported_module) {
+            return Abi::Wasi;
+        }
+    }
+
+    Abi::None
 }
