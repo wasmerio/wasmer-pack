@@ -51,6 +51,10 @@ fn use_wasi_javascript_bindings() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "macos", target_arch = "aarch64"),
+    ignore = "Wasmer Python doesn't work on M1 MacOS"
+)]
 fn use_python_bindings() {
     let pkg = wasmer_pack_fixture();
     let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR"))
@@ -74,6 +78,10 @@ fn use_python_bindings() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "macos", target_arch = "aarch64"),
+    ignore = "Wasmer Python doesn't work on M1 MacOS"
+)]
 fn use_wasi_python_bindings() {
     let pkg = wabt_fixture();
     let out_dir = Path::new(env!("CARGO_TARGET_TMPDIR"))

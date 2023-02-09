@@ -77,7 +77,6 @@ fn detected_languages(crate_dir: &Path) -> HashSet<Language> {
             _ => {}
         }
     }
-
     languages
 }
 
@@ -225,6 +224,11 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
 }
 
 fn run_pytest(crate_dir: &Path) -> Result<(), Error> {
+    if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
+        tracing::warn!("Skipping Pytest. Wasmer Python doesn't work on M1 MacOS. For more, see <https://github.com/wasmerio/wasmer-python/issues/680>");
+        return Ok(());
+    }
+
     let mut cmd = Command::new("poetry");
     cmd.arg("run").arg("pytest").arg("--verbose");
     tracing::info!(?cmd, "Running pytest");
@@ -240,6 +244,18 @@ fn run_pytest(crate_dir: &Path) -> Result<(), Error> {
     Ok(())
 }
 
+fn shell() -> Command {
+    if cfg!(target_os = "windows") {
+        let mut cmd = Command::new("cmd");
+        cmd.arg("/C");
+        cmd
+    } else {
+        let mut cmd = Command::new("sh");
+        cmd.arg("-c");
+        cmd
+    }
+}
+
 #[derive(Deserialize, Debug)]
 struct PackageJson {
     name: String,
@@ -252,8 +268,9 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
 
     if yarn_lock.exists() {
         //need to install dependencies for generated package as yarn link doesn't resolves the dependencies on it own
-        let mut cmd = Command::new("yarn");
-        cmd.current_dir(&package_path);
+
+        let mut cmd = shell();
+        cmd.arg("yarn").current_dir(&package_path);
         tracing::info!(
             ?cmd,
             "Installing the Javascript Dependencies for generated package"
@@ -271,8 +288,8 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
             "Unable to install JavaScript Dependencies for generated package"
         );
 
-        let mut cmd = Command::new("yarn");
-        cmd.current_dir(crate_dir);
+        let mut cmd = shell();
+        cmd.arg("yarn").current_dir(crate_dir);
         tracing::info!(
             ?cmd,
             "Found `yarn-lock`. Installing the Javascript Dependencies"
@@ -292,8 +309,11 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
         return Ok(());
     }
 
-    let mut cmd = Command::new("yarn");
-    cmd.arg("init").arg("--yes").current_dir(crate_dir);
+    let mut cmd = shell();
+    cmd.arg("yarn")
+        .arg("init")
+        .arg("--yes")
+        .current_dir(crate_dir);
     tracing::info!(?cmd, "Initializing the Javascript package");
 
     let status = cmd
@@ -309,8 +329,10 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
     );
 
     // install jest to crate dir
-    let mut cmd = Command::new("yarn");
-    cmd.arg("add")
+
+    let mut cmd = shell();
+    cmd.arg("yarn")
+        .arg("add")
         .arg("--dev")
         .arg("jest")
         .current_dir(crate_dir);
@@ -333,8 +355,8 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
     fs::write(&jest_config_file, JEST_CONFIG)?;
     anyhow::ensure!(crate_dir.join(&jest_config_file).exists());
 
-    let mut cmd = Command::new("yarn");
-    cmd.current_dir(&package_path);
+    let mut cmd = shell();
+    cmd.arg("yarn").current_dir(&package_path);
 
     tracing::info!(?cmd, "Installing dependencies for generated bindings");
     let status = cmd
@@ -349,8 +371,8 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
         "Unable to install dependencies for generated bindings"
     );
 
-    let mut cmd = Command::new("yarn");
-    cmd.arg("link").current_dir(&package_path);
+    let mut cmd = shell();
+    cmd.arg("yarn").arg("link").current_dir(&package_path);
 
     tracing::info!(?cmd, "Linking the generated bindings as a `Yarn link`");
     let status = cmd
@@ -365,8 +387,9 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
         "Unable to perform yarn link on generated bindings"
     );
 
-    let mut cmd = Command::new("yarn");
-    cmd.arg("link")
+    let mut cmd = shell();
+    cmd.arg("yarn")
+        .arg("link")
         .arg(&generated_package_name)
         .current_dir(crate_dir);
 
@@ -386,10 +409,11 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
 }
 
 fn run_jest(crate_dir: &Path) -> Result<(), Error> {
-    let mut cmd = Command::new("yarn");
-    cmd.arg("jest").current_dir(crate_dir);
+    let mut cmd = shell();
 
-    tracing::info!(?cmd, "Running Jest tests");
+    cmd.current_dir(crate_dir).arg("yarn").arg("jest");
+    tracing::info!(?cmd, "Running the jest tests");
+
     let status = cmd
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
@@ -397,7 +421,10 @@ fn run_jest(crate_dir: &Path) -> Result<(), Error> {
         .current_dir(crate_dir)
         .status()
         .context("Unable to run yarn. Is it installed?")?;
-    anyhow::ensure!(status.success(), "jest failed");
+    anyhow::ensure!(
+        status.success(),
+        "Unable to install JavaScript Dependencies for generated package"
+    );
 
     Ok(())
 }
