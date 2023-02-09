@@ -42,6 +42,7 @@ extern crate pretty_assertions;
 
 mod files;
 mod js;
+mod pirita;
 mod py;
 mod types;
 mod versions;

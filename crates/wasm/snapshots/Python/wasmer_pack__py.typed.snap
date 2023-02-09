@@ -1,0 +1,5 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: crates/wasm/generated_bindings/Python/wasmer_pack/py.typed
+---
+

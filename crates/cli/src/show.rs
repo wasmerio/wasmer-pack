@@ -22,7 +22,9 @@ pub struct Show {
 
 impl Show {
     pub fn run(self) -> Result<(), Error> {
-        let pkg = crate::pirita::load(&self.input).context("Unable to load the package")?;
+        let pkg = crate::pirita::load_from_disk(&self.input).with_context(|| {
+            format!("Unable to load a package from \"{}\"", self.input.display())
+        })?;
 
         let summary: Summary = summarize(&pkg);
 
@@ -54,6 +56,7 @@ fn summarize(pkg: &Package) -> Summary {
         .iter()
         .map(|lib| Library {
             interface_name: lib.interface_name().to_string(),
+            wasi: lib.requires_wasi(),
         })
         .collect();
 
@@ -140,13 +143,23 @@ impl Command {
 #[derive(Debug, serde::Serialize)]
 struct Library {
     interface_name: String,
+    wasi: bool,
 }
 
 impl Library {
     fn dump(&self, mut writer: impl Write) -> Result<(), Error> {
-        let Library { interface_name } = self;
+        let Library {
+            interface_name,
+            wasi,
+        } = self;
 
-        writeln!(writer, "- {interface_name}")?;
+        write!(writer, "- {interface_name}")?;
+
+        if *wasi {
+            write!(writer, " (wasi)")?;
+        }
+
+        writeln!(writer)?;
 
         Ok(())
     }

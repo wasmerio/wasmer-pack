@@ -5,7 +5,8 @@ expression: "format!(\"{meta:#}\")"
 {
   "bindings": [
     {
-      "interface_name": "hello-world"
+      "interface_name": "hello-world",
+      "wasi": false
     }
   ],
   "commands": [],

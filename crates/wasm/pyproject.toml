@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "tests"
+version = "0.1.0"
+description = "Python integration tests"
+authors = ["Michael-F-Bryan <michael@wasmer.io>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pytest = "^7.2.1"
+wasmer-pack = { path = "generated_bindings/Python", develop = true }
+requests = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -31,7 +31,7 @@ develop = true
 
 [package.dependencies]
 wasmer = "*"
-wasmer_compiler_cranelift = "*"
+wasmer-compiler-cranelift = "*"
 
 [package.source]
 type = "directory"

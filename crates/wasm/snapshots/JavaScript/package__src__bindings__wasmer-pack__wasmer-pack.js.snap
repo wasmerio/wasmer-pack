@@ -1,0 +1,585 @@
+---
+source: crates/testing/src/autodiscover.rs
+input_file: crates/wasm/generated_bindings/JavaScript/package/src/bindings/wasmer-pack/wasmer-pack.js
+---
+const { data_view, to_string, UTF8_DECODER, utf8_encode, utf8_encoded_len, Slab } = require('./intrinsics.js');
+class WasmerPack {
+  constructor() {
+    this._resource0_slab = new Slab();
+    this._resource1_slab = new Slab();
+    this._resource2_slab = new Slab();
+  }
+  addToImports(imports) {
+    if (!("canonical_abi" in imports)) imports["canonical_abi"] = {};
+    
+    imports.canonical_abi['resource_drop_package'] = i => {
+      this._resource0_slab.remove(i).drop();
+    };
+    imports.canonical_abi['resource_clone_package'] = i => {
+      const obj = this._resource0_slab.get(i);
+      return this._resource0_slab.insert(obj.clone())
+    };
+    imports.canonical_abi['resource_get_package'] = i => {
+      return this._resource0_slab.get(i)._wasm_val;
+    };
+    imports.canonical_abi['resource_new_package'] = i => {
+      const registry = this._registry0;
+      return this._resource0_slab.insert(new Package(i, this));
+    };
+    
+    imports.canonical_abi['resource_drop_metadata'] = i => {
+      this._resource1_slab.remove(i).drop();
+    };
+    imports.canonical_abi['resource_clone_metadata'] = i => {
+      const obj = this._resource1_slab.get(i);
+      return this._resource1_slab.insert(obj.clone())
+    };
+    imports.canonical_abi['resource_get_metadata'] = i => {
+      return this._resource1_slab.get(i)._wasm_val;
+    };
+    imports.canonical_abi['resource_new_metadata'] = i => {
+      const registry = this._registry1;
+      return this._resource1_slab.insert(new Metadata(i, this));
+    };
+    
+    imports.canonical_abi['resource_drop_interface'] = i => {
+      this._resource2_slab.remove(i).drop();
+    };
+    imports.canonical_abi['resource_clone_interface'] = i => {
+      const obj = this._resource2_slab.get(i);
+      return this._resource2_slab.insert(obj.clone())
+    };
+    imports.canonical_abi['resource_get_interface'] = i => {
+      return this._resource2_slab.get(i)._wasm_val;
+    };
+    imports.canonical_abi['resource_new_interface'] = i => {
+      const registry = this._registry2;
+      return this._resource2_slab.insert(new Interface(i, this));
+    };
+  }
+  
+  async instantiate(module, imports) {
+    imports = imports || {};
+    this.addToImports(imports);
+    
+    if (module instanceof WebAssembly.Instance) {
+      this.instance = module;
+    } else if (module instanceof WebAssembly.Module) {
+      this.instance = await WebAssembly.instantiate(module, imports);
+    } else if (module instanceof ArrayBuffer || module instanceof Uint8Array) {
+      const { instance } = await WebAssembly.instantiate(module, imports);
+      this.instance = instance;
+    } else {
+      const { instance } = await WebAssembly.instantiateStreaming(module, imports);
+      this.instance = instance;
+    }
+    this._exports = this.instance.exports;
+    this._registry0 = new FinalizationRegistry(this._exports['canonical_abi_drop_package']);
+    this._registry1 = new FinalizationRegistry(this._exports['canonical_abi_drop_metadata']);
+    this._registry2 = new FinalizationRegistry(this._exports['canonical_abi_drop_interface']);
+  }
+}
+
+class Package {
+  constructor(wasm_val, obj) {
+    this._wasm_val = wasm_val;
+    this._obj = obj;
+    this._refcnt = 1;
+    obj._registry0.register(this, wasm_val, this);
+  }
+  
+  clone() {
+    this._refcnt += 1;
+    return this;
+  }
+  
+  drop() {
+    this._refcnt -= 1;
+    if (this._refcnt !== 0)
+    return;
+    this._obj._registry0.unregister(this);
+    const dtor = this._obj._exports['canonical_abi_drop_package'];
+    const wasm_val = this._wasm_val;
+    delete this._obj;
+    delete this._refcnt;
+    delete this._wasm_val;
+    dtor(wasm_val);
+  }
+  static new(wasmerPack, arg0, arg1, arg2) {
+    const memory = wasmerPack._exports.memory;
+    const realloc = wasmerPack._exports["canonical_abi_realloc"];
+    const obj0 = arg0;
+    if (!(obj0 instanceof Metadata)) throw new TypeError('expected instance of Metadata');
+    const vec7 = arg1;
+    const len7 = vec7.length;
+    const result7 = realloc(0, 0, 4, len7 * 24);
+    for (let i = 0; i < vec7.length; i++) {
+      const e = vec7[i];
+      const base = result7 + i * 24;
+      const {exports: v1_0, imports: v1_1, abi: v1_2, wasm: v1_3 } = e;
+      const obj2 = v1_0;
+      if (!(obj2 instanceof Interface)) throw new TypeError('expected instance of Interface');
+      data_view(memory).setInt32(base + 0, wasmerPack._resource2_slab.insert(obj2.clone()), true);
+      const vec4 = v1_1;
+      const len4 = vec4.length;
+      const result4 = realloc(0, 0, 4, len4 * 4);
+      for (let i = 0; i < vec4.length; i++) {
+        const e = vec4[i];
+        const base = result4 + i * 4;
+        const obj3 = e;
+        if (!(obj3 instanceof Interface)) throw new TypeError('expected instance of Interface');
+        data_view(memory).setInt32(base + 0, wasmerPack._resource2_slab.insert(obj3.clone()), true);
+      }
+      data_view(memory).setInt32(base + 8, len4, true);
+      data_view(memory).setInt32(base + 4, result4, true);
+      const val5 = to_string(v1_2);
+      let enum5;
+      switch (val5) {
+        case "none": {
+          enum5 = 0;
+          break;
+        }
+        case "wasi": {
+          enum5 = 1;
+          break;
+        }
+        default: {
+          throw new TypeError(`"${val5}" is not one of the cases of abi`);
+        }
+      }
+      data_view(memory).setInt8(base + 12, enum5, true);
+      const val6 = v1_3;
+      const len6 = val6.length;
+      const ptr6 = realloc(0, 0, 1, len6 * 1);
+      (new Uint8Array(memory.buffer, ptr6, len6 * 1)).set(new Uint8Array(val6.buffer, val6.byteOffset, len6 * 1));
+      data_view(memory).setInt32(base + 20, len6, true);
+      data_view(memory).setInt32(base + 16, ptr6, true);
+    }
+    const vec11 = arg2;
+    const len11 = vec11.length;
+    const result11 = realloc(0, 0, 4, len11 * 16);
+    for (let i = 0; i < vec11.length; i++) {
+      const e = vec11[i];
+      const base = result11 + i * 16;
+      const {name: v8_0, wasm: v8_1 } = e;
+      const ptr9 = utf8_encode(v8_0, realloc, memory);
+      const len9 = utf8_encoded_len();
+      data_view(memory).setInt32(base + 4, len9, true);
+      data_view(memory).setInt32(base + 0, ptr9, true);
+      const val10 = v8_1;
+      const len10 = val10.length;
+      const ptr10 = realloc(0, 0, 1, len10 * 1);
+      (new Uint8Array(memory.buffer, ptr10, len10 * 1)).set(new Uint8Array(val10.buffer, val10.byteOffset, len10 * 1));
+      data_view(memory).setInt32(base + 12, len10, true);
+      data_view(memory).setInt32(base + 8, ptr10, true);
+    }
+    const ret = wasmerPack._exports['package::new'](wasmerPack._resource1_slab.insert(obj0.clone()), result7, len7, result11, len11);
+    return wasmerPack._resource0_slab.remove(ret);
+  }
+  static fromWebc(wasmerPack, arg0) {
+    const memory = wasmerPack._exports.memory;
+    const realloc = wasmerPack._exports["canonical_abi_realloc"];
+    const free = wasmerPack._exports["canonical_abi_free"];
+    const val0 = arg0;
+    const len0 = val0.length;
+    const ptr0 = realloc(0, 0, 1, len0 * 1);
+    (new Uint8Array(memory.buffer, ptr0, len0 * 1)).set(new Uint8Array(val0.buffer, val0.byteOffset, len0 * 1));
+    const ret = wasmerPack._exports['package::from-webc'](ptr0, len0);
+    
+    let variant5;
+    switch (data_view(memory).getUint8(ret + 0, true)) {
+      case 0: {
+        
+        variant5 = { tag: "ok", val: wasmerPack._resource0_slab.remove(data_view(memory).getInt32(ret + 4, true)) };
+        break;
+      }
+      case 1: {
+        const ptr1 = data_view(memory).getInt32(ret + 4, true);
+        const len1 = data_view(memory).getInt32(ret + 8, true);
+        const list1 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr1, len1));
+        free(ptr1, len1, 1);
+        const ptr2 = data_view(memory).getInt32(ret + 12, true);
+        const len2 = data_view(memory).getInt32(ret + 16, true);
+        const list2 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr2, len2));
+        free(ptr2, len2, 1);
+        const len4 = data_view(memory).getInt32(ret + 24, true);
+        const base4 = data_view(memory).getInt32(ret + 20, true);
+        const result4 = [];
+        for (let i = 0; i < len4; i++) {
+          const base = base4 + i * 8;
+          const ptr3 = data_view(memory).getInt32(base + 0, true);
+          const len3 = data_view(memory).getInt32(base + 4, true);
+          const list3 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr3, len3));
+          free(ptr3, len3, 1);
+          result4.push(list3);
+        }
+        free(base4, len4 * 8, 4);
+        
+        variant5 = { tag: "err", val: {
+          message: list1,
+          verbose: list2,
+          causes: result4,
+        } };
+        break;
+      }
+      default: {
+        throw new RangeError("invalid variant discriminant for expected");
+      }
+    }
+    return variant5;
+  }
+  generateJavascript() {
+    const memory = this._obj._exports.memory;
+    const free = this._obj._exports["canonical_abi_free"];
+    const obj0 = this;
+    const ret = this._obj._exports['package::generate-javascript'](this._obj._resource0_slab.insert(obj0.clone()));
+    
+    let variant8;
+    switch (data_view(memory).getUint8(ret + 0, true)) {
+      case 0: {
+        const len3 = data_view(memory).getInt32(ret + 8, true);
+        const base3 = data_view(memory).getInt32(ret + 4, true);
+        const result3 = [];
+        for (let i = 0; i < len3; i++) {
+          const base = base3 + i * 16;
+          const ptr1 = data_view(memory).getInt32(base + 0, true);
+          const len1 = data_view(memory).getInt32(base + 4, true);
+          const list1 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr1, len1));
+          free(ptr1, len1, 1);
+          const ptr2 = data_view(memory).getInt32(base + 8, true);
+          const len2 = data_view(memory).getInt32(base + 12, true);
+          const list2 = new Uint8Array(memory.buffer.slice(ptr2, ptr2 + len2 * 1));
+          free(ptr2, len2, 1);
+          result3.push({
+            filename: list1,
+            contents: list2,
+          });
+        }
+        free(base3, len3 * 16, 4);
+        
+        variant8 = { tag: "ok", val: result3 };
+        break;
+      }
+      case 1: {
+        const ptr4 = data_view(memory).getInt32(ret + 4, true);
+        const len4 = data_view(memory).getInt32(ret + 8, true);
+        const list4 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr4, len4));
+        free(ptr4, len4, 1);
+        const ptr5 = data_view(memory).getInt32(ret + 12, true);
+        const len5 = data_view(memory).getInt32(ret + 16, true);
+        const list5 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr5, len5));
+        free(ptr5, len5, 1);
+        const len7 = data_view(memory).getInt32(ret + 24, true);
+        const base7 = data_view(memory).getInt32(ret + 20, true);
+        const result7 = [];
+        for (let i = 0; i < len7; i++) {
+          const base = base7 + i * 8;
+          const ptr6 = data_view(memory).getInt32(base + 0, true);
+          const len6 = data_view(memory).getInt32(base + 4, true);
+          const list6 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr6, len6));
+          free(ptr6, len6, 1);
+          result7.push(list6);
+        }
+        free(base7, len7 * 8, 4);
+        
+        variant8 = { tag: "err", val: {
+          message: list4,
+          verbose: list5,
+          causes: result7,
+        } };
+        break;
+      }
+      default: {
+        throw new RangeError("invalid variant discriminant for expected");
+      }
+    }
+    return variant8;
+  }
+  generatePython() {
+    const memory = this._obj._exports.memory;
+    const free = this._obj._exports["canonical_abi_free"];
+    const obj0 = this;
+    const ret = this._obj._exports['package::generate-python'](this._obj._resource0_slab.insert(obj0.clone()));
+    
+    let variant8;
+    switch (data_view(memory).getUint8(ret + 0, true)) {
+      case 0: {
+        const len3 = data_view(memory).getInt32(ret + 8, true);
+        const base3 = data_view(memory).getInt32(ret + 4, true);
+        const result3 = [];
+        for (let i = 0; i < len3; i++) {
+          const base = base3 + i * 16;
+          const ptr1 = data_view(memory).getInt32(base + 0, true);
+          const len1 = data_view(memory).getInt32(base + 4, true);
+          const list1 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr1, len1));
+          free(ptr1, len1, 1);
+          const ptr2 = data_view(memory).getInt32(base + 8, true);
+          const len2 = data_view(memory).getInt32(base + 12, true);
+          const list2 = new Uint8Array(memory.buffer.slice(ptr2, ptr2 + len2 * 1));
+          free(ptr2, len2, 1);
+          result3.push({
+            filename: list1,
+            contents: list2,
+          });
+        }
+        free(base3, len3 * 16, 4);
+        
+        variant8 = { tag: "ok", val: result3 };
+        break;
+      }
+      case 1: {
+        const ptr4 = data_view(memory).getInt32(ret + 4, true);
+        const len4 = data_view(memory).getInt32(ret + 8, true);
+        const list4 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr4, len4));
+        free(ptr4, len4, 1);
+        const ptr5 = data_view(memory).getInt32(ret + 12, true);
+        const len5 = data_view(memory).getInt32(ret + 16, true);
+        const list5 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr5, len5));
+        free(ptr5, len5, 1);
+        const len7 = data_view(memory).getInt32(ret + 24, true);
+        const base7 = data_view(memory).getInt32(ret + 20, true);
+        const result7 = [];
+        for (let i = 0; i < len7; i++) {
+          const base = base7 + i * 8;
+          const ptr6 = data_view(memory).getInt32(base + 0, true);
+          const len6 = data_view(memory).getInt32(base + 4, true);
+          const list6 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr6, len6));
+          free(ptr6, len6, 1);
+          result7.push(list6);
+        }
+        free(base7, len7 * 8, 4);
+        
+        variant8 = { tag: "err", val: {
+          message: list4,
+          verbose: list5,
+          causes: result7,
+        } };
+        break;
+      }
+      default: {
+        throw new RangeError("invalid variant discriminant for expected");
+      }
+    }
+    return variant8;
+  }
+}
+
+class Metadata {
+  constructor(wasm_val, obj) {
+    this._wasm_val = wasm_val;
+    this._obj = obj;
+    this._refcnt = 1;
+    obj._registry1.register(this, wasm_val, this);
+  }
+  
+  clone() {
+    this._refcnt += 1;
+    return this;
+  }
+  
+  drop() {
+    this._refcnt -= 1;
+    if (this._refcnt !== 0)
+    return;
+    this._obj._registry1.unregister(this);
+    const dtor = this._obj._exports['canonical_abi_drop_metadata'];
+    const wasm_val = this._wasm_val;
+    delete this._obj;
+    delete this._refcnt;
+    delete this._wasm_val;
+    dtor(wasm_val);
+  }
+  static new(wasmerPack, arg0, arg1) {
+    const memory = wasmerPack._exports.memory;
+    const realloc = wasmerPack._exports["canonical_abi_realloc"];
+    const free = wasmerPack._exports["canonical_abi_free"];
+    const ptr0 = utf8_encode(arg0, realloc, memory);
+    const len0 = utf8_encoded_len();
+    const ptr1 = utf8_encode(arg1, realloc, memory);
+    const len1 = utf8_encoded_len();
+    const ret = wasmerPack._exports['metadata::new'](ptr0, len0, ptr1, len1);
+    
+    let variant6;
+    switch (data_view(memory).getUint8(ret + 0, true)) {
+      case 0: {
+        
+        variant6 = { tag: "ok", val: wasmerPack._resource1_slab.remove(data_view(memory).getInt32(ret + 4, true)) };
+        break;
+      }
+      case 1: {
+        const ptr2 = data_view(memory).getInt32(ret + 4, true);
+        const len2 = data_view(memory).getInt32(ret + 8, true);
+        const list2 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr2, len2));
+        free(ptr2, len2, 1);
+        const ptr3 = data_view(memory).getInt32(ret + 12, true);
+        const len3 = data_view(memory).getInt32(ret + 16, true);
+        const list3 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr3, len3));
+        free(ptr3, len3, 1);
+        const len5 = data_view(memory).getInt32(ret + 24, true);
+        const base5 = data_view(memory).getInt32(ret + 20, true);
+        const result5 = [];
+        for (let i = 0; i < len5; i++) {
+          const base = base5 + i * 8;
+          const ptr4 = data_view(memory).getInt32(base + 0, true);
+          const len4 = data_view(memory).getInt32(base + 4, true);
+          const list4 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr4, len4));
+          free(ptr4, len4, 1);
+          result5.push(list4);
+        }
+        free(base5, len5 * 8, 4);
+        
+        variant6 = { tag: "err", val: {
+          message: list2,
+          verbose: list3,
+          causes: result5,
+        } };
+        break;
+      }
+      default: {
+        throw new RangeError("invalid variant discriminant for expected");
+      }
+    }
+    return variant6;
+  }
+  setDescription(arg1) {
+    const memory = this._obj._exports.memory;
+    const realloc = this._obj._exports["canonical_abi_realloc"];
+    const obj0 = this;
+    const ptr1 = utf8_encode(arg1, realloc, memory);
+    const len1 = utf8_encoded_len();
+    this._obj._exports['metadata::set-description'](this._obj._resource1_slab.insert(obj0.clone()), ptr1, len1);
+    return undefined;
+  }
+}
+
+class Interface {
+  constructor(wasm_val, obj) {
+    this._wasm_val = wasm_val;
+    this._obj = obj;
+    this._refcnt = 1;
+    obj._registry2.register(this, wasm_val, this);
+  }
+  
+  clone() {
+    this._refcnt += 1;
+    return this;
+  }
+  
+  drop() {
+    this._refcnt -= 1;
+    if (this._refcnt !== 0)
+    return;
+    this._obj._registry2.unregister(this);
+    const dtor = this._obj._exports['canonical_abi_drop_interface'];
+    const wasm_val = this._wasm_val;
+    delete this._obj;
+    delete this._refcnt;
+    delete this._wasm_val;
+    dtor(wasm_val);
+  }
+  static fromWit(wasmerPack, arg0, arg1) {
+    const memory = wasmerPack._exports.memory;
+    const realloc = wasmerPack._exports["canonical_abi_realloc"];
+    const free = wasmerPack._exports["canonical_abi_free"];
+    const ptr0 = utf8_encode(arg0, realloc, memory);
+    const len0 = utf8_encoded_len();
+    const ptr1 = utf8_encode(arg1, realloc, memory);
+    const len1 = utf8_encoded_len();
+    const ret = wasmerPack._exports['interface::from-wit'](ptr0, len0, ptr1, len1);
+    
+    let variant6;
+    switch (data_view(memory).getUint8(ret + 0, true)) {
+      case 0: {
+        
+        variant6 = { tag: "ok", val: wasmerPack._resource2_slab.remove(data_view(memory).getInt32(ret + 4, true)) };
+        break;
+      }
+      case 1: {
+        const ptr2 = data_view(memory).getInt32(ret + 4, true);
+        const len2 = data_view(memory).getInt32(ret + 8, true);
+        const list2 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr2, len2));
+        free(ptr2, len2, 1);
+        const ptr3 = data_view(memory).getInt32(ret + 12, true);
+        const len3 = data_view(memory).getInt32(ret + 16, true);
+        const list3 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr3, len3));
+        free(ptr3, len3, 1);
+        const len5 = data_view(memory).getInt32(ret + 24, true);
+        const base5 = data_view(memory).getInt32(ret + 20, true);
+        const result5 = [];
+        for (let i = 0; i < len5; i++) {
+          const base = base5 + i * 8;
+          const ptr4 = data_view(memory).getInt32(base + 0, true);
+          const len4 = data_view(memory).getInt32(base + 4, true);
+          const list4 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr4, len4));
+          free(ptr4, len4, 1);
+          result5.push(list4);
+        }
+        free(base5, len5 * 8, 4);
+        
+        variant6 = { tag: "err", val: {
+          message: list2,
+          verbose: list3,
+          causes: result5,
+        } };
+        break;
+      }
+      default: {
+        throw new RangeError("invalid variant discriminant for expected");
+      }
+    }
+    return variant6;
+  }
+  static fromPath(wasmerPack, arg0) {
+    const memory = wasmerPack._exports.memory;
+    const realloc = wasmerPack._exports["canonical_abi_realloc"];
+    const free = wasmerPack._exports["canonical_abi_free"];
+    const ptr0 = utf8_encode(arg0, realloc, memory);
+    const len0 = utf8_encoded_len();
+    const ret = wasmerPack._exports['interface::from-path'](ptr0, len0);
+    
+    let variant5;
+    switch (data_view(memory).getUint8(ret + 0, true)) {
+      case 0: {
+        
+        variant5 = { tag: "ok", val: wasmerPack._resource2_slab.remove(data_view(memory).getInt32(ret + 4, true)) };
+        break;
+      }
+      case 1: {
+        const ptr1 = data_view(memory).getInt32(ret + 4, true);
+        const len1 = data_view(memory).getInt32(ret + 8, true);
+        const list1 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr1, len1));
+        free(ptr1, len1, 1);
+        const ptr2 = data_view(memory).getInt32(ret + 12, true);
+        const len2 = data_view(memory).getInt32(ret + 16, true);
+        const list2 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr2, len2));
+        free(ptr2, len2, 1);
+        const len4 = data_view(memory).getInt32(ret + 24, true);
+        const base4 = data_view(memory).getInt32(ret + 20, true);
+        const result4 = [];
+        for (let i = 0; i < len4; i++) {
+          const base = base4 + i * 8;
+          const ptr3 = data_view(memory).getInt32(base + 0, true);
+          const len3 = data_view(memory).getInt32(base + 4, true);
+          const list3 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr3, len3));
+          free(ptr3, len3, 1);
+          result4.push(list3);
+        }
+        free(base4, len4 * 8, 4);
+        
+        variant5 = { tag: "err", val: {
+          message: list1,
+          verbose: list2,
+          causes: result4,
+        } };
+        break;
+      }
+      default: {
+        throw new RangeError("invalid variant discriminant for expected");
+      }
+    }
+    return variant5;
+  }
+}
+
+module.exports = { WasmerPack, Package, Metadata, Interface };
+

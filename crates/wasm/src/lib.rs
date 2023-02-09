@@ -1,34 +1,51 @@
-extern crate wasmer_pack as upstream;
-
-use std::cell::RefCell;
+use std::{
+    cell::RefCell,
+    sync::atomic::{AtomicU8, Ordering},
+};
 
 use anyhow::Error;
-use upstream::SourceFile;
+use original::SourceFile;
 use wai_bindgen_rust::Handle;
 
 wai_bindgen_rust::export!("wasmer-pack.exports.wai");
 
 pub struct WasmerPack;
 
-impl crate::wasmer_pack::WasmerPack for WasmerPack {
-    fn generate_javascript(
-        pkg: crate::wasmer_pack::Package,
-    ) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
-        let pkg = pkg.into();
-        let js = upstream::generate_javascript(&pkg)?;
-        Ok(unwrap_files(js))
+impl crate::wasmer_pack::WasmerPack for WasmerPack {}
+
+pub struct Package(original::Package);
+
+impl crate::wasmer_pack::Package for Package {
+    fn new(
+        metadata: Handle<Metadata>,
+        libraries: Vec<wasmer_pack::Library>,
+        commands: Vec<wasmer_pack::Command>,
+    ) -> Handle<crate::Package> {
+        let metadata = metadata.0.borrow().clone();
+        let libraries = libraries.into_iter().map(|lib| lib.into()).collect();
+        let commands = commands.into_iter().map(|cmd| cmd.into()).collect();
+        let pkg = original::Package::new(metadata, libraries, commands);
+
+        Handle::new(Package(pkg))
     }
 
-    fn generate_python(
-        pkg: crate::wasmer_pack::Package,
-    ) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
-        let pkg = pkg.into();
-        let py = upstream::generate_python(&pkg)?;
-        Ok(unwrap_files(py))
+    fn from_webc(bytes: Vec<u8>) -> Result<Handle<crate::Package>, wasmer_pack::Error> {
+        let pkg = original::Package::from_webc(&bytes)?;
+        Ok(Handle::new(Package(pkg)))
+    }
+
+    fn generate_javascript(&self) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
+        let files = original::generate_javascript(&self.0)?;
+        Ok(unwrap_files(files))
+    }
+
+    fn generate_python(&self) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
+        let files = original::generate_python(&self.0)?;
+        Ok(unwrap_files(files))
     }
 }
 
-fn unwrap_files(files: upstream::Files) -> Vec<wasmer_pack::File> {
+fn unwrap_files(files: original::Files) -> Vec<wasmer_pack::File> {
     files
         .into_iter()
         .map(|(path, SourceFile(contents))| wasmer_pack::File {
@@ -38,28 +55,28 @@ fn unwrap_files(files: upstream::Files) -> Vec<wasmer_pack::File> {
         .collect()
 }
 
-pub struct Interface(upstream::Interface);
+pub struct Interface(original::Interface);
 
 impl crate::wasmer_pack::Interface for Interface {
     fn from_wit(name: String, contents: String) -> Result<Handle<Interface>, wasmer_pack::Error> {
-        let exports = upstream::Interface::from_wit(&name, &contents)?;
+        let exports = original::Interface::from_wit(&name, &contents)?;
         Ok(Handle::new(Interface(exports)))
     }
 
     fn from_path(path: String) -> Result<Handle<Interface>, wasmer_pack::Error> {
-        let exports = upstream::Interface::from_path(path)?;
+        let exports = original::Interface::from_path(path)?;
         Ok(Handle::new(Interface(exports)))
     }
 }
 
-pub struct Metadata(RefCell<upstream::Metadata>);
+pub struct Metadata(RefCell<original::Metadata>);
 
 impl crate::wasmer_pack::Metadata for Metadata {
     fn new(
         package_name: String,
         version: String,
-    ) -> Result<wai_bindgen_rust::Handle<crate::Metadata>, wasmer_pack::Error> {
-        let meta = upstream::Metadata::new(package_name.parse()?, version);
+    ) -> Result<Handle<crate::Metadata>, wasmer_pack::Error> {
+        let meta = original::Metadata::new(package_name.parse()?, version);
 
         Ok(Handle::new(Metadata(RefCell::new(meta))))
     }
@@ -69,11 +86,11 @@ impl crate::wasmer_pack::Metadata for Metadata {
     }
 }
 
-impl From<crate::wasmer_pack::Abi> for ::wasmer_pack::Abi {
+impl From<crate::wasmer_pack::Abi> for original::Abi {
     fn from(abi: crate::wasmer_pack::Abi) -> Self {
         match abi {
-            wasmer_pack::Abi::None => upstream::Abi::None,
-            wasmer_pack::Abi::Wasi => upstream::Abi::Wasi,
+            wasmer_pack::Abi::None => original::Abi::None,
+            wasmer_pack::Abi::Wasi => original::Abi::Wasi,
         }
     }
 }
@@ -88,23 +105,7 @@ impl From<Error> for crate::wasmer_pack::Error {
     }
 }
 
-impl From<crate::wasmer_pack::Package> for upstream::Package {
-    fn from(pkg: crate::wasmer_pack::Package) -> Self {
-        let crate::wasmer_pack::Package {
-            metadata,
-            libraries,
-            commands,
-        } = pkg;
-        let metadata = metadata.0.borrow();
-        upstream::Package::new(
-            upstream::Metadata::clone(&metadata),
-            libraries.into_iter().map(Into::into).collect(),
-            commands.into_iter().map(Into::into).collect(),
-        )
-    }
-}
-
-impl From<wasmer_pack::Library> for upstream::Library {
+impl From<wasmer_pack::Library> for original::Library {
     fn from(lib: wasmer_pack::Library) -> Self {
         let wasmer_pack::Library {
             exports,
@@ -112,8 +113,8 @@ impl From<wasmer_pack::Library> for upstream::Library {
             abi,
             wasm,
         } = lib;
-        upstream::Library {
-            module: upstream::Module {
+        original::Library {
+            module: original::Module {
                 name: format!("{}.wasm", exports.0.name()),
                 abi: abi.into(),
                 wasm,
@@ -124,9 +125,23 @@ impl From<wasmer_pack::Library> for upstream::Library {
     }
 }
 
-impl From<wasmer_pack::Command> for upstream::Command {
+impl From<wasmer_pack::Command> for original::Command {
     fn from(cmd: wasmer_pack::Command) -> Self {
         let wasmer_pack::Command { name, wasm } = cmd;
-        upstream::Command { name, wasm }
+        original::Command { name, wasm }
     }
+}
+
+// Something requires a RNG, so we provide our own dummy implementation
+getrandom::register_custom_getrandom!(rand);
+
+fn rand(buf: &mut [u8]) -> Result<(), getrandom::Error> {
+    static NEXT: AtomicU8 = AtomicU8::new(0);
+
+    for dest in buf {
+        // Note: atomics wrap on overflow
+        *dest = NEXT.fetch_add(1, Ordering::Relaxed);
+    }
+
+    Ok(())
 }

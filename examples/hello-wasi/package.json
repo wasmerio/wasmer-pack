@@ -1,0 +1,12 @@
+{
+  "name": "hello-wasi",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.4.1"
+  },
+  "dependencies": {
+    "@michael-f-bryan/hello-wasi": "./generated_bindings/JavaScript/package"
+  }
+}
