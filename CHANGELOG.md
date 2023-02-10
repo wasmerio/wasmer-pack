@@ -17,7 +17,7 @@ change, where applicable.
 
 ## [0.7.0] - 2023-02-10
 
-### 💥 Breaking Changed 💥
+### 💥 Breaking Changes 💥
 
 - Restructured the `wasmer/wasmer-pack` WAPM package's API
   ([#118](https://github.com/wasmerio/wasmer-pack/pull/118))
@@ -111,7 +111,7 @@ change, where applicable.
   type with the same name as one of types we generate
   ([#75](https://github.com/wasmerio/wasmer-pack/pull/75))
 
-### 💥 Breaking Changed 💥
+### 💥 Breaking Changes 💥
 
 - The project has been renamed from `wit-pack` to `wasmer-pack`
 
@@ -224,7 +224,7 @@ change, where applicable.
 - The `wit-pack` crate now allows packages to contain multiple WebAssembly
   modules ([#22](https://github.com/wasmerio/wasmer_pack/pull/22))
 
-### 💥 Breaking Changed 💥
+### 💥 Breaking Changes 💥
 
 - The `wit-pack` CLI now takes a Pirita file as its only input
   ([#20](https://github.com/wasmerio/wasmer_pack/pull/20))
