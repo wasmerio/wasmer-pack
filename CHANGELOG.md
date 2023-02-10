@@ -36,6 +36,12 @@ change, where applicable.
   which namespaces are imported by a module
   ([#118](https://github.com/wasmerio/wasmer-pack/pull/118))
 
+### Removed
+
+- Removed the `TestEnvironment` construct from `wasmer-pack-testing` in favour
+  of the `autodiscover()` tests
+  ([#121](https://github.com/wasmerio/wasmer-pack/pull/121))
+
 ## [0.6.0] - 2022-12-28
 
 ### Added
