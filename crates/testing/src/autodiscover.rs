@@ -15,6 +15,8 @@ use ignore::{overrides::OverrideBuilder, Walk, WalkBuilder};
 use insta::Settings;
 use wasmer_pack_cli::Language;
 
+const JEST_CONFIG: &str = include_str!("./jest.config.js");
+
 pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
     let start = Instant::now();
 
@@ -349,8 +351,6 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
 
     let jest_file_name = "jest.config.js";
     let jest_config_file = crate_dir.join(jest_file_name);
-
-    const JEST_CONFIG: &str = include_str!("../configs/jest.config.js");
 
     fs::write(&jest_config_file, JEST_CONFIG)?;
     anyhow::ensure!(crate_dir.join(&jest_config_file).exists());

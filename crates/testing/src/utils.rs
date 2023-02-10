@@ -1,12 +1,12 @@
 use std::{
+    ffi::OsString,
+    fmt::{self, Display, Formatter},
     io::ErrorKind,
     path::{Path, PathBuf},
     process::{Command, Output, Stdio},
 };
 
 use wasmer_pack_cli::{Codegen, Language};
-
-use crate::{CommandFailed, LoadError, TestFailure};
 
 pub(crate) fn execute_command(cmd: &mut Command) -> Result<(), CommandFailed> {
     let command = format!("{cmd:?}");
@@ -87,7 +87,11 @@ fn first_dir_in_folder(dir: &Path) -> Result<PathBuf, std::io::Error> {
     Ok(first_item)
 }
 
-pub fn generate_bindings(dest: &Path, wapm_dir: &Path, lang: Language) -> Result<(), TestFailure> {
+pub fn generate_bindings(
+    dest: &Path,
+    wapm_dir: &Path,
+    lang: Language,
+) -> Result<(), anyhow::Error> {
     tracing::info!(
         output_dir=%dest.display(),
         wapm_dir=%wapm_dir.display(),
@@ -98,6 +102,103 @@ pub fn generate_bindings(dest: &Path, wapm_dir: &Path, lang: Language) -> Result
         out_dir: Some(dest.to_path_buf()),
         input: wapm_dir.to_path_buf(),
     };
-    codegen.run(lang).map_err(TestFailure::BindingsGeneration)?;
+    codegen.run(lang)?;
     Ok(())
+}
+
+#[derive(Debug)]
+pub enum CommandFailed {
+    Spawn {
+        command: OsString,
+        error: std::io::Error,
+    },
+    CompletedUnsuccessfully {
+        command: String,
+        stdout: String,
+        stderr: String,
+        exit_code: Option<i32>,
+    },
+}
+
+impl std::error::Error for CommandFailed {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            CommandFailed::Spawn { error, .. } => Some(error),
+            CommandFailed::CompletedUnsuccessfully { .. } => None,
+        }
+    }
+}
+
+impl Display for CommandFailed {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            CommandFailed::Spawn { command, .. } => write!(f, "Unable to spawn {command:?}"),
+            CommandFailed::CompletedUnsuccessfully {
+                command,
+                stdout,
+                stderr,
+                exit_code,
+            } => {
+                write!(f, "Executing {command} failed")?;
+                if let Some(exit_code) = exit_code {
+                    write!(f, " (exit code: {exit_code})")?;
+                }
+                write!(f, ".")?;
+
+                if !stdout.trim().is_empty() {
+                    writeln!(f)?;
+                    writeln!(f, "Stdout: {stdout}")?;
+                }
+                if !stderr.trim().is_empty() {
+                    writeln!(f)?;
+                    writeln!(f, "Stderr: {stderr}")?;
+                }
+
+                Ok(())
+            }
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum LoadError {
+    ManifestNotFound { path: PathBuf },
+    TempDir(std::io::Error),
+    SpawnFailed(std::io::Error),
+    CargoWapmFailed(CommandFailed),
+    UnableToLocateBindings { dir: PathBuf, error: std::io::Error },
+}
+
+impl std::error::Error for LoadError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            LoadError::TempDir(e)
+            | LoadError::SpawnFailed(e)
+            | LoadError::UnableToLocateBindings { error: e, .. } => Some(e),
+            LoadError::CargoWapmFailed(e) => Some(e),
+            LoadError::ManifestNotFound { .. } => None,
+        }
+    }
+}
+
+impl Display for LoadError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            LoadError::ManifestNotFound { path } => {
+                write!(f, "\"{}\" doesn't exist", path.display())
+            }
+            LoadError::TempDir(_) => write!(f, "Unable to create a temporary directory"),
+            LoadError::SpawnFailed(_) => {
+                write!(f, "Unable to start \"cargo wapm\". Is it installed?")
+            }
+            LoadError::CargoWapmFailed(_) => {
+                write!(f, "Generating a WAPM package with \"cargo wapm\" failed")
+            }
+            LoadError::UnableToLocateBindings { dir, .. } => write!(
+                f,
+                "Unable to locate the generated bindings in \"{}\"",
+                dir.display()
+            ),
+        }
+    }
 }
