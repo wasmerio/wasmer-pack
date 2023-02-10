@@ -24,10 +24,10 @@ change, where applicable.
   - There are now convenience functions for loading a `Package` from known
     binary formats (e.g. WEBC)
 
-### Changed
+### Added
 
 - Moved the logic for loading a `wasmer_pack::Package` from a WEBC binary out
-  of `wasmer-pack-cli` crate into the main `wasmer-pack` crate
+  of `wasmer-pack-cli` into the main `wasmer-pack` crate
   ([#118](https://github.com/wasmerio/wasmer-pack/pull/118))
 
 ### Fixed
