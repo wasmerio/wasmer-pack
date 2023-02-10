@@ -11,7 +11,7 @@ Bindings to Michael-F-Bryan/hello-wasi v0.1.0.
 from wasmer import Store as _Store # type: ignore
 from .bindings import Bindings as _Bindings
 
-__version__ = "0.1.0"
+__version__ = "x.y.z"
 
 _store = _Store()
 bindings = _Bindings(_store)

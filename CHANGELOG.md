@@ -15,7 +15,9 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
-### 💥 Breaking Changed 💥
+## [0.7.0] - 2023-02-10
+
+### 💥 Breaking Changes 💥
 
 - Restructured the `wasmer/wasmer-pack` WAPM package's API
   ([#118](https://github.com/wasmerio/wasmer-pack/pull/118))
@@ -24,10 +26,10 @@ change, where applicable.
   - There are now convenience functions for loading a `Package` from known
     binary formats (e.g. WEBC)
 
-### Changed
+### Added
 
 - Moved the logic for loading a `wasmer_pack::Package` from a WEBC binary out
-  of `wasmer-pack-cli` crate into the main `wasmer-pack` crate
+  of `wasmer-pack-cli` into the main `wasmer-pack` crate
   ([#118](https://github.com/wasmerio/wasmer-pack/pull/118))
 
 ### Fixed
@@ -109,7 +111,7 @@ change, where applicable.
   type with the same name as one of types we generate
   ([#75](https://github.com/wasmerio/wasmer-pack/pull/75))
 
-### 💥 Breaking Changed 💥
+### 💥 Breaking Changes 💥
 
 - The project has been renamed from `wit-pack` to `wasmer-pack`
 
@@ -222,7 +224,7 @@ change, where applicable.
 - The `wit-pack` crate now allows packages to contain multiple WebAssembly
   modules ([#22](https://github.com/wasmerio/wasmer_pack/pull/22))
 
-### 💥 Breaking Changed 💥
+### 💥 Breaking Changes 💥
 
 - The `wit-pack` CLI now takes a Pirita file as its only input
   ([#20](https://github.com/wasmerio/wasmer_pack/pull/20))
@@ -259,7 +261,8 @@ change, where applicable.
 ## [0.1.2] - 2022-08-24
 
 <!-- next-url -->
-[Unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/wasmerio/wasmer-pack/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.3...v0.6.0
 [0.5.3]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.1...v0.5.2

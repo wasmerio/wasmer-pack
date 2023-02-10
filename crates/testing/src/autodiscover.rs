@@ -104,6 +104,10 @@ fn snapshot_generated_bindings(
     settings.set_prepend_module_to_snapshot(false);
     settings.set_input_file(package_dir);
     settings.set_omit_expression(true);
+    // We want to ignore version strings because it makes tests fail when you
+    // make new versions
+    settings.add_filter(r#""\d+\.\d+\.\d+""#, r#""x.y.z""#);
+    // Also ignore the generator version comments
     settings.add_filter(r"wasmer-pack v\d+\.\d+\.\d+", "wasmer-pack vX.Y.Z");
 
     let _guard = settings.bind_to_scope();
