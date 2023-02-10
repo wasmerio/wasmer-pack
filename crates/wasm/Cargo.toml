@@ -29,7 +29,7 @@ harness = false
 [dependencies]
 anyhow = "1.0.62"
 getrandom = { version = "0.2.8", features = ["custom"] }
-original = { package = "wasmer-pack", version = "0.6.0", path = "../wasmer-pack" }
+original = { package = "wasmer-pack", version = "0.7.0", path = "../wasmer-pack" }
 wai-bindgen-rust = "0.2.1"
 
 [dev-dependencies]
