@@ -4,7 +4,7 @@ input_file: crates/wasm/generated_bindings/Python/pyproject.toml
 ---
 [project]
 name = "wasmer_pack"
-version = "0.6.0"
+version = "x.y.z"
 keywords = []
 dependencies = ["wasmer", "wasmer_compiler_cranelift"]
 

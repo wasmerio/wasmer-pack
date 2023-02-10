@@ -4,7 +4,7 @@ input_file: examples/calc/generated_bindings/Python/pyproject.toml
 ---
 [project]
 name = "calc"
-version = "0.0.0"
+version = "x.y.z"
 keywords = []
 dependencies = ["wasmer", "wasmer_compiler_cranelift"]
 
