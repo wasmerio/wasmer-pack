@@ -36,7 +36,7 @@ WebAssembly packages which implement a WAI interface.
 Some useful links:
 
 - [The `wasmerio/wai` repository](https://github.com/wasmerio/wai)
-- [`*.wai` syntax](https://github.com/wasmerio/wai/blob/main/WAI.md)
+- [The `*.wai` format](https://github.com/wasmerio/wai/blob/main/WAI.md)
 - [The `wai-bindgen` CLI on crates.io](https://crates.io/crates/wai-bindgen-cli)
 
 ## The `*.wai` File

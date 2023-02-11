@@ -12,6 +12,9 @@ The core basic types are
 - UTF-8 code points (`char`)
 - [Void][void] or nothing (`unit`)
 
+For a more precise definition, consult [the *Types* section][types] in the
+`*.wai` format.
+
 ## Other Builtin Types
 
 Besides the basic builtin types, there are several "generic" types built into
@@ -72,3 +75,4 @@ asynchronous operations.
 [rust-option]: https://doc.rust-lang.org/std/option/enum.Option.html
 [rust-result]: https://doc.rust-lang.org/std/result/enum.Result.html
 [void]: https://en.wikipedia.org/wiki/Void_type
+[types]: https://github.com/wasmerio/wai/blob/main/WAI.md#types
