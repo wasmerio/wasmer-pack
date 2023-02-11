@@ -26,6 +26,10 @@
   - [Enums, Flags, Variants, and Unions](./concepts/wai/variants.md)
   - [Resources](./concepts/wai/resources.md)
 
+# How-To Guides
+
+- [Choosing Between Resources and Records](./how-to/resources-vs-records.md)
+
 # For Developers
 
 - [Contributing Guide](contributing.md)
