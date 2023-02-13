@@ -15,6 +15,12 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Fixed
+
+- Fixed the "Releases" job in CI so `wasmer/wasmer-pack-cli` would be published
+  and not just `wasmer/wasmer-pack`
+  ([#124](https://github.com/wasmerio/wasmer-pack/pull/124))
+
 ## [0.7.0] - 2023-02-10
 
 ### 💥 Breaking Changes 💥
