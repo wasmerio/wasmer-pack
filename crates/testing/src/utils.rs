@@ -11,6 +11,7 @@ pub fn compile_rust_to_wapm_package(
     let mut pack = Pack::default();
     pack.manifest.manifest_path = Some(manifest_path.to_path_buf());
     pack.out_dir = Some(out_dir.into());
+    pack.debug = true;
 
     let meta = pack
         .metadata()
