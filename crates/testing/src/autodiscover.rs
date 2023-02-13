@@ -26,7 +26,7 @@ pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
     let manifest_path = crate_dir.join("Cargo.toml");
     let temp = tempfile::tempdir().context("Unable to create a temporary directory")?;
 
-    tracing::info!("Compiling the crate and generating a WAPM package");
+    tracing::info!(?temp, "Compiling the crate and generating a WAPM package");
     let wapm_package = crate::compile_rust_to_wapm_package(&manifest_path, temp.path())?;
 
     let generated_bindings = crate_dir.join("generated_bindings");
