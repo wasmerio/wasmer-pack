@@ -4,7 +4,7 @@ The difference between a [resource](../concepts/wai/resources.md) and a
 [record](../concepts/wai/records.md) can be subtle when first starting out,
 but there is a simple rule of thumb that will work 90% of the time:
 
-> Records contain data. Resources encapsulate behaviour.
+> Records contain data, resources encapsulate behaviour.
 
 ## Typical Examples
 
@@ -38,15 +38,15 @@ resource file {
 
 ## Edge Cases
 
-While the *Records contain data. Resources encapsulate behaviour* rule works for
-most cases, you will almost certainly run into situations where something has
-both data and behaviour.
+While the *"Records contain data, resources encapsulate behaviour"* rule works
+for most cases, you will almost certainly run into situations where something
+has both data and behaviour.
 
 This happens a lot when wrapping a "normal" library with a WAI interface so it
 can be used from WebAssembly. The distinction between "object" and "data" is
-more fluid in most general purpose programming languages, meaning it can be
-common to encounter something that doesn't neatly fall into the "record" or
-"resource" categories.
+more fluid in most general purpose programming languages so it can be common to
+encounter something that doesn't neatly fall into the "record" or "resource"
+categories.
 
 ### Workaround 1: Getters & Setters
 
