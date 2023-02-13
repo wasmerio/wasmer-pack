@@ -26,15 +26,14 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: install
-          args: cargo-wapm --verbose --debug
+          args: cargo-wapm --verbose --debug --version 0.3
 
       - name: Login to wapm.dev
         run: |
           wapm config set registry.url https://registry.wapm.dev
           wapm login ${{ secrets.WAPM_DEV_TOKEN }}
       - name: Publish to wapm.dev
-        run: cargo wapm
-        working-directory: crates/wasm
+        run: cargo wapm --package wasmer-pack-cli --package wasmer-pack-wasm
         continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
       - name: Update the bindings generator on wapm.dev
         uses: actions-rs/cargo@v1
@@ -52,8 +51,7 @@ jobs:
           wapm config set registry.url https://registry.wapm.io
           wapm login ${{ secrets.WAPM_PROD_TOKEN }}
       - name: Publish to wapm.io
-        run: cargo wapm
-        working-directory: crates/wasm
+        run: cargo wapm --package wasmer-pack-cli --package wasmer-pack-wasm
         continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
       - name: Update the bindings generator on wapm.io
         uses: actions-rs/cargo@v1
