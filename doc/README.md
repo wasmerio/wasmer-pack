@@ -50,5 +50,5 @@ SUBCOMMANDS:
 > WebAssembly is sandboxed by default, so all file system access must be
 > explicitly provided.
 
-[wai]: ./explainers/ecosystem.md#wai-bindgen
+[wai]: ./concepts/wai/
 [cli-wapm]: https://wapm.io/wasmer/wasmer-pack-cli

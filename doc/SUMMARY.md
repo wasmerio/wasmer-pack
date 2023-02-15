@@ -17,9 +17,18 @@
 - [Tantivy]()
 - [Integrating Tantivy with a React App]()
 
-# Advanced
+# Concepts
 
-- [The Ecosystem](./explainers/ecosystem.md)
+- [WebAssembly Interfaces (WAI)](./concepts/wai/README.md)
+  - [Builtin Types](./concepts/wai/types.md)
+  - [Functions](./concepts/wai/functions.md)
+  - [Records](./concepts/wai/records.md)
+  - [Enums, Flags, Variants, and Unions](./concepts/wai/variants.md)
+  - [Resources](./concepts/wai/resources.md)
+
+# How-To Guides
+
+- [Choosing Between Resources and Records](./how-to/resources-vs-records.md)
 
 # For Developers
 
