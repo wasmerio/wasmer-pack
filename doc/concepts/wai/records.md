@@ -11,7 +11,7 @@ Depending on the language, records may be expressed in in different ways.
 | Rust       | Struct                   |
 | C          | Struct                   |
 | Python     | [Data Class][dataclass]  |
-| JavaScript | [Type alias][type-alias] |
+| TypeScript | [Type alias][type-alias] |
 
 ## Syntax
 

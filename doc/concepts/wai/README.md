@@ -26,7 +26,7 @@ automagically passes things around within the constraints of WebAssembly.
 There are four main parts to WAI:
 
 - The `*.wai` file
-- the WAI Bindgen code generator
+- The WAI Bindgen code generator
 - The guest
 - The host
 
@@ -51,6 +51,20 @@ languages. It has [types](./types.md), interfaces
 
 The precise syntax [is defined in the WAI repository][wai-format] and a parser,
 [`wai-parser`][wai-parser], is available as a Rust crate.
+
+## The Guest
+
+In an application using WebAssembly, the "guest" is the code that has been
+compiled to WebAssembly and is being loaded into a WebAssembly virtual machine.
+
+## The Host
+
+In an application using WebAssembly, the "host" is the code that uses a
+WebAssembly virtual machine (like [`wasmer`][wasmer]) to load a guest and use
+functionality it provides.
+
+The WebAssembly spec refers to the host in some places as
+[*the embedder*][embedder].
 
 ## WAI Bindgen
 
@@ -88,20 +102,6 @@ programmatically and give them much more control over the generation process.
 [proc-rust]: https://docs.rs/wai-bindgen-rust/
 [proc-wasmer]: https://docs.rs/wai-bindgen-wasmer/
 [proc-wasmtime]: https://docs.rs/wai-bindgen-wasmtime/
-
-## The Guest
-
-In an application using WebAssembly, the "guest" is the code that has been
-compiled to WebAssembly and is being loaded into a WebAssembly virtual machine.
-
-## The Host
-
-In an application using WebAssembly, the "host" is the code that uses a
-WebAssembly virtual machine (like [`wasmer`][wasmer]) to load a guest and use
-functionality it provides.
-
-The WebAssembly spec refers to the host in some places as
-[*the embedder*][embedder].
 
 [embedder]: https://webassembly.github.io/spec/core/intro/overview.html#embedder
 [idl]: https://en.wikipedia.org/wiki/Interface_description_language
