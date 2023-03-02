@@ -273,7 +273,8 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
     let yarn_lock = crate_dir.join("yarn.lock");
 
     if yarn_lock.exists() {
-        //need to install dependencies for generated package as yarn link doesn't resolves the dependencies on it own
+        //need to install dependencies for generated package as yarn link
+        //doesn't resolves the dependencies on it own
 
         let mut cmd = shell();
         cmd.arg("yarn").current_dir(&package_path);
@@ -294,24 +295,6 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
             "Unable to install JavaScript Dependencies for generated package"
         );
 
-        let mut cmd = shell();
-        cmd.arg("yarn").current_dir(crate_dir);
-        tracing::info!(
-            ?cmd,
-            "Found `yarn-lock`. Installing the Javascript Dependencies"
-        );
-
-        let status = cmd
-            .stdin(Stdio::null())
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .current_dir(crate_dir)
-            .status()
-            .context("Unable to run yarn. Is it installed?")?;
-        anyhow::ensure!(
-            status.success(),
-            "Unable to install JavaScript Dependencies"
-        );
         return Ok(());
     }
 
