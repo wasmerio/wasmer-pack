@@ -165,6 +165,7 @@ fn language_specific_matches(package_dir: &Path, language: Language) -> Result<W
     Ok(walk)
 }
 
+#[tracing::instrument(skip_all)]
 fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error> {
     let pyproject = crate_dir.join("pyproject.toml");
 
@@ -229,6 +230,7 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
     Ok(())
 }
 
+#[tracing::instrument(skip_all)]
 fn run_pytest(crate_dir: &Path) -> Result<(), Error> {
     if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
         tracing::warn!("Skipping Pytest. Wasmer Python doesn't work on M1 MacOS. For more, see <https://github.com/wasmerio/wasmer-python/issues/680>");
@@ -266,6 +268,8 @@ fn shell(command: impl AsRef<std::ffi::OsStr>) -> Command {
 struct PackageJson {
     name: String,
 }
+
+#[tracing::instrument(skip_all)]
 fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error> {
     // reading the package and getting the namespace and name of the javascript created package
     let package_path = generated_bindings.join("package");
@@ -277,17 +281,13 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
         //doesn't resolves the dependencies on it own
 
         let mut cmd = shell("yarn");
-        cmd.current_dir(&package_path);
-        tracing::info!(
-            ?cmd,
-            "Installing the Javascript Dependencies for generated package"
-        );
+        cmd.current_dir(&crate_dir);
+        tracing::info!(?cmd, "Installing Javascript dependencies");
 
         let status = cmd
             .stdin(Stdio::null())
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
-            .current_dir(&package_path)
             .status()
             .context("Unable to run yarn. Is it installed?")?;
         anyhow::ensure!(
@@ -385,6 +385,7 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
     Ok(())
 }
 
+#[tracing::instrument(skip_all)]
 fn run_jest(crate_dir: &Path) -> Result<(), Error> {
     let mut cmd = shell("yarn jest");
     cmd.current_dir(crate_dir);
