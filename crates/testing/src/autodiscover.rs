@@ -397,10 +397,7 @@ fn run_jest(crate_dir: &Path) -> Result<(), Error> {
         .current_dir(crate_dir)
         .status()
         .context("Unable to run yarn. Is it installed?")?;
-    anyhow::ensure!(
-        status.success(),
-        "Unable to install JavaScript Dependencies for generated package"
-    );
+    anyhow::ensure!(status.success(), "`yarn jest` completed unsuccessfully");
 
     Ok(())
 }
