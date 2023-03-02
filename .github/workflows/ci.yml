@@ -27,7 +27,6 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Non-Rust Cache
         uses: actions/cache@v3
-        if: false
         with:
           path: |
             **/generated_bindings/
@@ -65,14 +64,6 @@ jobs:
         with:
           command: test
           args: --workspace --verbose --locked
-      - name: Non-Rust Cache
-        uses: actions/cache/save@v3
-        if: always()
-        with:
-          path: |
-            **/generated_bindings/
-            **/node_modules/
-          key: non-rust-cache-${{ hashFiles('**/yarn.lock', '**/poetry.lock') }}
 
   workflow-times:
     name: Workflow Timings
