@@ -30,9 +30,9 @@ describe("wasmer-pack bindings", () => {
             "package/src/bindings/index.d.ts",
             "package/src/bindings/index.js",
             "package/src/bindings/wasmer-pack/intrinsics.js",
+            "package/src/bindings/wasmer-pack/wasmer-pack-wasm.wasm",
             "package/src/bindings/wasmer-pack/wasmer-pack.d.ts",
             "package/src/bindings/wasmer-pack/wasmer-pack.js",
-            "package/src/bindings/wasmer-pack/wasmer-pack.wasm",
             "package/src/index.d.ts",
             "package/src/index.js",
         ]);
@@ -44,10 +44,10 @@ describe("wasmer-pack bindings", () => {
             packageJsonFile.contents
         );
 
-        expect(JSON.parse(packageJson)).toEqual(
-            jasmine.objectContaining({
+        expect(JSON.parse(packageJson)).toMatchObject(
+            {
                 name: "@wasmer/wasmer-pack",
-            })
+            }
         );
     });
 });
