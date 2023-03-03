@@ -224,8 +224,8 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
 
 #[tracing::instrument(skip_all)]
 fn run_pytest(crate_dir: &Path) -> Result<(), Error> {
-    if cfg!(target_os = "macos") && cfg!(target_arch = "aarch64") {
-        tracing::warn!("Skipping Pytest. Wasmer Python doesn't work on M1 MacOS. For more, see <https://github.com/wasmerio/wasmer-python/issues/680>");
+    if cfg!(target_os = "macos") {
+        tracing::warn!("Skipping Pytest. Wasmer Python doesn't work on MacOS. For more, see <https://github.com/wasmerio/wasmer-python/issues/680>");
         return Ok(());
     }
 
