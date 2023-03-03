@@ -1,14 +1,12 @@
 use std::{
     collections::{BTreeSet, HashSet},
     env,
-    fs::{self, File},
-    io::BufReader,
+    fmt::Display,
+    fs,
     path::Path,
     process::{Command, Stdio},
     time::Instant,
 };
-
-use serde::Deserialize;
 
 use anyhow::{Context, Error, Ok};
 use ignore::{overrides::OverrideBuilder, Walk, WalkBuilder};
@@ -173,59 +171,53 @@ fn setup_python(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error
         // Assume everything has been set up correctly. Now, we just need to
         // make sure the dependencies are available.
 
-        let mut cmd = Command::new("poetry");
-        cmd.arg("install")
-            .arg("--sync")
-            .arg("--no-interaction")
-            .arg("--no-root");
-        tracing::info!(?cmd, "Installing dependencies");
-        let status = cmd
-            .stdin(Stdio::null())
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .current_dir(crate_dir)
-            .status()
-            .context("Unable to run poetry. Is it installed?")?;
-        anyhow::ensure!(status.success(), "Unable to install Python dependencies");
+        tracing::info!("Installing dependencies");
+        shell(
+            crate_dir,
+            [
+                "poetry",
+                "install",
+                "--sync",
+                "--no-interaction",
+                "--no-root",
+            ],
+        )
+        .context("Unable to install Python dependencies")?;
 
         return Ok(());
     }
 
     tracing::info!("Initializing the python package");
 
-    let mut cmd = Command::new("poetry");
-    cmd.arg("init")
-        .arg("--name=tests")
-        .arg("--no-interaction")
-        .arg("--description=Python integration tests")
-        .arg("--dependency=pytest");
-    tracing::info!(?cmd, "Initializing the Python package");
-    let status = cmd
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .current_dir(crate_dir)
-        .status()
-        .context("Unable to run poetry. Is it installed?")?;
-    anyhow::ensure!(status.success(), "Unable to initialize the Python package");
+    shell(
+        crate_dir,
+        [
+            "poetry",
+            "init",
+            "--name=tests",
+            "--no-interaction",
+            "--description=Python integration tests",
+            "--dependency=pytest",
+        ],
+    )
+    .context("Unable to initialize the Python package")?;
 
-    let mut cmd = Command::new("poetry");
-    cmd.arg("add")
-        .arg("--no-interaction")
-        .arg("--editable")
-        .arg(generated_bindings.strip_prefix(crate_dir)?);
-    tracing::info!(?cmd, "Adding the generated bindings as a dependency");
-    let status = cmd
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .current_dir(crate_dir)
-        .status()
-        .context("Unable to run poetry. Is it installed?")?;
-    anyhow::ensure!(
-        status.success(),
-        "Unable to add the generated bindings as a dependency"
-    );
+    tracing::info!("Adding the generated bindings as a dependency");
+    shell(
+        crate_dir,
+        [
+            "poetry",
+            "add",
+            "--no-interaction",
+            "--editable",
+            generated_bindings
+                .strip_prefix(crate_dir)?
+                .display()
+                .to_string()
+                .as_str(),
+        ],
+    )
+    .context("Unable to add the generated bindings as a dependency")?;
 
     Ok(())
 }
@@ -237,182 +229,105 @@ fn run_pytest(crate_dir: &Path) -> Result<(), Error> {
         return Ok(());
     }
 
-    let mut cmd = Command::new("poetry");
-    cmd.arg("run").arg("pytest").arg("--verbose");
-    tracing::info!(?cmd, "Running pytest");
-    let status = cmd
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .current_dir(crate_dir)
-        .status()
-        .context("Unable to run poetry. Is it installed?")?;
-    anyhow::ensure!(status.success(), "pytest failed");
+    shell(crate_dir, ["poetry", "run", "pytest", "--verbose"]).context("pytest failed")?;
 
     Ok(())
 }
 
-fn shell(command: impl AsRef<std::ffi::OsStr>) -> Command {
-    if cfg!(target_os = "windows") {
-        let mut cmd = Command::new("cmd");
-        cmd.arg("/C").arg(command);
-        cmd
-    } else {
-        let mut cmd = Command::new("sh");
-        cmd.arg("-c").arg(command);
-        cmd
-    }
-}
+fn shell<A, S>(cwd: &Path, args: A) -> Result<(), Error>
+where
+    A: IntoIterator<Item = S>,
+    S: Display,
+{
+    let command = args
+        .into_iter()
+        .map(|s| {
+            // quick'n'dirty shell-escape
+            let mut s = s.to_string();
+            if s.contains(' ') {
+                s.insert(0, '"');
+                s.push('"');
+            }
+            s
+        })
+        .collect::<Vec<_>>()
+        .join(" ");
 
-#[derive(Deserialize, Debug)]
-struct PackageJson {
-    name: String,
+    let mut cmd = {
+        if cfg!(target_os = "windows") {
+            let mut cmd = Command::new("cmd");
+            cmd.arg("/C").arg(&command);
+            cmd
+        } else {
+            let mut cmd = Command::new("sh");
+            cmd.arg("-c").arg(&command);
+            cmd
+        }
+    };
+
+    tracing::info!(
+        command=?cmd,
+        cwd=%cwd.display(),
+        "Executing a shell command",
+    );
+
+    let status = cmd
+        .current_dir(cwd)
+        .stdin(Stdio::null())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status()
+        .context("Unable to run yarn. Is it installed?")?;
+    anyhow::ensure!(status.success(), "Unable to execute `{command}`");
+
+    Ok(())
 }
 
 #[tracing::instrument(skip_all)]
 fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), Error> {
-    // reading the package and getting the namespace and name of the javascript created package
     let package_path = generated_bindings.join("package");
-    let generated_package_name = get_package_name(&package_path)?;
     let yarn_lock = crate_dir.join("yarn.lock");
 
-    if yarn_lock.exists() {
+    if !yarn_lock.exists() {
         //need to install dependencies for generated package as yarn link
         //doesn't resolves the dependencies on it own
 
-        let mut cmd = shell("yarn");
-        cmd.current_dir(&crate_dir);
-        tracing::info!(?cmd, "Installing Javascript dependencies");
+        tracing::info!("Initializing the Javascript package");
+        shell(crate_dir, ["yarn", "init", "--yes"]).context("Unable to initialize the package.json")?;
 
-        let status = cmd
-            .stdin(Stdio::null())
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .status()
-            .context("Unable to run yarn. Is it installed?")?;
-        anyhow::ensure!(
-            status.success(),
-            "Unable to install JavaScript Dependencies for generated package"
-        );
+        tracing::info!("Installing the Jest testing library");
+        shell(crate_dir, ["yarn", "add", "--dev", "jest"])
+            .context("Unable to add jest as a dev-dependency")?;
 
-        return Ok(());
+        let jest_config_file = crate_dir.join("jest.config.js");
+
+        fs::write(&jest_config_file, JEST_CONFIG)?;
+
+        tracing::info!("Adding the generated bindings as a dependency");
+        let relative_path = package_path
+            .strip_prefix(crate_dir)
+            .unwrap_or(&package_path);
+        shell(
+            crate_dir,
+            ["yarn", "add", &format!("file:{}", relative_path.display())],
+        )
+        .context("Unable to add the generated bindings as a dependency")?;
     }
 
-    let mut cmd = shell("yarn init --yes");
-    cmd.current_dir(crate_dir);
-    tracing::info!(?cmd, "Initializing the Javascript package");
+    tracing::info!("Installing dependencies for generated bindings");
+    shell(&package_path, ["yarn", "install"])
+        .context("Unable to install dependencies for the generated bindings")?;
 
-    let status = cmd
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .current_dir(crate_dir)
-        .status()
-        .context("Unable to run yarn. Is it installed?")?;
-    anyhow::ensure!(
-        status.success(),
-        "Unable to initialize the JavaScript package"
-    );
+    tracing::info!("Installing dependencies for the test package");
+    shell(crate_dir, ["yarn", "install"]).context("Unable to install the test package's dependencies")?;
 
-    // install jest to crate dir
-
-    let mut cmd = shell("yarn add --dev jest");
-    cmd.current_dir(crate_dir);
-    tracing::info!(?cmd, "Installing the Jest testing library");
-
-    let status = cmd
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .current_dir(crate_dir)
-        .status()
-        .context("Unable to run yarn. Is it installed?")?;
-    anyhow::ensure!(status.success(), "Unable to install jest testing library");
-
-    let jest_file_name = "jest.config.js";
-    let jest_config_file = crate_dir.join(jest_file_name);
-
-    fs::write(&jest_config_file, JEST_CONFIG)?;
-    anyhow::ensure!(crate_dir.join(&jest_config_file).exists());
-
-    let mut cmd = shell("yarn");
-    cmd.current_dir(&package_path);
-
-    tracing::info!(?cmd, "Installing dependencies for generated bindings");
-    let status = cmd
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .current_dir(&package_path)
-        .status()
-        .context("Unable to run yarn. Is it installed?")?;
-    anyhow::ensure!(
-        status.success(),
-        "Unable to install dependencies for generated bindings"
-    );
-
-    let mut cmd = shell("yarn link");
-    cmd.current_dir(&package_path);
-
-    tracing::info!(?cmd, "Linking the generated bindings as a `Yarn link`");
-    let status = cmd
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .current_dir(&package_path)
-        .status()
-        .context("Unable to run yarn. Is it installed?")?;
-    anyhow::ensure!(
-        status.success(),
-        "Unable to perform yarn link on generated bindings"
-    );
-
-    let mut cmd = shell(format!("yarn link {generated_package_name}"));
-    cmd.current_dir(crate_dir);
-
-    tracing::info!(?cmd, "Linking the testing package to generated bindings");
-    let status = cmd
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .current_dir(crate_dir)
-        .status()
-        .context("Unable to run yarn. Is it installed?")?;
-    anyhow::ensure!(
-        status.success(),
-        "Unable to initialize a link to the generated bindings from testing crate"
-    );
     Ok(())
 }
 
 #[tracing::instrument(skip_all)]
 fn run_jest(crate_dir: &Path) -> Result<(), Error> {
-    let mut cmd = shell("yarn jest");
-    cmd.current_dir(crate_dir);
-    tracing::info!(?cmd, "Running the jest tests");
-
-    let status = cmd
-        .stdin(Stdio::null())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .current_dir(crate_dir)
-        .status()
-        .context("Unable to run yarn. Is it installed?")?;
-    anyhow::ensure!(status.success(), "`yarn jest` completed unsuccessfully");
+    tracing::info!("Running the jest tests");
+    shell(crate_dir, ["yarn", "jest"]).context("Testing failed")?;
 
     Ok(())
-}
-
-fn get_package_name(package_path: &Path) -> Result<String, Error> {
-    let package_json_path = package_path.join("package.json");
-
-    anyhow::ensure!(
-        package_json_path.is_file(),
-        "Package Json file for generated package not found"
-    );
-
-    let file = File::open(package_json_path).unwrap();
-    let reader = BufReader::new(file);
-    let package_json: PackageJson = serde_json::from_reader(reader).unwrap();
-    Ok(package_json.name)
 }
