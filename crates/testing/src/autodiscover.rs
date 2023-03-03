@@ -293,7 +293,8 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
         //doesn't resolves the dependencies on it own
 
         tracing::info!("Initializing the Javascript package");
-        shell(crate_dir, ["yarn", "init", "--yes"]).context("Unable to initialize the package.json")?;
+        shell(crate_dir, ["yarn", "init", "--yes"])
+            .context("Unable to initialize the package.json")?;
 
         tracing::info!("Installing the Jest testing library");
         shell(crate_dir, ["yarn", "add", "--dev", "jest"])
@@ -319,7 +320,8 @@ fn setup_javascript(crate_dir: &Path, generated_bindings: &Path) -> Result<(), E
         .context("Unable to install dependencies for the generated bindings")?;
 
     tracing::info!("Installing dependencies for the test package");
-    shell(crate_dir, ["yarn", "install"]).context("Unable to install the test package's dependencies")?;
+    shell(crate_dir, ["yarn", "install"])
+        .context("Unable to install the test package's dependencies")?;
 
     Ok(())
 }
