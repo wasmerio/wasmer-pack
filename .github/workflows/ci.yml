@@ -20,7 +20,10 @@ concurrency:
 jobs:
   check:
     name: Compile and Test
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: Rust Cache
@@ -31,28 +34,23 @@ jobs:
           path: |
             **/generated_bindings/
             **/node_modules/
-          key: non-rust-cache
+          key: non-rust-cache-${{ hashFiles('**/yarn.lock', '**/poetry.lock') }}
+          restore-keys: non-rust-cache-
       - name: Install Node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: "1.2.2"
+          node-version: 19
       - name: Install Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      - name: Install Pipenv
-        run: pip install --user pipenv
+      - name: Install Poetry and Pipenv
+        run: |
+          pip install poetry pipenv
+          poetry --version
+          pipenv --version
       - name: Setup Wasmer
         uses: wasmerio/setup-wasmer@v1
-      - name: Install cargo-wapm
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: cargo-wapm --debug --verbose
       - name: Type Checking
         uses: actions-rs/cargo@v1
         with:
@@ -79,7 +77,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           jobs: |
-            Compile and Test
+            Compile and Test (ubuntu-latest)
+            Compile and Test (windows-latest)
+            Compile and Test (macos-latest)
           message: |
             Make sure you keep an eye on build times!
 

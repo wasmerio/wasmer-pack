@@ -30,8 +30,8 @@ fn use_wasi_javascript_bindings() {
 
 #[test]
 #[cfg_attr(
-    all(target_os = "macos", target_arch = "aarch64"),
-    ignore = "Wasmer Python doesn't work on M1 MacOS"
+    target_os = "macos",
+    ignore = "Wasmer Python doesn't work on MacOS"
 )]
 fn use_wasi_python_bindings() {
     let pkg = wabt_fixture();

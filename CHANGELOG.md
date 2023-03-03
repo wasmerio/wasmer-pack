@@ -20,6 +20,8 @@ change, where applicable.
 - Fixed the "Releases" job in CI so `wasmer/wasmer-pack-cli` would be published
   and not just `wasmer/wasmer-pack`
   ([#124](https://github.com/wasmerio/wasmer-pack/pull/124))
+- Fixed the `wasmer-pack-testing` crate so it would run `jest` commands properly
+  on Linux/MacOS ([#125](https://github.com/wasmerio/wasmer-pack/pull/125))
 
 ## [0.7.0] - 2023-02-10
 
