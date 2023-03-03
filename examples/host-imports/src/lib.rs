@@ -21,6 +21,11 @@ mod non_wasm_externs {
     // however when you run "cargo build --workspace" it'll try to compile for
     // the host architecture. This will cause linker errors on Windows because
     // we expect the host functions to have been provided.
+    //
+    // The correct solution would be to set
+    // `package.forced-target = "wasm32-unknown-unknown"` in Cargo.toml, but
+    // that isn't stable yet.
+    // (https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#per-package-target)
 
     #[no_mangle]
     extern "C" fn logging_log(_: i32, _: i32) {
