@@ -20,7 +20,10 @@ concurrency:
 jobs:
   check:
     name: Compile and Test
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: Rust Cache
@@ -75,7 +78,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           jobs: |
-            Compile and Test
+            Compile and Test (ubuntu-latest)
+            Compile and Test (windows-latest)
+            Compile and Test (macos-latest)
           message: |
             Make sure you keep an eye on build times!
 
