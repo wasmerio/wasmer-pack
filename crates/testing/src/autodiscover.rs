@@ -107,6 +107,8 @@ fn snapshot_generated_bindings(
     settings.add_filter(r#""\d+\.\d+\.\d+""#, r#""x.y.z""#);
     // Also ignore the generator version comments
     settings.add_filter(r"wasmer-pack v\d+\.\d+\.\d+", "wasmer-pack vX.Y.Z");
+    // Directory separators on Windows (sometimes these may be escaped)
+    settings.add_filter(r"\\\\|\\", "/");
 
     let _guard = settings.bind_to_scope();
 
