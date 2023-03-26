@@ -1,6 +1,7 @@
-use std::path::Path;
-
 use anyhow::{Context, Error};
+use serde::{Deserialize, Serialize};
+pub use serde_cbor::Value;
+use std::path::Path;
 use webc::{DirOrFile, Manifest, ParseOptions, WebC};
 
 use crate::{Abi, Command, Interface, Library, Metadata, Module, Package};
@@ -10,7 +11,8 @@ pub(crate) fn load_webc_binary(raw_webc: &[u8]) -> Result<Package, Error> {
     let webc = WebC::parse(raw_webc, &options)?;
 
     let fully_qualified_package_name = webc.get_package_name();
-    let metadata = metadata(&fully_qualified_package_name)?;
+
+    let metadata = metadata(&webc, &fully_qualified_package_name)?;
     let libraries = libraries(&webc, &fully_qualified_package_name)?;
     let commands = commands(&webc, &fully_qualified_package_name)?;
 
@@ -45,12 +47,46 @@ fn libraries(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Vec<
     Ok(libraries)
 }
 
-fn metadata(fully_qualified_package_name: &str) -> Result<Metadata, Error> {
+#[derive(Debug, Serialize, Deserialize)]
+struct InternalPackageMeta {
+    description: String,
+}
+
+/// Returns the wapm package description.
+///
+/// Similar to `WebC::get_package_name_from_manifest` in the webc crate.
+/// This should probably be in the webc crate as well,
+/// but I don't want to mess with dependencies.
+///
+/// TODO: This function alone adds a new dependency to the project: `serde_cbor`.
+///       Move this function to a better place, most likely the webc crate
+fn get_description_from_webc_manifest(m: &Manifest) -> String {
+    m.package
+        .get("wapm")
+        .and_then(|value| {
+            let value = serde_cbor::to_vec(value).ok()?;
+            let meta = serde_cbor::from_slice::<InternalPackageMeta>(&value).ok()?;
+            Some(meta.description)
+        })
+        .or_else(|| {
+            let description = m.package.get("description")?;
+            let description = match description {
+                serde_cbor::Value::Text(t) => t,
+                _ => return None,
+            }
+            .to_string();
+            Some(description)
+        })
+        .unwrap_or_default()
+}
+
+fn metadata(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Metadata, Error> {
     let (unversioned_name, version) = fully_qualified_package_name.split_once('@').unwrap();
     let package_name = unversioned_name
         .parse()
         .context("Unable to parse the package name")?;
-    Ok(Metadata::new(package_name, version))
+    let description = get_description_from_webc_manifest(&webc.manifest);
+    Ok(Metadata::new(package_name, version).with_description(description))
 }
 
 fn load_library(
