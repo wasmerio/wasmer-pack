@@ -2462,6 +2462,7 @@ dependencies = [
  "once_cell",
  "pretty_assertions",
  "serde",
+ "serde_cbor",
  "serde_json",
  "toml 0.5.11",
  "wai-bindgen-gen-core",
