@@ -266,12 +266,18 @@ fn generate_package_json(needs_wasi: bool, metadata: &Metadata) -> SourceFile {
         serde_json::json!({})
     };
 
+    let description = match &metadata.description {
+        Some(description) => description.clone(),
+        None => "".to_string(),
+    };
+
     let package_json = serde_json::json!({
         "name": metadata.package_name.javascript_package(),
         "version": &metadata.version,
         "main": format!("src/index.js"),
         "types": format!("src/index.d.ts"),
         "type": "commonjs",
+        "description": description,
         "dependencies": dependencies,
     });
 
