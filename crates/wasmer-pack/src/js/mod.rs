@@ -266,7 +266,7 @@ fn generate_package_json(needs_wasi: bool, metadata: &Metadata) -> SourceFile {
         serde_json::json!({})
     };
 
-    let package_json = serde_json::json!({
+    let mut package_json = serde_json::json!({
         "name": metadata.package_name.javascript_package(),
         "version": &metadata.version,
         "main": format!("src/index.js"),
@@ -274,6 +274,9 @@ fn generate_package_json(needs_wasi: bool, metadata: &Metadata) -> SourceFile {
         "type": "commonjs",
         "dependencies": dependencies,
     });
+    if let Some(description) = &metadata.description {
+        package_json["description"] = serde_json::Value::String(description.to_string());
+    }
 
     format!("{package_json:#}").into()
 }

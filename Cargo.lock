@@ -139,6 +139,9 @@ name = "bytes"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "89b2fd2a0dcf38d7971e2194b6b6eebab45ae01067456a7fd93d5547a61b70be"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "calc"
@@ -2462,6 +2465,7 @@ dependencies = [
  "once_cell",
  "pretty_assertions",
  "serde",
+ "serde_cbor",
  "serde_json",
  "toml 0.5.11",
  "wai-bindgen-gen-core",
@@ -2469,7 +2473,7 @@ dependencies = [
  "wai-bindgen-gen-wasmer-py",
  "wai-parser",
  "wasmparser",
- "webc 4.1.1",
+ "webc 5.0.0-rc.6",
 ]
 
 [[package]]
@@ -2616,6 +2620,31 @@ dependencies = [
  "serde_cbor",
  "serde_json",
  "sha2",
+ "url",
+ "walkdir",
+]
+
+[[package]]
+name = "webc"
+version = "5.0.0-rc.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aa158c77bd41040f4b9a4b91be63446885ce9b04bc9a5bb457fa586e7a8c9815"
+dependencies = [
+ "anyhow",
+ "base64 0.21.0",
+ "byteorder",
+ "bytes",
+ "indexmap",
+ "leb128",
+ "lexical-sort",
+ "once_cell",
+ "path-clean",
+ "rand 0.8.5",
+ "serde",
+ "serde_cbor",
+ "serde_json",
+ "sha2",
+ "thiserror",
  "url",
  "walkdir",
 ]

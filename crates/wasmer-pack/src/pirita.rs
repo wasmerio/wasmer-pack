@@ -1,16 +1,18 @@
-use std::path::Path;
-
-use anyhow::{Context, Error};
-use webc::{DirOrFile, Manifest, ParseOptions, WebC};
-
 use crate::{Abi, Command, Interface, Library, Metadata, Module, Package};
+use anyhow::{Context, Error};
+pub use serde_cbor::Value;
+use std::path::Path;
+use webc::metadata::annotations::Wapm;
+use webc::metadata::{Binding, BindingsExtended, Manifest};
+use webc::v1::{DirOrFile, ParseOptions, WebC};
 
 pub(crate) fn load_webc_binary(raw_webc: &[u8]) -> Result<Package, Error> {
     let options = ParseOptions::default();
     let webc = WebC::parse(raw_webc, &options)?;
 
     let fully_qualified_package_name = webc.get_package_name();
-    let metadata = metadata(&fully_qualified_package_name)?;
+
+    let metadata = metadata(&webc, &fully_qualified_package_name)?;
     let libraries = libraries(&webc, &fully_qualified_package_name)?;
     let commands = commands(&webc, &fully_qualified_package_name)?;
 
@@ -39,22 +41,26 @@ fn libraries(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Vec<
     let Manifest { bindings, .. } = webc.get_metadata();
     let libraries = bindings
         .iter()
-        .map(|b| load_library(b, webc, fully_qualified_package_name))
+        .map(|b| load_library(b.clone(), webc, fully_qualified_package_name))
         .collect::<Result<Vec<_>, _>>()?;
 
     Ok(libraries)
 }
 
-fn metadata(fully_qualified_package_name: &str) -> Result<Metadata, Error> {
+fn metadata(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Metadata, Error> {
     let (unversioned_name, version) = fully_qualified_package_name.split_once('@').unwrap();
     let package_name = unversioned_name
         .parse()
         .context("Unable to parse the package name")?;
-    Ok(Metadata::new(package_name, version))
+    let mut metadata = Metadata::new(package_name, version);
+    if let Ok(Some(Wapm { description, .. })) = webc.manifest.package_annotation("wapm") {
+        metadata = metadata.with_description(description);
+    }
+    Ok(metadata)
 }
 
 fn load_library(
-    bindings: &webc::Binding,
+    bindings: Binding,
     webc: &WebC,
     fully_qualified_package_name: &str,
 ) -> Result<Library, Error> {
@@ -69,8 +75,8 @@ fn load_library(
         .context("Unable to load the exports interface")?;
 
     let imports_paths = match &bindings {
-        webc::BindingsExtended::Wit(_) => &[],
-        webc::BindingsExtended::Wai(w) => w.imports.as_slice(),
+        BindingsExtended::Wit(_) => &[],
+        BindingsExtended::Wai(w) => w.imports.as_slice(),
     };
     let imports = imports_paths
         .iter()

@@ -21,6 +21,10 @@ change, where applicable.
   and not just `wasmer/wasmer-pack`
   ([#124](https://github.com/wasmerio/wasmer-pack/pull/124))
 
+- Added description field to package.json for javascript packages, and
+  pyproject.toml for python projects..
+  ([#128](1https://github.com/wasmerio/wasmer-pack/pull/128))
+
 ## [0.7.0] - 2023-02-10
 
 ### 💥 Breaking Changes 💥
