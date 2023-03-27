@@ -63,12 +63,8 @@ struct InternalPackageMeta {
 fn get_description_from_webc_manifest(m: &Manifest) -> String {
     let wapm: Option<webc::metadata::annotations::Wapm> = m.package_annotation("wapm").unwrap();
     match wapm {
-        None => {
-            return "".to_string();
-        }
-        Some(wapm) => {
-            return wapm.description;
-        }
+        None => "".to_string(),
+        Some(wapm) => wapm.description,
     }
 }
 
