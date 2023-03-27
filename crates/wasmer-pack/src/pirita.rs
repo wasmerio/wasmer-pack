@@ -52,16 +52,19 @@ struct InternalPackageMeta {
     description: String,
 }
 
-/// Returns the wapm package description.
+/// Retrieves the package description from the given `Manifest` object,
+/// If the `wapm` annotation is not found in manifest, returns an empty string.
 ///
-/// Similar to `WebC::get_package_name_from_manifest` in the webc crate.
-/// This should probably be in the webc crate as well,
-/// but I don't want to mess with dependencies.
+/// # Arguments
 ///
-/// TODO: This function alone adds a new dependency to the project: `serde_cbor`.
-///       Move this function to a better place, most likely the webc crate
-fn get_description_from_webc_manifest(m: &Manifest) -> String {
-    let wapm: Option<webc::metadata::annotations::Wapm> = m.package_annotation("wapm").unwrap();
+/// * `manifest` - A reference to the `webc::metadata::Manifest` object containing the package metadata.
+///
+/// # Returns
+///
+/// A string representing the package description, or an empty string if the `wapm` annotation is not found.
+fn get_description_from_webc_manifest(manifest: &Manifest) -> String {
+    let wapm: Option<webc::metadata::annotations::Wapm> =
+        manifest.package_annotation("wapm").unwrap();
     match wapm {
         None => "".to_string(),
         Some(wapm) => wapm.description,
