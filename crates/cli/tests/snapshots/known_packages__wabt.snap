@@ -29,7 +29,7 @@ expression: "format!(\"{meta:#}\")"
       "name": "wasm-strip"
     }
   ],
-  "description": null,
+  "description": "The WebAssembly Binary Toolkit",
   "name": "wasmer/wabt",
   "version": "1.0.33"
 }

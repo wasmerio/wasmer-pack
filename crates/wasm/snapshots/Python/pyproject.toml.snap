@@ -5,6 +5,7 @@ input_file: crates/wasm/generated_bindings/Python/pyproject.toml
 [project]
 name = "wasmer_pack"
 version = "x.y.z"
+description = "The WebAssembly interface to wasmer-pack."
 keywords = []
 dependencies = ["wasmer", "wasmer_compiler_cranelift"]
 

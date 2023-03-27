@@ -10,7 +10,7 @@ expression: "format!(\"{meta:#}\")"
     }
   ],
   "commands": [],
-  "description": null,
+  "description": "Add two numbers",
   "name": "wai/tutorial-01",
   "version": "0.1.1"
 }

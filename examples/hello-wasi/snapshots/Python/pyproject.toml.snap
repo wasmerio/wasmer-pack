@@ -5,6 +5,7 @@ input_file: examples/hello-wasi/generated_bindings/Python/pyproject.toml
 [project]
 name = "hello_wasi"
 version = "x.y.z"
+description = "The simplest possible WASI WebAssembly library."
 keywords = []
 dependencies = ["wasmer", "wasmer_compiler_cranelift"]
 

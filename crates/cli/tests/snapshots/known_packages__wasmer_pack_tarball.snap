@@ -10,7 +10,7 @@ expression: "format!(\"{meta:#}\")"
     }
   ],
   "commands": [],
-  "description": null,
+  "description": "The WebAssembly interface to wit-pack.",
   "name": "wasmer/wit-pack",
   "version": "0.3.0-beta"
 }

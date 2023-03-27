@@ -5,6 +5,7 @@ input_file: examples/host-imports/generated_bindings/Python/pyproject.toml
 [project]
 name = "host_imports"
 version = "x.y.z"
+description = "A WebAssembly library that imports some functions from its host."
 keywords = []
 dependencies = ["wasmer", "wasmer_compiler_cranelift"]
 

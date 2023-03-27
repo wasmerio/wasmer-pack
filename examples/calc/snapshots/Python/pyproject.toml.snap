@@ -5,6 +5,7 @@ input_file: examples/calc/generated_bindings/Python/pyproject.toml
 [project]
 name = "calc"
 version = "x.y.z"
+description = "The simplest possible WebAssembly module"
 keywords = []
 dependencies = ["wasmer", "wasmer_compiler_cranelift"]
 
