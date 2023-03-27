@@ -2,6 +2,7 @@ use crate::{Abi, Command, Interface, Library, Metadata, Module, Package};
 use anyhow::{Context, Error};
 pub use serde_cbor::Value;
 use std::path::Path;
+use webc::metadata::annotations::Wapm;
 use webc::metadata::{Binding, BindingsExtended, Manifest};
 use webc::v1::{DirOrFile, ParseOptions, WebC};
 
@@ -46,32 +47,16 @@ fn libraries(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Vec<
     Ok(libraries)
 }
 
-/// Retrieves the package description from the given `Manifest` object,
-/// If the `wapm` annotation is not found in manifest, returns an empty string.
-///
-/// # Arguments
-///
-/// * `manifest` - A reference to the `webc::metadata::Manifest` object containing the package metadata.
-///
-/// # Returns
-///
-/// A string representing the package description, or an empty string if the `wapm` annotation is not found.
-fn get_description_from_webc_manifest(manifest: &Manifest) -> String {
-    let wapm: Option<webc::metadata::annotations::Wapm> =
-        manifest.package_annotation("wapm").unwrap();
-    match wapm {
-        None => "".to_string(),
-        Some(wapm) => wapm.description,
-    }
-}
-
 fn metadata(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Metadata, Error> {
     let (unversioned_name, version) = fully_qualified_package_name.split_once('@').unwrap();
     let package_name = unversioned_name
         .parse()
         .context("Unable to parse the package name")?;
-    let description = get_description_from_webc_manifest(&webc.manifest);
-    Ok(Metadata::new(package_name, version).with_description(description))
+    let mut metadata = Metadata::new(package_name, version);
+    if let Ok(Some(Wapm { description, .. })) = webc.manifest.package_annotation("wapm") {
+        metadata = metadata.with_description(description);
+    }
+    Ok(metadata)
 }
 
 fn load_library(
