@@ -6,7 +6,6 @@ expression: got.utf8_contents().unwrap()
   "dependencies": {
     "@wasmer/wasi": "^1.2.2"
   },
-  "description": "",
   "main": "src/index.js",
   "name": "@wasmerio/wabt",
   "type": "commonjs",

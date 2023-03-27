@@ -4,7 +4,6 @@ expression: got.utf8_contents().unwrap()
 ---
 {
   "dependencies": {},
-  "description": "",
   "main": "src/index.js",
   "name": "@wasmerio/wasmer-pack",
   "type": "commonjs",
