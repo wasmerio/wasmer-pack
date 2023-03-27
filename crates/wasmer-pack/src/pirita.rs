@@ -1,6 +1,5 @@
 use crate::{Abi, Command, Interface, Library, Metadata, Module, Package};
 use anyhow::{Context, Error};
-use serde::{Deserialize, Serialize};
 pub use serde_cbor::Value;
 use std::path::Path;
 use webc::metadata::{Binding, BindingsExtended, Manifest};
@@ -45,11 +44,6 @@ fn libraries(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Vec<
         .collect::<Result<Vec<_>, _>>()?;
 
     Ok(libraries)
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct InternalPackageMeta {
-    description: String,
 }
 
 /// Retrieves the package description from the given `Manifest` object,
