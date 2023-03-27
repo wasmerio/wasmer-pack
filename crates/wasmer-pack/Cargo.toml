@@ -26,7 +26,7 @@ wai-bindgen-gen-js = "0.2.1"
 wai-bindgen-gen-wasmer-py = "0.2.1"
 wai-parser = "0.2.1"
 wasmparser = "0.99.0"
-webc = "4.0.0"
+webc = "5.0.0-rc.6"
 
 [dev-dependencies]
 cargo_metadata = "0.15.0"

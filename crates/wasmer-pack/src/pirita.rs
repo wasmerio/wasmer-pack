@@ -1,10 +1,10 @@
+use crate::{Abi, Command, Interface, Library, Metadata, Module, Package};
 use anyhow::{Context, Error};
 use serde::{Deserialize, Serialize};
 pub use serde_cbor::Value;
 use std::path::Path;
-use webc::{DirOrFile, Manifest, ParseOptions, WebC};
-
-use crate::{Abi, Command, Interface, Library, Metadata, Module, Package};
+use webc::metadata::{Binding, BindingsExtended, Manifest};
+use webc::v1::{DirOrFile, ParseOptions, WebC};
 
 pub(crate) fn load_webc_binary(raw_webc: &[u8]) -> Result<Package, Error> {
     let options = ParseOptions::default();
@@ -41,7 +41,7 @@ fn libraries(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Vec<
     let Manifest { bindings, .. } = webc.get_metadata();
     let libraries = bindings
         .iter()
-        .map(|b| load_library(b, webc, fully_qualified_package_name))
+        .map(|b| load_library(b.clone(), webc, fully_qualified_package_name))
         .collect::<Result<Vec<_>, _>>()?;
 
     Ok(libraries)
@@ -61,23 +61,15 @@ struct InternalPackageMeta {
 /// TODO: This function alone adds a new dependency to the project: `serde_cbor`.
 ///       Move this function to a better place, most likely the webc crate
 fn get_description_from_webc_manifest(m: &Manifest) -> String {
-    m.package
-        .get("wapm")
-        .and_then(|value| {
-            let value = serde_cbor::to_vec(value).ok()?;
-            let meta = serde_cbor::from_slice::<InternalPackageMeta>(&value).ok()?;
-            Some(meta.description)
-        })
-        .or_else(|| {
-            let description = m.package.get("description")?;
-            let description = match description {
-                serde_cbor::Value::Text(t) => t,
-                _ => return None,
-            }
-            .to_string();
-            Some(description)
-        })
-        .unwrap_or_default()
+    let wapm: Option<webc::metadata::annotations::Wapm> = m.package_annotation("wapm").unwrap();
+    match wapm {
+        None => {
+            return "".to_string();
+        }
+        Some(wapm) => {
+            return wapm.description;
+        }
+    }
 }
 
 fn metadata(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Metadata, Error> {
@@ -90,7 +82,7 @@ fn metadata(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Metad
 }
 
 fn load_library(
-    bindings: &webc::Binding,
+    bindings: Binding,
     webc: &WebC,
     fully_qualified_package_name: &str,
 ) -> Result<Library, Error> {
@@ -105,8 +97,8 @@ fn load_library(
         .context("Unable to load the exports interface")?;
 
     let imports_paths = match &bindings {
-        webc::BindingsExtended::Wit(_) => &[],
-        webc::BindingsExtended::Wai(w) => w.imports.as_slice(),
+        BindingsExtended::Wit(_) => &[],
+        BindingsExtended::Wai(w) => w.imports.as_slice(),
     };
     let imports = imports_paths
         .iter()
