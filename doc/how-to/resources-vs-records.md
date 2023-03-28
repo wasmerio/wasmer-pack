@@ -26,15 +26,35 @@ record address {
 }
 ```
 
-On the other hand, a file would be best represented using a resource.
+On the other hand, a database connection would be best represented using a
+resource.
 
-```
-resource file {
-    static open: func(path: string) -> expected<file, error>
-    read: func() -> expected<list<u8>, error>
-    write: func(data: list<u8>) -> expected<unit, error>
+```wai
+resource database {
+    static connect: func(connection_string: string) -> expected<database, error>
+    query: func(sql: string) -> expected<list<record>, error>
+    close: func() -> expected<unit, error>
 }
 ```
+
+## Key Considerations
+
+When deciding between using a resource or a record, consider the following:
+
+- Performance: Records require deep copying when passed between guest and host,
+  which can be expensive for large or complex records. Consider using resources
+  for objects with significant amounts of data or complex structures to mitigate
+  performance issues.
+- Immutability: Records provide a level of immutability due to their
+  pass-by-value nature. If immutability is a priority, records can be a suitable
+  choice. However, if you need to frequently modify an object's state, a resource
+  might be more appropriate.
+- Encapsulation: For objects with both data and behavior, consider whether
+  separating the data and behavior into different objects—a record for data and a
+  resource for behavior—adds value or complexity to your code.
+- Data Sharing: If data sharing or synchronization across components or
+  instances is important, resources are a better choice since they use references,
+  while records are not ideal for sharing data.
 
 ## Edge Cases
 
@@ -44,7 +64,7 @@ has both data and behaviour.
 
 This happens a lot when wrapping a "normal" library with a WAI interface so it
 can be used from WebAssembly. The distinction between "object" and "data" is
-more fluid in most general purpose programming languages so it can be common to
+more fluid in most general purpose programming languages, so it can be common to
 encounter something that doesn't neatly fall into the "record" or "resource"
 categories.
 
@@ -86,7 +106,7 @@ top-level functions and use a record.
 One example of this could be the satellite object used in a library that
 predicts the motion of a satellite.
 
-```
+```wai
 /// An element
 record satellite {
     object-name: optional<string>,
@@ -104,10 +124,12 @@ predicted-location: func(s: satellite, ts: timestamp) -> position
 ```
 
 This works well when the thing being expressed is mostly data, with only a
-couple pieces of assocated behaviour.
+couple of pieces of associated behaviour.
 
 Records are passed around by value, meaning any operations that would normally
 modify a field will need to return a new value with the updated field, instead.
 This can be quite expensive when the record is large, because passing a record
 from guest to host (or host to guest) will often mean the entire object is
-serialized recursively and copied across the host-guest boundary.
+serialized recursively and copied across the host-guest boundary. Consider the
+trade-offs between performance and immutability when deciding whether to use
+records or resources in these edge cases.
