@@ -15,6 +15,17 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- Upgraded the `webc` crate to `5.0.4` so we now have support for `*.webc` files
+  in both the v1 and v2 formats
+  ([#131](https://github.com/wasmerio/wasmer-pack/pull/131))
+
+### Changed
+
+- Raised the MSRV from `1.64.0` to `1.67.0` to match `wapm-targz-to-pirita`
+  ([#131](https://github.com/wasmerio/wasmer-pack/pull/131))
+
 ### Fixed
 
 - Fixed the "Releases" job in CI so `wasmer/wasmer-pack-cli` would be published
