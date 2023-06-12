@@ -1,12 +1,8 @@
-use std::{
-    collections::BTreeMap,
-    path::{Path, PathBuf},
-};
+use std::{collections::BTreeMap, path::Path};
 
 use anyhow::{Context, Error};
-use wapm_targz_to_pirita::{generate_webc_file, TransformManifestFunctions};
+use wapm_targz_to_pirita::{generate_webc_file, webc::v1::DirOrFile, TransformManifestFunctions};
 use wasmer_pack::Package;
-use webc::DirOrFile;
 
 pub(crate) fn load_from_disk(path: &Path) -> Result<Package, Error> {
     let raw_webc: Vec<u8> = if path.is_dir() {
@@ -30,7 +26,7 @@ fn webc_from_dir(path: &Path) -> Result<Vec<u8>, Error> {
         );
     }
 
-    let mut files: BTreeMap<webc::DirOrFile, Vec<u8>> = BTreeMap::new();
+    let mut files: BTreeMap<DirOrFile, Vec<u8>> = BTreeMap::new();
 
     fn read_dir(
         files: &mut BTreeMap<DirOrFile, Vec<u8>>,
@@ -63,8 +59,8 @@ fn webc_from_dir(path: &Path) -> Result<Vec<u8>, Error> {
 
     read_dir(&mut files, path, path).context("Unable to read the directory into memory")?;
 
-    let functions = TransformManifestFunctions::default();
-    let tarball = generate_webc_file(files, &path.to_path_buf(), None, &functions)
+    let functions = wapm_targz_to_pirita::TransformManifestFunctions::default();
+    let tarball = generate_webc_file(files, path, &functions)
         .context("Unable to convert the files to a tarball")?;
 
     Ok(tarball)
@@ -76,8 +72,7 @@ pub(crate) fn webc_from_tarball(tarball: Vec<u8>) -> Result<Vec<u8>, Error> {
 
     wapm_targz_to_pirita::generate_webc_file(
         files,
-        &PathBuf::new(),
-        None,
+        Path::new("."),
         &TransformManifestFunctions::default(),
     )
 }

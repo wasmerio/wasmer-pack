@@ -13,19 +13,19 @@ version.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.62"
+anyhow = { workspace = true }
 heck = "0.4.0"
-minijinja = "0.23.0"
+minijinja = "0.34.0"
 once_cell = "1.14.0"
-serde = { version = "1.0.143", features = ["derive"] }
-serde_json = "1.0.83"
-toml = "0.5.9"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.7"
 wai-bindgen-gen-core = "0.2.1"
 wai-bindgen-gen-js = "0.2.1"
 wai-bindgen-gen-wasmer-py = "0.2.1"
 wai-parser = "0.2.1"
-wasmparser = "0.99.0"
-webc = "4.0.0"
+wasmparser = "0.107.0"
+webc = { workspace = true }
 
 [dev-dependencies]
 cargo_metadata = "0.15.0"

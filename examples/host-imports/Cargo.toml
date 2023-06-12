@@ -26,7 +26,7 @@ name = "host-import-integration-tests"
 harness = false
 
 [dependencies]
-wai-bindgen-rust = "0.2.1"
+wai-bindgen-rust = { workspace = true }
 
 [dev-dependencies]
 anyhow = "1.0.66"

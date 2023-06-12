@@ -10,7 +10,6 @@ pub struct Codegen {
     #[clap(short, long)]
     pub out_dir: Option<PathBuf>,
     /// The Pirita file to read.
-    #[clap(parse(from_os_str))]
     pub input: PathBuf,
 }
 
