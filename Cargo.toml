@@ -13,5 +13,5 @@ version = "0.7.0"
 
 [workspace.dependencies]
 anyhow = "1"
-webc = "4.0.0"
+webc = "5.0.4"
 wapm-targz-to-pirita = "0.3.1"

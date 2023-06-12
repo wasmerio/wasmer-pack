@@ -1,63 +1,69 @@
 use std::path::Path;
 
 use anyhow::{Context, Error};
-use webc::{DirOrFile, Manifest, ParseOptions, WebC};
+use webc::{
+    compat::Container,
+    metadata::{self, annotations::Wapm},
+};
 
-use crate::{Abi, Command, Interface, Library, Metadata, Module, Package};
+use crate::{Abi, Command, Interface, Library, Metadata, Module, Package, PackageName};
 
 pub(crate) fn load_webc_binary(raw_webc: &[u8]) -> Result<Package, Error> {
-    let options = ParseOptions::default();
-    let webc = WebC::parse(raw_webc, &options)?;
+    let webc = Container::from_bytes(raw_webc.to_vec()).context("Unable to parse the webc file")?;
 
-    let fully_qualified_package_name = webc.get_package_name();
-    let metadata = metadata(&fully_qualified_package_name)?;
-    let libraries = libraries(&webc, &fully_qualified_package_name)?;
-    let commands = commands(&webc, &fully_qualified_package_name)?;
+    let metadata = metadata(webc.manifest())?;
+    let libraries = libraries(&webc)?;
+    let commands = commands(&webc)?;
 
     Ok(Package::new(metadata, libraries, commands))
 }
 
-fn commands(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Vec<Command>, Error> {
+fn commands(webc: &Container) -> Result<Vec<Command>, Error> {
     let mut commands = Vec::new();
 
-    for name in webc.list_commands() {
-        let atom_name = webc
-            .get_atom_name_for_command("wasi", name)
-            .map_err(Error::msg)?;
-        let wasm = webc.get_atom(fully_qualified_package_name, &atom_name)?;
-
-        commands.push(Command {
-            name: name.to_string(),
-            wasm: wasm.to_vec(),
-        });
+    for (name, command) in &webc.manifest().commands {
+        if command
+            .runner
+            .starts_with(webc::metadata::annotations::WASI_RUNNER_URI)
+        {
+            let atom_name = command
+                .wasi()
+                .ok()
+                .flatten()
+                .map(|wasi| wasi.atom)
+                .unwrap_or_else(|| name.clone());
+            let wasm = webc.get_atom(&atom_name).with_context(|| {
+                format!("Unable to get the \"{atom_name}\" atom for the \"{name}\" command")
+            })?;
+            commands.push(Command {
+                name: name.to_string(),
+                wasm: wasm.into(),
+            });
+        }
     }
 
     Ok(commands)
 }
 
-fn libraries(webc: &WebC<'_>, fully_qualified_package_name: &str) -> Result<Vec<Library>, Error> {
-    let Manifest { bindings, .. } = webc.get_metadata();
+fn libraries(webc: &Container) -> Result<Vec<Library>, Error> {
+    let metadata::Manifest { bindings, .. } = webc.manifest();
     let libraries = bindings
         .iter()
-        .map(|b| load_library(b, webc, fully_qualified_package_name))
+        .map(|b| load_library(webc, b))
         .collect::<Result<Vec<_>, _>>()?;
 
     Ok(libraries)
 }
 
-fn metadata(fully_qualified_package_name: &str) -> Result<Metadata, Error> {
-    let (unversioned_name, version) = fully_qualified_package_name.split_once('@').unwrap();
-    let package_name = unversioned_name
-        .parse()
-        .context("Unable to parse the package name")?;
+fn metadata(manifest: &metadata::Manifest) -> Result<Metadata, Error> {
+    let Wapm { name, version, .. } = manifest
+        .wapm()?
+        .context("Unable to find the wapm metadata")?;
+    let package_name = PackageName::parse(&name).context("Unable to parse the package name")?;
     Ok(Metadata::new(package_name, version))
 }
 
-fn load_library(
-    bindings: &webc::Binding,
-    webc: &WebC,
-    fully_qualified_package_name: &str,
-) -> Result<Library, Error> {
+fn load_library(webc: &Container, bindings: &metadata::Binding) -> Result<Library, Error> {
     let bindings = bindings
         .get_bindings()
         .context("Unable to read the bindings metadata")?;
@@ -65,21 +71,21 @@ fn load_library(
     let exports_path = bindings
         .exports()
         .context("The library doesn't have any exports")?;
-    let exports = load_interface(webc, exports_path, fully_qualified_package_name)
-        .context("Unable to load the exports interface")?;
+    let exports =
+        load_interface(webc, exports_path).context("Unable to load the exports interface")?;
 
     let imports_paths = match &bindings {
-        webc::BindingsExtended::Wit(_) => &[],
-        webc::BindingsExtended::Wai(w) => w.imports.as_slice(),
+        metadata::BindingsExtended::Wit(_) => &[],
+        metadata::BindingsExtended::Wai(w) => w.imports.as_slice(),
     };
     let imports = imports_paths
         .iter()
-        .map(|path| load_interface(webc, path, fully_qualified_package_name))
+        .map(|path| load_interface(webc, path))
         .collect::<Result<Vec<_>, Error>>()?;
 
     let module_name = bindings.module().trim_start_matches("atoms://");
     let module = webc
-        .get_atom(fully_qualified_package_name, module_name)
+        .get_atom(module_name)
         .with_context(|| format!("Unable to get the \"{}\" atom", bindings.module()))?;
     let module = Module {
         name: Path::new(module_name)
@@ -87,7 +93,7 @@ fn load_library(
             .and_then(|s| s.to_str())
             .context("Unable to determine the module's name")?
             .to_string(),
-        abi: wasm_abi(module),
+        abi: wasm_abi(&module),
         wasm: module.to_vec(),
     };
 
@@ -98,54 +104,25 @@ fn load_library(
     })
 }
 
-fn load_interface(
-    webc: &WebC<'_>,
-    exports_path: &str,
-    fully_qualified_package_name: &str,
-) -> Result<Interface, Error> {
+fn load_interface(webc: &Container, exports_path: &str) -> Result<Interface, Error> {
     let (volume, exports_path) = exports_path.split_once("://").unwrap();
-    let exports: &[u8] =
-        get_file_from_volume(webc, fully_qualified_package_name, volume, exports_path)?;
-    let exports = std::str::from_utf8(exports).context("The WIT file should be a UTF-8 string")?;
+    let exports = get_file_from_volume(webc, volume, exports_path)?;
+    let exports = std::str::from_utf8(&exports).context("The WIT file should be a UTF-8 string")?;
     Interface::from_wit(exports_path, exports).context("Unable to parse the WIT file")
 }
 
-fn get_file_from_volume<'webc>(
-    webc: &'webc WebC,
-    fully_qualified_package_name: &str,
+fn get_file_from_volume(
+    webc: &Container,
     volume_name: &str,
     exports_path: &str,
-) -> Result<&'webc [u8], Error> {
+) -> Result<webc::compat::SharedBytes, Error> {
     let volume = webc
-        .get_volume(fully_qualified_package_name, volume_name)
+        .get_volume(volume_name)
         .with_context(|| format!("The container doesn't have a \"{volume_name}\" volume"))?;
 
-    let result = volume.get_file(exports_path).with_context(|| {
+    volume.read_file(exports_path).with_context(|| {
         format!("Unable to find \"{exports_path}\" in the \"{volume_name}\" volume")
-    });
-
-    if result.is_err() {
-        // Older versions of wapm2pirita would create entries where the filename
-        // section contained an internal `/` (i.e. the root directory has a file
-        // called `path/to/foo.wasm`, rather than a `path/` directory that
-        // contains a `to/` directory which contains a `foo.wasm` file).
-        //
-        // That means calls to volume.get_file() will always fail.
-        // See https://github.com/wasmerio/pirita/issues/30 for more
-
-        let path = DirOrFile::File(exports_path.into());
-        if let Some(entry) = volume
-            .get_all_file_and_dir_entries()
-            .ok()
-            .and_then(|entries| entries.get(&path).cloned())
-        {
-            let start = entry.offset_start as usize;
-            let end = entry.offset_end as usize;
-            return Ok(&volume.data[start..end]);
-        }
-    }
-
-    result
+    })
 }
 
 /// Try to automatically detec the ABI for a WebAssembly module based in its
