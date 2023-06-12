@@ -9,7 +9,7 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/wasmerio/wasmer-pack"
 rust-version = "1.67.0"                                       # Required for [workspace.package]
-version = "0.7.0"
+version = "0.7.1"
 
 [workspace.dependencies]
 anyhow = "1"
