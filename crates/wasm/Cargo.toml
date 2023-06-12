@@ -30,7 +30,7 @@ harness = false
 anyhow = { workspace = true }
 getrandom = { version = "0.2.8", features = ["custom"] }
 original = { package = "wasmer-pack", version = "0.7.0", path = "../wasmer-pack" }
-wai-bindgen-rust = "0.2.1"
+wai-bindgen-rust = { workspace = true }
 
 [dev-dependencies]
 tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }

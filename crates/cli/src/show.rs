@@ -1,4 +1,4 @@
-use std::{io::Write, path::PathBuf, str::FromStr};
+use std::{fmt::Display, io::Write, path::PathBuf, str::FromStr};
 
 use anyhow::{Context, Error};
 use clap::Parser;
@@ -7,16 +7,9 @@ use wasmer_pack::{Metadata, Package};
 #[derive(Debug, Parser)]
 pub struct Show {
     /// The format to use when emitting metadata.
-    #[clap(
-        short,
-        long,
-        possible_values = ["json", "text"],
-        default_value = "text",
-        parse(try_from_str),
-    )]
+    #[clap(short, long, default_value_t = Format::Text)]
     format: Format,
     /// The Pirita file to read.
-    #[clap(parse(from_os_str))]
     input: PathBuf,
 }
 
@@ -165,10 +158,19 @@ impl Library {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, clap::ValueEnum)]
 pub enum Format {
     Json,
     Text,
+}
+
+impl Display for Format {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Format::Json => f.write_str("json"),
+            Format::Text => f.write_str("text"),
+        }
+    }
 }
 
 impl FromStr for Format {

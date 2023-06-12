@@ -22,10 +22,9 @@ abi = "wasi"
 
 [dependencies]
 anyhow = { workspace = true }
-clap = { version = "3.2.17", features = ["derive"] }
+clap = { workspace = true }
 serde = { version = "1.0.145", features = ["derive"] }
 serde_json = "1.0.85"
-wapm-toml = "0.4.0"
 wapm-targz-to-pirita = { workspace = true }
 wasmer-pack = { version = "0.7.0", path = "../wasmer-pack" }
 webc = { workspace = true }
