@@ -27,12 +27,11 @@ harness = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.62"
+anyhow = { workspace = true }
 getrandom = { version = "0.2.8", features = ["custom"] }
 original = { package = "wasmer-pack", version = "0.7.0", path = "../wasmer-pack" }
 wai-bindgen-rust = "0.2.1"
 
 [dev-dependencies]
-anyhow = "1.0.66"
 tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
 wasmer-pack-testing = { path = "../testing" }
