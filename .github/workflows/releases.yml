@@ -26,7 +26,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: install
-          args: cargo-wapm --verbose --debug --version 0.3
+          args: cargo-wapm --verbose --debug --version '^0.3'
 
       - name: Login to wapm.dev
         run: |

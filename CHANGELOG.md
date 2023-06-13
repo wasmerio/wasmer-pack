@@ -15,6 +15,8 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+## [0.7.1] - 2023-06-12
+
 ### Added
 
 - Upgraded the `webc` crate to `5.0.4` so we now have support for `*.webc` files
@@ -278,7 +280,8 @@ change, where applicable.
 ## [0.1.2] - 2022-08-24
 
 <!-- next-url -->
-[Unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/wasmerio/wasmer-pack/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/wasmerio/wasmer-pack/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.3...v0.6.0
 [0.5.3]: https://github.com/wasmerio/wasmer-pack/compare/v0.5.2...v0.5.3

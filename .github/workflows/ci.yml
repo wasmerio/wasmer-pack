@@ -52,7 +52,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: install
-          args: cargo-wapm --debug --verbose
+          args: cargo-wapm --verbose --debug --version '^0.3'
       - name: Type Checking
         uses: actions-rs/cargo@v1
         with:

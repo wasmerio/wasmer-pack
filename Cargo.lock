@@ -1898,7 +1898,7 @@ checksum = "ed9d5b4305409d1fc9482fee2d7f9bcbf24b3972bf59817ef757e23982242a93"
 
 [[package]]
 name = "wasmer-pack"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -1920,7 +1920,7 @@ dependencies = [
 
 [[package]]
 name = "wasmer-pack-cli"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -1940,7 +1940,7 @@ dependencies = [
 
 [[package]]
 name = "wasmer-pack-testing"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "anyhow",
  "cargo-wapm",
@@ -1956,7 +1956,7 @@ dependencies = [
 
 [[package]]
 name = "wasmer-pack-wasm"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "anyhow",
  "getrandom",
