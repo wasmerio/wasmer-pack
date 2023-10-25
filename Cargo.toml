@@ -14,6 +14,5 @@ version = "0.7.1"
 [workspace.dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive", "env"] }
-webc = "5.0.4"
+webc = "5.7"
 wai-bindgen-rust = "0.2.3"
-wapm-targz-to-pirita = "0.3.1"

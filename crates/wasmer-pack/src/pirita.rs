@@ -8,12 +8,10 @@ use webc::{
 
 use crate::{Abi, Command, Interface, Library, Metadata, Module, Package, PackageName};
 
-pub(crate) fn load_webc_binary(raw_webc: &[u8]) -> Result<Package, Error> {
-    let webc = Container::from_bytes(raw_webc.to_vec()).context("Unable to parse the webc file")?;
-
+pub(crate) fn load_webc_binary(webc: &Container) -> Result<Package, Error> {
     let metadata = metadata(webc.manifest())?;
-    let libraries = libraries(&webc)?;
-    let commands = commands(&webc)?;
+    let libraries = libraries(webc)?;
+    let commands = commands(webc)?;
 
     Ok(Package::new(metadata, libraries, commands))
 }
