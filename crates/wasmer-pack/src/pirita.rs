@@ -3,7 +3,10 @@ use std::path::Path;
 use anyhow::{Context, Error};
 use webc::{
     compat::Container,
-    metadata::{self, annotations::Wapm},
+    metadata::{
+        self,
+        annotations::{Atom, Wapm},
+    },
 };
 
 use crate::{Abi, Command, Interface, Library, Metadata, Module, Package, PackageName};
@@ -24,12 +27,20 @@ fn commands(webc: &Container) -> Result<Vec<Command>, Error> {
             .runner
             .starts_with(webc::metadata::annotations::WASI_RUNNER_URI)
         {
-            let atom_name = command
-                .wasi()
+            let Atom {
+                name: atom_name,
+                dependency,
+                ..
+            } = command
+                .atom()
                 .ok()
                 .flatten()
-                .map(|wasi| wasi.atom)
-                .unwrap_or_else(|| name.clone());
+                .unwrap_or_else(|| webc::metadata::annotations::Atom::new(name, None));
+
+            if let Some(dependency) = &dependency {
+                anyhow::bail!("The \"{name}\" command uses the \"{atom_name}\" atom from its \"{dependency}\" dependency, but wasmer-pack doesn't support dependency resolution");
+            }
+
             let wasm = webc.get_atom(&atom_name).with_context(|| {
                 format!("Unable to get the \"{atom_name}\" atom for the \"{name}\" command")
             })?;
