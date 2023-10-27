@@ -2,7 +2,7 @@ use assert_cmd::Command;
 use flate2::read::GzDecoder;
 use std::{
     collections::BTreeSet,
-    fs::File,
+    io::Cursor,
     path::{Path, PathBuf},
 };
 use tar::Archive;
@@ -10,8 +10,7 @@ use tempfile::TempDir;
 
 use url::Url;
 
-const WIT_PACK_TARBALL: &str =
-    "https://registry-cdn.wapm.dev/packages/wasmer/wit-pack/wit-pack-0.3.0-beta.tar.gz";
+const WIT_PACK_TARBALL: &[u8] = include_bytes!("./wit-pack-0.3.0.tar.gz");
 
 /// Download a WEBC package and make sure it would contain the expected
 /// libraries and commands.
@@ -45,7 +44,7 @@ macro_rules! codegen_test {
 
 codegen_test! {
     name: wabt,
-    url: "https://registry-cdn.wapm.dev/packages/wasmer/wabt/wabt-1.0.33.webc",
+    url: "https://wasmer.wtf/wasmer/wabt@1.0.33",
     libraries: ["bindings"],
     commands: [
         "wat2wasm", "wast2json", "wasm2wat", "wasm-interp", "wasm-validate", "wasm-strip",
@@ -54,14 +53,14 @@ codegen_test! {
 
 codegen_test! {
     name: wasmer_pack_cli,
-    url: "https://registry-cdn.wapm.dev/packages/wasmer/wit-pack-cli/wit-pack-cli-0.3.0-beta.webc",
+    url: "https://wasmer.wtf/wasmer/wit-pack-cli@0.3.0-beta",
     libraries: [],
     commands: ["wit-pack"],
 }
 
 codegen_test! {
     name: wasmer_pack,
-    url: "https://registry-cdn.wapm.dev/packages/wasmer/wit-pack/wit-pack-0.3.0-beta.webc",
+    url: "https://wasmer.wtf/wasmer/wit-pack@0.3.0-beta",
     libraries: ["wit-pack"],
     commands: [],
 }
@@ -69,26 +68,34 @@ codegen_test! {
 codegen_test! {
     /// The issue we ran into when releasing Wasmer Pack
     name: wai_tutorial_01,
-    url: "https://storage.googleapis.com/wapm-registry-dev/packages/wai/tutorial-01/tutorial-01-0.1.1-b2773b70-7278-11ed-ace2-e60b9cd6ac8c.webc",
+    url: "https://wasmer.wtf/wai/tutorial-01@0.1.1",
     libraries: ["hello-world"],
     commands: [],
 }
 
-codegen_test! {
-    name: wasmer_pack_tarball,
-    url: WIT_PACK_TARBALL,
-    libraries: ["wit-pack"],
-    commands: [],
+#[test]
+fn load_a_package_from_a_tarball() {
+    let temp = tempfile::tempdir().unwrap();
+    let raw = include_bytes!("./wit-pack-0.3.0.tar.gz");
+    let pkg = webc::wasmer_package::Package::from_tarball(Cursor::new(raw)).unwrap();
+    let webc = pkg.serialize().unwrap();
+    let local_path = temp.path().join("wit-pack.webc");
+    std::fs::write(&local_path, &webc).unwrap();
+
+    let meta = metadata(&local_path);
+
+    // Make sure we detect the correct commands and libraries
+    insta::assert_display_snapshot!(format!("{meta:#}"));
+    assert_contains_libraries_and_commands(&meta, &["wit-pack"], &[]);
+
+    // Make sure the binding generation doesn't fail
+    generate_bindings(&local_path, temp.path());
 }
 
 #[test]
 fn load_a_package_from_a_directory() {
     let temp = TempDir::new().unwrap();
-    let tarball = cached_url(WIT_PACK_TARBALL);
-
-    let reader = File::open(tarball).unwrap();
-    let reader = GzDecoder::new(reader);
-    let mut archive = Archive::new(reader);
+    let mut archive = Archive::new(GzDecoder::new(WIT_PACK_TARBALL));
     archive.unpack(temp.path()).unwrap();
 
     let meta = metadata(temp.path());
@@ -156,7 +163,10 @@ fn cached_url(url: &str) -> PathBuf {
     std::fs::create_dir_all(&fixtures_dir).unwrap();
 
     if !dest.exists() {
-        let response = ureq::get(url.as_str()).call().unwrap();
+        let response = ureq::get(url.as_str())
+            .set("Accept", "application/webc")
+            .call()
+            .unwrap();
         assert_eq!(
             response.status(),
             200,

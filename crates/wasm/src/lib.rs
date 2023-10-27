@@ -3,7 +3,7 @@ use std::{
     sync::atomic::{AtomicU8, Ordering},
 };
 
-use anyhow::Error;
+use anyhow::{Context, Error};
 use original::SourceFile;
 use wai_bindgen_rust::Handle;
 
@@ -30,7 +30,8 @@ impl crate::wasmer_pack::Package for Package {
     }
 
     fn from_webc(bytes: Vec<u8>) -> Result<Handle<crate::Package>, wasmer_pack::Error> {
-        let pkg = original::Package::from_webc(&bytes)?;
+        let webc = webc::Container::from_bytes(bytes).context("Invalid webc")?;
+        let pkg = original::Package::from_webc(&webc)?;
         Ok(Handle::new(Package(pkg)))
     }
 

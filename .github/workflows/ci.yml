@@ -48,11 +48,11 @@ jobs:
         run: pip install --user pipenv
       - name: Setup Wasmer
         uses: wasmerio/setup-wasmer@v1
-      - name: Install cargo-wapm
+      - name: Install cargo-wasmer
         uses: actions-rs/cargo@v1
         with:
           command: install
-          args: cargo-wapm --verbose --debug --version '^0.3'
+          args: cargo-wasmer --verbose --debug --version '^0.4'
       - name: Type Checking
         uses: actions-rs/cargo@v1
         with:

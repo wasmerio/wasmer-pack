@@ -6,6 +6,7 @@ use std::{
 
 use anyhow::{Context, Error};
 use heck::{ToPascalCase, ToSnakeCase};
+use webc::Container;
 
 #[derive(Debug, Clone)]
 pub struct Package {
@@ -32,8 +33,8 @@ impl Package {
     }
 
     /// Load a [`Package`] from a WEBC binary.
-    pub fn from_webc(bytes: &[u8]) -> Result<Self, Error> {
-        crate::pirita::load_webc_binary(bytes)
+    pub fn from_webc(webc: &Container) -> Result<Self, Error> {
+        crate::pirita::load_webc_binary(webc)
     }
 
     pub fn metadata(&self) -> &Metadata {

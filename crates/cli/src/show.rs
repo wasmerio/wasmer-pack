@@ -1,6 +1,6 @@
 use std::{fmt::Display, io::Write, path::PathBuf, str::FromStr};
 
-use anyhow::{Context, Error};
+use anyhow::Error;
 use clap::Parser;
 use wasmer_pack::{Metadata, Package};
 
@@ -15,14 +15,14 @@ pub struct Show {
 
 impl Show {
     pub fn run(self) -> Result<(), Error> {
-        let pkg = crate::pirita::load_from_disk(&self.input).with_context(|| {
-            format!("Unable to load a package from \"{}\"", self.input.display())
-        })?;
+        let Show { format, input } = self;
+
+        let pkg = crate::utils::load(&input)?;
 
         let summary: Summary = summarize(&pkg);
 
         let mut stdout = std::io::stdout();
-        match self.format {
+        match format {
             Format::Json => {
                 summary.write_json(stdout.lock())?;
                 writeln!(stdout)?;

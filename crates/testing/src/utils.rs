@@ -1,7 +1,7 @@
 use anyhow::{Context, Error};
 use std::path::{Path, PathBuf};
 
-use cargo_wapm::Pack;
+use cargo_wasmer::Pack;
 use wasmer_pack_cli::{Codegen, Language};
 
 pub fn compile_rust_to_wapm_package(
@@ -21,7 +21,7 @@ pub fn compile_rust_to_wapm_package(
     anyhow::ensure!(packages.len() == 1);
 
     let generated_package_dir =
-        pack.generate_wapm_package(packages[0], meta.target_directory.as_ref())?;
+        pack.generate_wasmer_package(packages[0], meta.target_directory.as_ref())?;
 
     Ok(generated_package_dir)
 }

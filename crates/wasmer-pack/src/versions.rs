@@ -1,5 +1,5 @@
 /// The versions of [`wai_parser`] this crate is compatible with.
-pub const WAI_PARSER_VERSION: &str = "^0.2.0";
+pub const WAI_PARSER_VERSION: &str = include_str!("wai_version.txt");
 
 #[cfg(test)]
 mod tests {
@@ -38,10 +38,9 @@ mod tests {
             .join("wai_version.txt");
 
         let wai_version_txt = std::fs::read_to_string(&path).unwrap();
-        let wai_version_txt = wai_version_txt.trim();
 
         if wai_version_txt != actual_version {
-            std::fs::write(&path, format!("{actual_version}\n")).unwrap();
+            std::fs::write(&path, actual_version).unwrap();
             panic!(
                 "The WAI parser version was out of date. Re-run the tests and commit the changes."
             );

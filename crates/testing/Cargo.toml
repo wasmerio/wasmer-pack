@@ -21,7 +21,7 @@ tracing = "0.1.37"
 serde_json = "1.0.89"
 serde = "1.0.149"
 wasmer-pack-cli = { version = "0.7.1", path = "../cli" }
-cargo-wapm = "0.3.3"
+cargo-wasmer = "0.4.0"
 
 [dev-dependencies]
 tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
