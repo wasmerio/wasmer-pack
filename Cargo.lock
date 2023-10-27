@@ -197,10 +197,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "cargo-wapm"
-version = "0.3.6"
+name = "cargo-wasmer"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2896a7b9048d657d5afe3df149fbf38a7560233ea8c6b7d69f04f1a5d72c1e9"
+checksum = "f5acb9d52e1f6d5d23a1c82267d059593722ae8a10d04cfa81fa296e149efb42"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -1811,7 +1811,7 @@ name = "wasmer-pack-testing"
 version = "0.7.1"
 dependencies = [
  "anyhow",
- "cargo-wapm",
+ "cargo-wasmer",
  "ignore",
  "insta",
  "serde",

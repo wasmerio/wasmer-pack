@@ -1,9 +1,8 @@
 use std::{fmt::Display, io::Write, path::PathBuf, str::FromStr};
 
-use anyhow::{Context, Error};
+use anyhow::Error;
 use clap::Parser;
 use wasmer_pack::{Metadata, Package};
-use webc::Container;
 
 #[derive(Debug, Parser)]
 pub struct Show {
@@ -18,10 +17,7 @@ impl Show {
     pub fn run(self) -> Result<(), Error> {
         let Show { format, input } = self;
 
-        let pkg = Container::from_disk(&input)
-            .map_err(Error::from)
-            .and_then(|webc| Package::from_webc(&webc))
-            .with_context(|| format!("Unable to load the package from \"{}\"", input.display()))?;
+        let pkg = crate::utils::load(&input)?;
 
         let summary: Summary = summarize(&pkg);
 
