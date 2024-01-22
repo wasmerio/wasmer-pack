@@ -35,13 +35,19 @@ impl crate::wasmer_pack::Package for Package {
         Ok(Handle::new(Package(pkg)))
     }
 
-    fn generate_javascript(&self) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
-        let files = original::generate_javascript(&self.0)?;
+    fn generate_javascript(
+        &self,
+        name: Option<String>,
+    ) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
+        let files = original::generate_javascript(&self.0, name)?;
         Ok(unwrap_files(files))
     }
 
-    fn generate_python(&self) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
-        let files = original::generate_python(&self.0)?;
+    fn generate_python(
+        &self,
+        name: Option<String>,
+    ) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
+        let files = original::generate_python(&self.0, name)?;
         Ok(unwrap_files(files))
     }
 }

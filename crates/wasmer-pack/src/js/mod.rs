@@ -41,7 +41,7 @@ static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
 });
 
 /// Generate JavaScript bindings for a package.
-pub fn generate_javascript(package: &Package) -> Result<Files, Error> {
+pub fn generate_javascript(package: &Package, name: Option<String>) -> Result<Files, Error> {
     let mut files = Files::new();
 
     let ctx = Context::for_package(package);
@@ -53,8 +53,11 @@ pub fn generate_javascript(package: &Package) -> Result<Files, Error> {
     }
 
     files.insert_child_directory("src", top_level(&ctx)?);
-
-    let package_json = generate_package_json(package.requires_wasi(), package.metadata());
+    let mut metadata = package.metadata().clone();
+    if let Some(package_name) = name {
+        metadata.package_name.set_name(&package_name);
+    }
+    let package_json = generate_package_json(package.requires_wasi(), &metadata);
     files.insert("package.json", package_json);
 
     // Note: We need to wrap the generated files in an extra folder because
@@ -112,7 +115,7 @@ impl CommandContext {
 
         CommandContext {
             name: cmd.name.clone(),
-            ident: cmd.name.replace('-', "_"),
+            ident: cmd.name.to_snake_case(),
             module_filename: module_filename.display().to_string(),
             wasm: cmd.wasm.clone(),
         }
@@ -374,7 +377,7 @@ mod tests {
         }];
         let pkg = Package::new(metadata, libraries, commands);
 
-        let files = generate_javascript(&pkg).unwrap();
+        let files = generate_javascript(&pkg, None).unwrap();
 
         let actual_files: BTreeSet<_> = files.iter().map(|(p, _)| p).collect();
         assert_eq!(actual_files, expected);

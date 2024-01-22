@@ -36,9 +36,13 @@ static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
 });
 
 /// Generate Python bindings.
-pub fn generate_python(package: &Package) -> Result<Files, Error> {
+pub fn generate_python(package: &Package, name: Option<String>) -> Result<Files, Error> {
     let metadata = package.metadata();
-    let package_name = metadata.package_name.python_name();
+    let package_name = if let Some(name) = name {
+        name
+    } else {
+        metadata.package_name.name().to_string()
+    };
 
     let mut files = Files::new();
 
@@ -167,6 +171,7 @@ impl From<Interface> for InterfaceContext {
 
 #[derive(Debug, serde::Serialize)]
 struct CommandContext {
+    name: String,
     ident: String,
     module_filename: String,
     #[serde(skip)]
@@ -175,11 +180,11 @@ struct CommandContext {
 
 impl From<crate::Command> for CommandContext {
     fn from(cmd: crate::Command) -> CommandContext {
-        let ident = cmd.name.replace('-', "_");
-        let module_filename = format!("{ident}.wasm");
+        let module_filename = Path::new(&cmd.name).with_extension("wasm");
         CommandContext {
-            ident,
-            module_filename,
+            name: cmd.name.clone(),
+            ident: cmd.name.to_snake_case(),
+            module_filename: module_filename.display().to_string(),
             wasm: cmd.wasm,
         }
     }
@@ -393,7 +398,7 @@ mod tests {
         }];
         let package = Package::new(metadata, libraries, commands);
 
-        let files = generate_python(&package).unwrap();
+        let files = generate_python(&package, None).unwrap();
 
         let actual_files: BTreeSet<_> = files.iter().map(|(p, _)| p).collect();
         assert_eq!(actual_files, expected);

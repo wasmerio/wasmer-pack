@@ -44,7 +44,7 @@ pub fn autodiscover(crate_dir: impl AsRef<Path>) -> Result<(), Error> {
             language = language.name(),
             "Generating bindings",
         );
-        crate::generate_bindings(&bindings, &wapm_package, language)?;
+        crate::generate_bindings(&bindings, &wapm_package, language, None)?;
 
         match language {
             Language::JavaScript => {

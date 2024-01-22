@@ -11,10 +11,10 @@ resource package {
 
     /// Generate a JavaScript project that can be used to access the provided
     /// package.
-    generate-javascript: func() -> expected<list<file>, error>
+    generate-javascript: func(name: option<string>) -> expected<list<file>, error>
 
     /// Generate a Python project that can be used to access the provided package.
-    generate-python: func() -> expected<list<file>, error>
+    generate-python: func(name: option<string>) -> expected<list<file>, error>
 }
 
 /// Metadata describing a package.
