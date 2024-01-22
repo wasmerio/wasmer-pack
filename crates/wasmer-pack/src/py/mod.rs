@@ -38,10 +38,12 @@ static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
 /// Generate Python bindings.
 pub fn generate_python(package: &Package, name: Option<String>) -> Result<Files, Error> {
     let metadata = package.metadata();
+
+    // make sure the name is in snake-case
     let package_name = if let Some(name) = name {
-        name
+        name.to_snake_case()
     } else {
-        metadata.package_name.name().to_string()
+        metadata.package_name.name().to_string().to_snake_case()
     };
 
     let mut files = Files::new();
@@ -180,10 +182,11 @@ struct CommandContext {
 
 impl From<crate::Command> for CommandContext {
     fn from(cmd: crate::Command) -> CommandContext {
-        let module_filename = Path::new(&cmd.name).with_extension("wasm");
+        let ident = cmd.name.to_snake_case();
+        let module_filename = Path::new(&ident).with_extension("wasm");
         CommandContext {
             name: cmd.name.clone(),
-            ident: cmd.name.to_snake_case(),
+            ident,
             module_filename: module_filename.display().to_string(),
             wasm: cmd.wasm,
         }

@@ -39,7 +39,7 @@ pub fn generate_bindings(
         "Generating bindings",
     );
     let codegen = Codegen {
-        name: name,
+        name,
         out_dir: Some(dest.to_path_buf()),
         input: wapm_dir.to_path_buf(),
     };
