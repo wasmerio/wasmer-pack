@@ -15,6 +15,17 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Added
+- Added ability to pass in a user-specified name for the generated
+  bindings. This can be done by passing in the `--name` flag in the
+  CLI or by passing in the `name` options when calling the
+  `generate_*` functions.
+
+### Fixed
+- Fixed the `python-wasi` test in `wasmer-pack` crate to use poetry
+  instead of pipenv. This is because poetry is used everywhere else,
+  except in this one place.
+
 ## [0.7.1] - 2023-06-12
 
 ### Added
