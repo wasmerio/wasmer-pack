@@ -47,10 +47,10 @@ fn use_wasi_python_bindings() {
         .join("tests")
         .join("python-wasi");
 
-    execute("pipenv install", &python_dir);
-    execute("pipenv run pytest", &python_dir);
+    execute("poetry install --no-root", &python_dir);
+    execute("poetry run pytest", &python_dir);
     execute(
-        format!("pipenv run mypy {}", out_dir.join("wabt").display()),
+        format!("poetry run mypy {}", out_dir.join("wabt").display()),
         &python_dir,
     );
 }
