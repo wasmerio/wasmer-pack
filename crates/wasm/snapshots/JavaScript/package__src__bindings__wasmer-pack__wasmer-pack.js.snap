@@ -228,64 +228,90 @@ class Package {
     }
     return variant5;
   }
-  generateJavascript() {
+  generateJavascript(arg1) {
     const memory = this._obj._exports.memory;
+    const realloc = this._obj._exports["canonical_abi_realloc"];
     const free = this._obj._exports["canonical_abi_free"];
     const obj0 = this;
-    const ret = this._obj._exports['package::generate-javascript'](this._obj._resource0_slab.insert(obj0.clone()));
+    const {name: v1_0 } = arg1;
+    const variant3 = v1_0;
+    let variant3_0;
+    let variant3_1;
+    let variant3_2;
     
-    let variant8;
+    switch (variant3) {
+      case null: {
+        variant3_0 = 0;
+        variant3_1 = 0;
+        variant3_2 = 0;
+        
+        break;
+      }
+      default: {
+        const e = variant3;
+        const ptr2 = utf8_encode(e, realloc, memory);
+        const len2 = utf8_encoded_len();
+        variant3_0 = 1;
+        variant3_1 = ptr2;
+        variant3_2 = len2;
+        
+        break;
+      }
+    }
+    const ret = this._obj._exports['package::generate-javascript'](this._obj._resource0_slab.insert(obj0.clone()), variant3_0, variant3_1, variant3_2);
+    
+    let variant11;
     switch (data_view(memory).getUint8(ret + 0, true)) {
       case 0: {
-        const len3 = data_view(memory).getInt32(ret + 8, true);
-        const base3 = data_view(memory).getInt32(ret + 4, true);
-        const result3 = [];
-        for (let i = 0; i < len3; i++) {
-          const base = base3 + i * 16;
-          const ptr1 = data_view(memory).getInt32(base + 0, true);
-          const len1 = data_view(memory).getInt32(base + 4, true);
-          const list1 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr1, len1));
-          free(ptr1, len1, 1);
-          const ptr2 = data_view(memory).getInt32(base + 8, true);
-          const len2 = data_view(memory).getInt32(base + 12, true);
-          const list2 = new Uint8Array(memory.buffer.slice(ptr2, ptr2 + len2 * 1));
-          free(ptr2, len2, 1);
-          result3.push({
-            filename: list1,
-            contents: list2,
+        const len6 = data_view(memory).getInt32(ret + 8, true);
+        const base6 = data_view(memory).getInt32(ret + 4, true);
+        const result6 = [];
+        for (let i = 0; i < len6; i++) {
+          const base = base6 + i * 16;
+          const ptr4 = data_view(memory).getInt32(base + 0, true);
+          const len4 = data_view(memory).getInt32(base + 4, true);
+          const list4 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr4, len4));
+          free(ptr4, len4, 1);
+          const ptr5 = data_view(memory).getInt32(base + 8, true);
+          const len5 = data_view(memory).getInt32(base + 12, true);
+          const list5 = new Uint8Array(memory.buffer.slice(ptr5, ptr5 + len5 * 1));
+          free(ptr5, len5, 1);
+          result6.push({
+            filename: list4,
+            contents: list5,
           });
         }
-        free(base3, len3 * 16, 4);
+        free(base6, len6 * 16, 4);
         
-        variant8 = { tag: "ok", val: result3 };
+        variant11 = { tag: "ok", val: result6 };
         break;
       }
       case 1: {
-        const ptr4 = data_view(memory).getInt32(ret + 4, true);
-        const len4 = data_view(memory).getInt32(ret + 8, true);
-        const list4 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr4, len4));
-        free(ptr4, len4, 1);
-        const ptr5 = data_view(memory).getInt32(ret + 12, true);
-        const len5 = data_view(memory).getInt32(ret + 16, true);
-        const list5 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr5, len5));
-        free(ptr5, len5, 1);
-        const len7 = data_view(memory).getInt32(ret + 24, true);
-        const base7 = data_view(memory).getInt32(ret + 20, true);
-        const result7 = [];
-        for (let i = 0; i < len7; i++) {
-          const base = base7 + i * 8;
-          const ptr6 = data_view(memory).getInt32(base + 0, true);
-          const len6 = data_view(memory).getInt32(base + 4, true);
-          const list6 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr6, len6));
-          free(ptr6, len6, 1);
-          result7.push(list6);
+        const ptr7 = data_view(memory).getInt32(ret + 4, true);
+        const len7 = data_view(memory).getInt32(ret + 8, true);
+        const list7 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr7, len7));
+        free(ptr7, len7, 1);
+        const ptr8 = data_view(memory).getInt32(ret + 12, true);
+        const len8 = data_view(memory).getInt32(ret + 16, true);
+        const list8 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr8, len8));
+        free(ptr8, len8, 1);
+        const len10 = data_view(memory).getInt32(ret + 24, true);
+        const base10 = data_view(memory).getInt32(ret + 20, true);
+        const result10 = [];
+        for (let i = 0; i < len10; i++) {
+          const base = base10 + i * 8;
+          const ptr9 = data_view(memory).getInt32(base + 0, true);
+          const len9 = data_view(memory).getInt32(base + 4, true);
+          const list9 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr9, len9));
+          free(ptr9, len9, 1);
+          result10.push(list9);
         }
-        free(base7, len7 * 8, 4);
+        free(base10, len10 * 8, 4);
         
-        variant8 = { tag: "err", val: {
-          message: list4,
-          verbose: list5,
-          causes: result7,
+        variant11 = { tag: "err", val: {
+          message: list7,
+          verbose: list8,
+          causes: result10,
         } };
         break;
       }
@@ -293,66 +319,92 @@ class Package {
         throw new RangeError("invalid variant discriminant for expected");
       }
     }
-    return variant8;
+    return variant11;
   }
-  generatePython() {
+  generatePython(arg1) {
     const memory = this._obj._exports.memory;
+    const realloc = this._obj._exports["canonical_abi_realloc"];
     const free = this._obj._exports["canonical_abi_free"];
     const obj0 = this;
-    const ret = this._obj._exports['package::generate-python'](this._obj._resource0_slab.insert(obj0.clone()));
+    const {name: v1_0 } = arg1;
+    const variant3 = v1_0;
+    let variant3_0;
+    let variant3_1;
+    let variant3_2;
     
-    let variant8;
+    switch (variant3) {
+      case null: {
+        variant3_0 = 0;
+        variant3_1 = 0;
+        variant3_2 = 0;
+        
+        break;
+      }
+      default: {
+        const e = variant3;
+        const ptr2 = utf8_encode(e, realloc, memory);
+        const len2 = utf8_encoded_len();
+        variant3_0 = 1;
+        variant3_1 = ptr2;
+        variant3_2 = len2;
+        
+        break;
+      }
+    }
+    const ret = this._obj._exports['package::generate-python'](this._obj._resource0_slab.insert(obj0.clone()), variant3_0, variant3_1, variant3_2);
+    
+    let variant11;
     switch (data_view(memory).getUint8(ret + 0, true)) {
       case 0: {
-        const len3 = data_view(memory).getInt32(ret + 8, true);
-        const base3 = data_view(memory).getInt32(ret + 4, true);
-        const result3 = [];
-        for (let i = 0; i < len3; i++) {
-          const base = base3 + i * 16;
-          const ptr1 = data_view(memory).getInt32(base + 0, true);
-          const len1 = data_view(memory).getInt32(base + 4, true);
-          const list1 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr1, len1));
-          free(ptr1, len1, 1);
-          const ptr2 = data_view(memory).getInt32(base + 8, true);
-          const len2 = data_view(memory).getInt32(base + 12, true);
-          const list2 = new Uint8Array(memory.buffer.slice(ptr2, ptr2 + len2 * 1));
-          free(ptr2, len2, 1);
-          result3.push({
-            filename: list1,
-            contents: list2,
+        const len6 = data_view(memory).getInt32(ret + 8, true);
+        const base6 = data_view(memory).getInt32(ret + 4, true);
+        const result6 = [];
+        for (let i = 0; i < len6; i++) {
+          const base = base6 + i * 16;
+          const ptr4 = data_view(memory).getInt32(base + 0, true);
+          const len4 = data_view(memory).getInt32(base + 4, true);
+          const list4 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr4, len4));
+          free(ptr4, len4, 1);
+          const ptr5 = data_view(memory).getInt32(base + 8, true);
+          const len5 = data_view(memory).getInt32(base + 12, true);
+          const list5 = new Uint8Array(memory.buffer.slice(ptr5, ptr5 + len5 * 1));
+          free(ptr5, len5, 1);
+          result6.push({
+            filename: list4,
+            contents: list5,
           });
         }
-        free(base3, len3 * 16, 4);
+        free(base6, len6 * 16, 4);
         
-        variant8 = { tag: "ok", val: result3 };
+        variant11 = { tag: "ok", val: result6 };
         break;
       }
       case 1: {
-        const ptr4 = data_view(memory).getInt32(ret + 4, true);
-        const len4 = data_view(memory).getInt32(ret + 8, true);
-        const list4 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr4, len4));
-        free(ptr4, len4, 1);
-        const ptr5 = data_view(memory).getInt32(ret + 12, true);
-        const len5 = data_view(memory).getInt32(ret + 16, true);
-        const list5 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr5, len5));
-        free(ptr5, len5, 1);
-        const len7 = data_view(memory).getInt32(ret + 24, true);
-        const base7 = data_view(memory).getInt32(ret + 20, true);
-        const result7 = [];
-        for (let i = 0; i < len7; i++) {
-          const base = base7 + i * 8;
-          const ptr6 = data_view(memory).getInt32(base + 0, true);
-          const len6 = data_view(memory).getInt32(base + 4, true);
-          const list6 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr6, len6));
-          free(ptr6, len6, 1);
-          result7.push(list6);
+        const ptr7 = data_view(memory).getInt32(ret + 4, true);
+        const len7 = data_view(memory).getInt32(ret + 8, true);
+        const list7 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr7, len7));
+        free(ptr7, len7, 1);
+        const ptr8 = data_view(memory).getInt32(ret + 12, true);
+        const len8 = data_view(memory).getInt32(ret + 16, true);
+        const list8 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr8, len8));
+        free(ptr8, len8, 1);
+        const len10 = data_view(memory).getInt32(ret + 24, true);
+        const base10 = data_view(memory).getInt32(ret + 20, true);
+        const result10 = [];
+        for (let i = 0; i < len10; i++) {
+          const base = base10 + i * 8;
+          const ptr9 = data_view(memory).getInt32(base + 0, true);
+          const len9 = data_view(memory).getInt32(base + 4, true);
+          const list9 = UTF8_DECODER.decode(new Uint8Array(memory.buffer, ptr9, len9));
+          free(ptr9, len9, 1);
+          result10.push(list9);
         }
-        free(base7, len7 * 8, 4);
+        free(base10, len10 * 8, 4);
         
-        variant8 = { tag: "err", val: {
-          message: list4,
-          verbose: list5,
-          causes: result7,
+        variant11 = { tag: "err", val: {
+          message: list7,
+          verbose: list8,
+          causes: result10,
         } };
         break;
       }
@@ -360,7 +412,7 @@ class Package {
         throw new RangeError("invalid variant discriminant for expected");
       }
     }
-    return variant8;
+    return variant11;
   }
 }
 

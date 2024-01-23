@@ -4,6 +4,12 @@ input_file: crates/wasm/generated_bindings/JavaScript/package/src/bindings/wasme
 ---
 export type Result<T, E> = { tag: "ok", val: T } | { tag: "err", val: E };
 /**
+* Extra options for bindings generation
+*/
+export interface BindingsOptions {
+  name?: string,
+}
+/**
 * A WASI executable.
 */
 export interface Command {
@@ -192,11 +198,11 @@ export class Package {
   * Generate a JavaScript project that can be used to access the provided
   * package.
   */
-  generateJavascript(): Result<File[], Error>;
+  generateJavascript(options: BindingsOptions): Result<File[], Error>;
   /**
   * Generate a Python project that can be used to access the provided package.
   */
-  generatePython(): Result<File[], Error>;
+  generatePython(options: BindingsOptions): Result<File[], Error>;
 }
 
 export class Metadata {

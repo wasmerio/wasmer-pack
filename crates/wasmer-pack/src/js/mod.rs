@@ -8,7 +8,7 @@ use wai_bindgen_gen_core::Generator;
 use wai_bindgen_gen_js::Js;
 use wai_parser::Interface;
 
-use crate::{types::Command, Files, Library, Metadata, Package, SourceFile};
+use crate::{types::Command, Files, Library, Metadata, Package, SourceFile, types::BindingsOptions};
 
 /// The version of `@wasmer/wasi` pulled in when using a WASI library.
 ///
@@ -41,7 +41,7 @@ static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
 });
 
 /// Generate JavaScript bindings for a package.
-pub fn generate_javascript(package: &Package, name: Option<String>) -> Result<Files, Error> {
+pub fn generate_javascript(package: &Package, options: BindingsOptions) -> Result<Files, Error> {
     let mut files = Files::new();
 
     let ctx = Context::for_package(package);
@@ -54,7 +54,7 @@ pub fn generate_javascript(package: &Package, name: Option<String>) -> Result<Fi
 
     files.insert_child_directory("src", top_level(&ctx)?);
     let mut metadata = package.metadata().clone();
-    if let Some(package_name) = name {
+    if let Some(package_name) = options.name {
         metadata.package_name.set_name(&package_name);
     }
     let package_json = generate_package_json(package.requires_wasi(), &metadata);
@@ -377,7 +377,8 @@ mod tests {
         }];
         let pkg = Package::new(metadata, libraries, commands);
 
-        let files = generate_javascript(&pkg, None).unwrap();
+        let files = generate_javascript(&pkg, BindingsOptions {
+        name: None}).unwrap();
 
         let actual_files: BTreeSet<_> = files.iter().map(|(p, _)| p).collect();
         assert_eq!(actual_files, expected);

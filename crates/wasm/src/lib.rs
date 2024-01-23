@@ -37,17 +37,21 @@ impl crate::wasmer_pack::Package for Package {
 
     fn generate_javascript(
         &self,
-        name: Option<String>,
+        options: wasmer_pack::BindingsOptions,
     ) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
-        let files = original::generate_javascript(&self.0, name)?;
+        let files = original::generate_javascript(&self.0, original::BindingsOptions{
+            name: options.name
+        })?;
         Ok(unwrap_files(files))
     }
 
     fn generate_python(
         &self,
-        name: Option<String>,
+        options: wasmer_pack::BindingsOptions,
     ) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
-        let files = original::generate_python(&self.0, name)?;
+        let files = original::generate_python(&self.0, original::BindingsOptions{
+            name: options.name
+        })?;
         Ok(unwrap_files(files))
     }
 }

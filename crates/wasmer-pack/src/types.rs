@@ -401,6 +401,13 @@ impl Command {
     }
 }
 
+/// A set of extra options passed to the bindings generator function
+#[derive(Default)]
+pub struct BindingsOptions {
+    /// User defined name for the generated bindings
+    pub name: Option<String>
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

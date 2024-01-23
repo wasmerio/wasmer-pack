@@ -8,7 +8,7 @@ use wai_bindgen_gen_core::Generator;
 use wai_bindgen_gen_wasmer_py::WasmerPy;
 
 use crate::{
-    types::{Interface, Package},
+    types::{Interface, Package, BindingsOptions},
     Files, Metadata, Module, SourceFile,
 };
 
@@ -36,11 +36,11 @@ static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
 });
 
 /// Generate Python bindings.
-pub fn generate_python(package: &Package, name: Option<String>) -> Result<Files, Error> {
+pub fn generate_python(package: &Package, options: BindingsOptions) -> Result<Files, Error> {
     let metadata = package.metadata();
 
     // make sure the name is in snake-case
-    let package_name = if let Some(name) = name {
+    let package_name = if let Some(name) = options.name {
         name.to_snake_case()
     } else {
         metadata.package_name.name().to_string().to_snake_case()
@@ -401,7 +401,7 @@ mod tests {
         }];
         let package = Package::new(metadata, libraries, commands);
 
-        let files = generate_python(&package, None).unwrap();
+        let files = generate_python(&package, BindingsOptions::default()).unwrap();
 
         let actual_files: BTreeSet<_> = files.iter().map(|(p, _)| p).collect();
         assert_eq!(actual_files, expected);

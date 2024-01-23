@@ -254,17 +254,19 @@ class Package:
         else:
             raise TypeError("invalid variant discriminant for expected")
         return expected
-    def generate_javascript(self, name: Optional[str]) -> Expected[List['File'], 'Error']:
+    def generate_javascript(self, options: 'BindingsOptions') -> Expected[List['File'], 'Error']:
         memory = self._obj._memory;
         realloc = self._obj._canonical_abi_realloc
         free = self._obj._canonical_abi_free
         obj = self
-        if name is None:
+        record = options
+        field = record.name
+        if field is None:
             variant = 0
             variant2 = 0
             variant3 = 0
         else:
-            payload0 = name
+            payload0 = field
             ptr, len1 = _encode_utf8(payload0, realloc, memory)
             variant = 1
             variant2 = ptr
@@ -328,17 +330,19 @@ class Package:
         else:
             raise TypeError("invalid variant discriminant for expected")
         return expected
-    def generate_python(self, name: Optional[str]) -> Expected[List['File'], 'Error']:
+    def generate_python(self, options: 'BindingsOptions') -> Expected[List['File'], 'Error']:
         memory = self._obj._memory;
         realloc = self._obj._canonical_abi_realloc
         free = self._obj._canonical_abi_free
         obj = self
-        if name is None:
+        record = options
+        field = record.name
+        if field is None:
             variant = 0
             variant2 = 0
             variant3 = 0
         else:
-            payload0 = name
+            payload0 = field
             ptr, len1 = _encode_utf8(payload0, realloc, memory)
             variant = 1
             variant2 = ptr
@@ -602,6 +606,13 @@ class Interface:
         else:
             raise TypeError("invalid variant discriminant for expected")
         return expected
+@dataclass
+class BindingsOptions:
+    """
+    Extra options for bindings generation
+    """
+    name: Optional[str]
+
 @dataclass
 class Command:
     """

@@ -4,6 +4,7 @@ use crate::Error;
 use anyhow::Context;
 use clap::Parser;
 
+
 #[derive(Debug, Parser)]
 pub struct Codegen {
     /// What to name the generated bindings.
@@ -26,8 +27,12 @@ impl Codegen {
         let pkg = crate::utils::load(&input)?;
 
         let files = match language {
-            Language::JavaScript => wasmer_pack::generate_javascript(&pkg, name)?,
-            Language::Python => wasmer_pack::generate_python(&pkg, name)?,
+            Language::JavaScript => wasmer_pack::generate_javascript(&pkg, wasmer_pack::BindingsOptions {
+                name,
+            })?,
+            Language::Python => wasmer_pack::generate_python(&pkg, wasmer_pack::BindingsOptions {
+                name,
+            })?,
         };
 
         let metadata = pkg.metadata();
