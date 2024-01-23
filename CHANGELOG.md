@@ -30,6 +30,9 @@ change, where applicable.
   wasmer-pack in both `test_wasmer_pack.py` (pytest) and
   `index.test.ts` (jest)
 
+- Pass in `BindingsOptions` by reference so it's easier to implement builder
+  pattern later on.
+
 
 ## [0.7.1] - 2023-06-12
 
