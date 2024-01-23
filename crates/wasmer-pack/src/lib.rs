@@ -49,9 +49,9 @@ mod versions;
 
 pub use crate::{
     files::{Files, SourceFile},
-    types::BindingsOptions,
     js::generate_javascript,
     py::generate_python,
+    types::BindingsOptions,
     types::{Abi, Command, Interface, Library, Metadata, Module, Package, PackageName},
     versions::WAI_PARSER_VERSION,
 };

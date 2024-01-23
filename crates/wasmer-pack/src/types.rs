@@ -405,7 +405,7 @@ impl Command {
 #[derive(Default)]
 pub struct BindingsOptions {
     /// User defined name for the generated bindings
-    pub name: Option<String>
+    pub name: Option<String>,
 }
 
 #[cfg(test)]

@@ -8,7 +8,7 @@ use wai_bindgen_gen_core::Generator;
 use wai_bindgen_gen_wasmer_py::WasmerPy;
 
 use crate::{
-    types::{Interface, Package, BindingsOptions},
+    types::{BindingsOptions, Interface, Package},
     Files, Metadata, Module, SourceFile,
 };
 

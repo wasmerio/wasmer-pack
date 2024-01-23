@@ -8,7 +8,9 @@ use wai_bindgen_gen_core::Generator;
 use wai_bindgen_gen_js::Js;
 use wai_parser::Interface;
 
-use crate::{types::Command, Files, Library, Metadata, Package, SourceFile, types::BindingsOptions};
+use crate::{
+    types::BindingsOptions, types::Command, Files, Library, Metadata, Package, SourceFile,
+};
 
 /// The version of `@wasmer/wasi` pulled in when using a WASI library.
 ///
@@ -377,8 +379,7 @@ mod tests {
         }];
         let pkg = Package::new(metadata, libraries, commands);
 
-        let files = generate_javascript(&pkg, BindingsOptions {
-        name: None}).unwrap();
+        let files = generate_javascript(&pkg, BindingsOptions { name: None }).unwrap();
 
         let actual_files: BTreeSet<_> = files.iter().map(|(p, _)| p).collect();
         assert_eq!(actual_files, expected);
