@@ -93,6 +93,10 @@ impl PackageName {
         &self.name
     }
 
+    pub fn set_name(&mut self, name: impl Into<String>) {
+        self.name = name.into();
+    }
+
     pub fn namespace(&self) -> &Namespace {
         &self.namespace
     }
@@ -397,6 +401,13 @@ impl Command {
     }
 }
 
+/// A set of extra options passed to the bindings generator function
+#[derive(Default)]
+pub struct BindingsOptions {
+    /// User defined name for the generated bindings
+    pub name: Option<String>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -417,6 +428,7 @@ mod tests {
             ("_wasmer/package", false),
             ("wasmer/_package", false),
             ("लाज/तोब", false),
+            ("test/package with spaces", false),
             ("-wasmer/package", false),
             ("wasmer/-package", false),
             ("wasmer/-", false),

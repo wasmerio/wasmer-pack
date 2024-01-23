@@ -4,9 +4,11 @@ import {
     Error as WasmerPackError,
     File,
     Package,
+    BindingsOptions,
 } from "@wasmer/wasmer-pack/src/bindings/wasmer-pack/wasmer-pack.js";
 
-const WASMER_PACK_WEBC_FILE = "https://registry-cdn.wapm.io/packages/wasmer/wasmer-pack/wasmer-pack-0.6.0-0b5e21ac-86e4-11ed-90e2-c6aeb50490de.webc";
+const WASMER_PACK_WEBC_FILE = "https://cdn.wasmer.io/webcimages/371a21a5a632442570f2d0ffe0125713ab8947b8b1596708e1fcee32be8cf2b7.webc";
+
 
 describe("wasmer-pack bindings", () => {
     it("is self-hosting", async () => {

@@ -30,6 +30,7 @@ pub fn generate_bindings(
     dest: &Path,
     wapm_dir: &Path,
     lang: Language,
+    name: Option<String>,
 ) -> Result<(), anyhow::Error> {
     tracing::info!(
         output_dir=%dest.display(),
@@ -38,6 +39,7 @@ pub fn generate_bindings(
         "Generating bindings",
     );
     let codegen = Codegen {
+        name,
         out_dir: Some(dest.to_path_buf()),
         input: wapm_dir.to_path_buf(),
     };

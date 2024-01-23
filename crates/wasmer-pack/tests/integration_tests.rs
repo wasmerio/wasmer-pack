@@ -14,7 +14,8 @@ fn use_wasi_javascript_bindings() {
         .join("javascript-wasi");
     let _ = std::fs::remove_dir_all(&out_dir);
 
-    let js = wasmer_pack::generate_javascript(&pkg).unwrap();
+    let js =
+        wasmer_pack::generate_javascript(&pkg, wasmer_pack::BindingsOptions::default()).unwrap();
     js.save_to_disk(&out_dir).unwrap();
 
     let js_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -40,17 +41,17 @@ fn use_wasi_python_bindings() {
         .join("python-wasi");
     let _ = std::fs::remove_dir_all(&out_dir);
 
-    let py = wasmer_pack::generate_python(&pkg).unwrap();
+    let py = wasmer_pack::generate_python(&pkg, wasmer_pack::BindingsOptions::default()).unwrap();
     py.save_to_disk(&out_dir).unwrap();
 
     let python_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("python-wasi");
 
-    execute("pipenv install", &python_dir);
-    execute("pipenv run pytest", &python_dir);
+    execute("poetry install --no-root", &python_dir);
+    execute("poetry run pytest", &python_dir);
     execute(
-        format!("pipenv run mypy {}", out_dir.join("wabt").display()),
+        format!("poetry run mypy {}", out_dir.join("wabt").display()),
         &python_dir,
     );
 }

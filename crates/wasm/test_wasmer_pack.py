@@ -5,6 +5,7 @@ from typing import Union
 import requests
 from wasmer_pack import bindings
 from wasmer_pack.bindings.wasmer_pack import (
+    BindingsOptions,
     Err,
     Error,
     Ok,
@@ -13,7 +14,7 @@ from wasmer_pack.bindings.wasmer_pack import (
 )
 
 
-WASMER_PACK_WEBC_FILE = "https://registry-cdn.wapm.io/packages/wasmer/wasmer-pack/wasmer-pack-0.6.0-0b5e21ac-86e4-11ed-90e2-c6aeb50490de.webc"
+WASMER_PACK_WEBC_FILE = "https://cdn.wasmer.io/webcimages/371a21a5a632442570f2d0ffe0125713ab8947b8b1596708e1fcee32be8cf2b7.webc"
 project_root = Path(__file__).parents[4]
 
 
@@ -34,7 +35,7 @@ def test_generate_bindings_for_wasmer_pack():
     pkg = unwrap(Package.from_webc(wasmer_pack, webc))
 
     try:
-        files = unwrap(pkg.generate_python())
+        files = unwrap(pkg.generate_python(options=BindingsOptions(name=None)))
 
         expected = {
             'MANIFEST.in',

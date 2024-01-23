@@ -254,129 +254,155 @@ class Package:
         else:
             raise TypeError("invalid variant discriminant for expected")
         return expected
-    def generate_javascript(self) -> Expected[List['File'], 'Error']:
+    def generate_javascript(self, options: 'BindingsOptions') -> Expected[List['File'], 'Error']:
         memory = self._obj._memory;
+        realloc = self._obj._canonical_abi_realloc
         free = self._obj._canonical_abi_free
         obj = self
-        ret = self._obj._package_generate_javascript(self._obj._resource0_slab.insert(obj.clone()))
+        record = options
+        field = record.name
+        if field is None:
+            variant = 0
+            variant2 = 0
+            variant3 = 0
+        else:
+            payload0 = field
+            ptr, len1 = _encode_utf8(payload0, realloc, memory)
+            variant = 1
+            variant2 = ptr
+            variant3 = len1
+        ret = self._obj._package_generate_javascript(self._obj._resource0_slab.insert(obj.clone()), variant, variant2, variant3)
         assert(isinstance(ret, int))
         load = _load(memory.uint8_view, memory, ret, 0)
         expected: Expected[List['File'], 'Error']
         if load == 0:
-            load0 = _load(memory.int32_view, memory, ret, 4)
-            load1 = _load(memory.int32_view, memory, ret, 8)
-            ptr11 = load0
-            len12 = load1
+            load4 = _load(memory.int32_view, memory, ret, 4)
+            load5 = _load(memory.int32_view, memory, ret, 8)
+            ptr16 = load4
+            len17 = load5
             result: List['File'] = []
-            for i13 in range(0, len12):
-                base2 = ptr11 + i13 * 16
-                load3 = _load(memory.int32_view, memory, base2, 0)
-                load4 = _load(memory.int32_view, memory, base2, 4)
-                ptr = load3
-                len5 = load4
-                list = _decode_utf8(memory, ptr, len5)
-                free(ptr, len5, 1)
-                load6 = _load(memory.int32_view, memory, base2, 8)
-                load7 = _load(memory.int32_view, memory, base2, 12)
-                ptr8 = load6
-                len9 = load7
-                list10 = cast(bytes, _list_canon_lift(ptr8, len9, 1, memory.uint8_view, memory))
-                free(ptr8, len9, 1)
-                result.append(File(list, list10))
-            free(ptr11, len12 * 16, 4)
+            for i18 in range(0, len17):
+                base6 = ptr16 + i18 * 16
+                load7 = _load(memory.int32_view, memory, base6, 0)
+                load8 = _load(memory.int32_view, memory, base6, 4)
+                ptr9 = load7
+                len10 = load8
+                list = _decode_utf8(memory, ptr9, len10)
+                free(ptr9, len10, 1)
+                load11 = _load(memory.int32_view, memory, base6, 8)
+                load12 = _load(memory.int32_view, memory, base6, 12)
+                ptr13 = load11
+                len14 = load12
+                list15 = cast(bytes, _list_canon_lift(ptr13, len14, 1, memory.uint8_view, memory))
+                free(ptr13, len14, 1)
+                result.append(File(list, list15))
+            free(ptr16, len17 * 16, 4)
             expected = Ok(result)
         elif load == 1:
-            load14 = _load(memory.int32_view, memory, ret, 4)
-            load15 = _load(memory.int32_view, memory, ret, 8)
-            ptr16 = load14
-            len17 = load15
-            list18 = _decode_utf8(memory, ptr16, len17)
-            free(ptr16, len17, 1)
-            load19 = _load(memory.int32_view, memory, ret, 12)
-            load20 = _load(memory.int32_view, memory, ret, 16)
+            load19 = _load(memory.int32_view, memory, ret, 4)
+            load20 = _load(memory.int32_view, memory, ret, 8)
             ptr21 = load19
             len22 = load20
             list23 = _decode_utf8(memory, ptr21, len22)
             free(ptr21, len22, 1)
-            load24 = _load(memory.int32_view, memory, ret, 20)
-            load25 = _load(memory.int32_view, memory, ret, 24)
-            ptr32 = load24
-            len33 = load25
-            result34: List[str] = []
-            for i35 in range(0, len33):
-                base26 = ptr32 + i35 * 8
-                load27 = _load(memory.int32_view, memory, base26, 0)
-                load28 = _load(memory.int32_view, memory, base26, 4)
-                ptr29 = load27
-                len30 = load28
-                list31 = _decode_utf8(memory, ptr29, len30)
-                free(ptr29, len30, 1)
-                result34.append(list31)
-            free(ptr32, len33 * 8, 4)
-            expected = Err(Error(list18, list23, result34))
+            load24 = _load(memory.int32_view, memory, ret, 12)
+            load25 = _load(memory.int32_view, memory, ret, 16)
+            ptr26 = load24
+            len27 = load25
+            list28 = _decode_utf8(memory, ptr26, len27)
+            free(ptr26, len27, 1)
+            load29 = _load(memory.int32_view, memory, ret, 20)
+            load30 = _load(memory.int32_view, memory, ret, 24)
+            ptr37 = load29
+            len38 = load30
+            result39: List[str] = []
+            for i40 in range(0, len38):
+                base31 = ptr37 + i40 * 8
+                load32 = _load(memory.int32_view, memory, base31, 0)
+                load33 = _load(memory.int32_view, memory, base31, 4)
+                ptr34 = load32
+                len35 = load33
+                list36 = _decode_utf8(memory, ptr34, len35)
+                free(ptr34, len35, 1)
+                result39.append(list36)
+            free(ptr37, len38 * 8, 4)
+            expected = Err(Error(list23, list28, result39))
         else:
             raise TypeError("invalid variant discriminant for expected")
         return expected
-    def generate_python(self) -> Expected[List['File'], 'Error']:
+    def generate_python(self, options: 'BindingsOptions') -> Expected[List['File'], 'Error']:
         memory = self._obj._memory;
+        realloc = self._obj._canonical_abi_realloc
         free = self._obj._canonical_abi_free
         obj = self
-        ret = self._obj._package_generate_python(self._obj._resource0_slab.insert(obj.clone()))
+        record = options
+        field = record.name
+        if field is None:
+            variant = 0
+            variant2 = 0
+            variant3 = 0
+        else:
+            payload0 = field
+            ptr, len1 = _encode_utf8(payload0, realloc, memory)
+            variant = 1
+            variant2 = ptr
+            variant3 = len1
+        ret = self._obj._package_generate_python(self._obj._resource0_slab.insert(obj.clone()), variant, variant2, variant3)
         assert(isinstance(ret, int))
         load = _load(memory.uint8_view, memory, ret, 0)
         expected: Expected[List['File'], 'Error']
         if load == 0:
-            load0 = _load(memory.int32_view, memory, ret, 4)
-            load1 = _load(memory.int32_view, memory, ret, 8)
-            ptr11 = load0
-            len12 = load1
+            load4 = _load(memory.int32_view, memory, ret, 4)
+            load5 = _load(memory.int32_view, memory, ret, 8)
+            ptr16 = load4
+            len17 = load5
             result: List['File'] = []
-            for i13 in range(0, len12):
-                base2 = ptr11 + i13 * 16
-                load3 = _load(memory.int32_view, memory, base2, 0)
-                load4 = _load(memory.int32_view, memory, base2, 4)
-                ptr = load3
-                len5 = load4
-                list = _decode_utf8(memory, ptr, len5)
-                free(ptr, len5, 1)
-                load6 = _load(memory.int32_view, memory, base2, 8)
-                load7 = _load(memory.int32_view, memory, base2, 12)
-                ptr8 = load6
-                len9 = load7
-                list10 = cast(bytes, _list_canon_lift(ptr8, len9, 1, memory.uint8_view, memory))
-                free(ptr8, len9, 1)
-                result.append(File(list, list10))
-            free(ptr11, len12 * 16, 4)
+            for i18 in range(0, len17):
+                base6 = ptr16 + i18 * 16
+                load7 = _load(memory.int32_view, memory, base6, 0)
+                load8 = _load(memory.int32_view, memory, base6, 4)
+                ptr9 = load7
+                len10 = load8
+                list = _decode_utf8(memory, ptr9, len10)
+                free(ptr9, len10, 1)
+                load11 = _load(memory.int32_view, memory, base6, 8)
+                load12 = _load(memory.int32_view, memory, base6, 12)
+                ptr13 = load11
+                len14 = load12
+                list15 = cast(bytes, _list_canon_lift(ptr13, len14, 1, memory.uint8_view, memory))
+                free(ptr13, len14, 1)
+                result.append(File(list, list15))
+            free(ptr16, len17 * 16, 4)
             expected = Ok(result)
         elif load == 1:
-            load14 = _load(memory.int32_view, memory, ret, 4)
-            load15 = _load(memory.int32_view, memory, ret, 8)
-            ptr16 = load14
-            len17 = load15
-            list18 = _decode_utf8(memory, ptr16, len17)
-            free(ptr16, len17, 1)
-            load19 = _load(memory.int32_view, memory, ret, 12)
-            load20 = _load(memory.int32_view, memory, ret, 16)
+            load19 = _load(memory.int32_view, memory, ret, 4)
+            load20 = _load(memory.int32_view, memory, ret, 8)
             ptr21 = load19
             len22 = load20
             list23 = _decode_utf8(memory, ptr21, len22)
             free(ptr21, len22, 1)
-            load24 = _load(memory.int32_view, memory, ret, 20)
-            load25 = _load(memory.int32_view, memory, ret, 24)
-            ptr32 = load24
-            len33 = load25
-            result34: List[str] = []
-            for i35 in range(0, len33):
-                base26 = ptr32 + i35 * 8
-                load27 = _load(memory.int32_view, memory, base26, 0)
-                load28 = _load(memory.int32_view, memory, base26, 4)
-                ptr29 = load27
-                len30 = load28
-                list31 = _decode_utf8(memory, ptr29, len30)
-                free(ptr29, len30, 1)
-                result34.append(list31)
-            free(ptr32, len33 * 8, 4)
-            expected = Err(Error(list18, list23, result34))
+            load24 = _load(memory.int32_view, memory, ret, 12)
+            load25 = _load(memory.int32_view, memory, ret, 16)
+            ptr26 = load24
+            len27 = load25
+            list28 = _decode_utf8(memory, ptr26, len27)
+            free(ptr26, len27, 1)
+            load29 = _load(memory.int32_view, memory, ret, 20)
+            load30 = _load(memory.int32_view, memory, ret, 24)
+            ptr37 = load29
+            len38 = load30
+            result39: List[str] = []
+            for i40 in range(0, len38):
+                base31 = ptr37 + i40 * 8
+                load32 = _load(memory.int32_view, memory, base31, 0)
+                load33 = _load(memory.int32_view, memory, base31, 4)
+                ptr34 = load32
+                len35 = load33
+                list36 = _decode_utf8(memory, ptr34, len35)
+                free(ptr34, len35, 1)
+                result39.append(list36)
+            free(ptr37, len38 * 8, 4)
+            expected = Err(Error(list23, list28, result39))
         else:
             raise TypeError("invalid variant discriminant for expected")
         return expected
@@ -580,6 +606,13 @@ class Interface:
         else:
             raise TypeError("invalid variant discriminant for expected")
         return expected
+@dataclass
+class BindingsOptions:
+    """
+    Extra options for bindings generation
+    """
+    name: Optional[str]
+
 @dataclass
 class Command:
     """

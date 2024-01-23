@@ -29,7 +29,7 @@
 //! let pkg = Package ::new(metadata, libraries, commands);
 //!
 //! // Now we can generate the bindings for our language
-//! let js = wasmer_pack::generate_javascript(&pkg)?;
+//! let js = wasmer_pack::generate_javascript(&pkg, wasmer_pack::BindingsOptions::default())?;
 //!
 //! // And finally, save them to disk
 //! js.save_to_disk("./out")?;
@@ -51,6 +51,7 @@ pub use crate::{
     files::{Files, SourceFile},
     js::generate_javascript,
     py::generate_python,
+    types::BindingsOptions,
     types::{Abi, Command, Interface, Library, Metadata, Module, Package, PackageName},
     versions::WAI_PARSER_VERSION,
 };

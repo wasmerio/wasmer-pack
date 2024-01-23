@@ -6,6 +6,9 @@ use clap::Parser;
 
 #[derive(Debug, Parser)]
 pub struct Codegen {
+    /// What to name the generated bindings.
+    #[clap(short, long)]
+    pub name: Option<String>,
     /// Where to save the generated bindings.
     #[clap(short, long)]
     pub out_dir: Option<PathBuf>,
@@ -15,13 +18,20 @@ pub struct Codegen {
 
 impl Codegen {
     pub fn run(self, language: Language) -> Result<(), Error> {
-        let Codegen { out_dir, input } = self;
-
+        let Codegen {
+            name,
+            out_dir,
+            input,
+        } = self;
         let pkg = crate::utils::load(&input)?;
 
         let files = match language {
-            Language::JavaScript => wasmer_pack::generate_javascript(&pkg)?,
-            Language::Python => wasmer_pack::generate_python(&pkg)?,
+            Language::JavaScript => {
+                wasmer_pack::generate_javascript(&pkg, wasmer_pack::BindingsOptions { name })?
+            }
+            Language::Python => {
+                wasmer_pack::generate_python(&pkg, wasmer_pack::BindingsOptions { name })?
+            }
         };
 
         let metadata = pkg.metadata();
