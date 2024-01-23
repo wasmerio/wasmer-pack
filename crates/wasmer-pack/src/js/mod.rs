@@ -43,7 +43,7 @@ static TEMPLATES: Lazy<Environment> = Lazy::new(|| {
 });
 
 /// Generate JavaScript bindings for a package.
-pub fn generate_javascript(package: &Package, options: BindingsOptions) -> Result<Files, Error> {
+pub fn generate_javascript(package: &Package, options: &BindingsOptions) -> Result<Files, Error> {
     let mut files = Files::new();
 
     let ctx = Context::for_package(package);
@@ -56,8 +56,8 @@ pub fn generate_javascript(package: &Package, options: BindingsOptions) -> Resul
 
     files.insert_child_directory("src", top_level(&ctx)?);
     let mut metadata = package.metadata().clone();
-    if let Some(package_name) = options.name {
-        metadata.package_name.set_name(&package_name);
+    if let Some(package_name) = &options.name {
+        metadata.package_name.set_name(package_name);
     }
     let package_json = generate_package_json(package.requires_wasi(), &metadata);
     files.insert("package.json", package_json);
@@ -378,8 +378,9 @@ mod tests {
             imports: vec![browser],
         }];
         let pkg = Package::new(metadata, libraries, commands);
+        let options = BindingsOptions::default();
 
-        let files = generate_javascript(&pkg, BindingsOptions { name: None }).unwrap();
+        let files = generate_javascript(&pkg, &options).unwrap();
 
         let actual_files: BTreeSet<_> = files.iter().map(|(p, _)| p).collect();
         assert_eq!(actual_files, expected);

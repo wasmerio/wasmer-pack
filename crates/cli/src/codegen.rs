@@ -24,14 +24,10 @@ impl Codegen {
             input,
         } = self;
         let pkg = crate::utils::load(&input)?;
-
+        let options = wasmer_pack::BindingsOptions { name };
         let files = match language {
-            Language::JavaScript => {
-                wasmer_pack::generate_javascript(&pkg, wasmer_pack::BindingsOptions { name })?
-            }
-            Language::Python => {
-                wasmer_pack::generate_python(&pkg, wasmer_pack::BindingsOptions { name })?
-            }
+            Language::JavaScript => wasmer_pack::generate_javascript(&pkg, &options)?,
+            Language::Python => wasmer_pack::generate_python(&pkg, &options)?,
         };
 
         let metadata = pkg.metadata();

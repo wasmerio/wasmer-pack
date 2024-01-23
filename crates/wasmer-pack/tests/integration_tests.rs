@@ -13,9 +13,8 @@ fn use_wasi_javascript_bindings() {
         .join("wasmer-pack")
         .join("javascript-wasi");
     let _ = std::fs::remove_dir_all(&out_dir);
-
-    let js =
-        wasmer_pack::generate_javascript(&pkg, wasmer_pack::BindingsOptions::default()).unwrap();
+    let options = wasmer_pack::BindingsOptions::default();
+    let js = wasmer_pack::generate_javascript(&pkg, &options).unwrap();
     js.save_to_disk(&out_dir).unwrap();
 
     let js_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -40,8 +39,8 @@ fn use_wasi_python_bindings() {
         .join("wasmer-pack")
         .join("python-wasi");
     let _ = std::fs::remove_dir_all(&out_dir);
-
-    let py = wasmer_pack::generate_python(&pkg, wasmer_pack::BindingsOptions::default()).unwrap();
+    let options = wasmer_pack::BindingsOptions::default();
+    let py = wasmer_pack::generate_python(&pkg, &options).unwrap();
     py.save_to_disk(&out_dir).unwrap();
 
     let python_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
