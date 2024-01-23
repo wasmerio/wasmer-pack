@@ -29,7 +29,7 @@
 //! let pkg = Package ::new(metadata, libraries, commands);
 //!
 //! // Now we can generate the bindings for our language
-//! let js = wasmer_pack::generate_javascript(&pkg)?;
+//! let js = wasmer_pack::generate_javascript(&pkg, None)?;
 //!
 //! // And finally, save them to disk
 //! js.save_to_disk("./out")?;
