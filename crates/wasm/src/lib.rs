@@ -39,10 +39,8 @@ impl crate::wasmer_pack::Package for Package {
         &self,
         options: wasmer_pack::BindingsOptions,
     ) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
-        let files = original::generate_javascript(
-            &self.0,
-            original::BindingsOptions { name: options.name },
-        )?;
+        let original_options = original::BindingsOptions { name: options.name };
+        let files = original::generate_javascript(&self.0, &original_options)?;
         Ok(unwrap_files(files))
     }
 
@@ -50,8 +48,8 @@ impl crate::wasmer_pack::Package for Package {
         &self,
         options: wasmer_pack::BindingsOptions,
     ) -> Result<Vec<wasmer_pack::File>, wasmer_pack::Error> {
-        let files =
-            original::generate_python(&self.0, original::BindingsOptions { name: options.name })?;
+        let original_options = original::BindingsOptions { name: options.name };
+        let files = original::generate_python(&self.0, &original_options)?;
         Ok(unwrap_files(files))
     }
 }

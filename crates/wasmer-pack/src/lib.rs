@@ -28,8 +28,11 @@
 //! // finally, we've got all the information we need
 //! let pkg = Package ::new(metadata, libraries, commands);
 //!
+//! // we setup the options that are passed to the generator
+//! let options = wasmer_pack::BindingsOptions::default();
+//!
 //! // Now we can generate the bindings for our language
-//! let js = wasmer_pack::generate_javascript(&pkg, wasmer_pack::BindingsOptions::default())?;
+//! let js = wasmer_pack::generate_javascript(&pkg, &options)?;
 //!
 //! // And finally, save them to disk
 //! js.save_to_disk("./out")?;
