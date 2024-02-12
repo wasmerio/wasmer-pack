@@ -21,6 +21,8 @@ change, where applicable.
 
 ## [0.7.2] - 2024-02-12
 
+## [0.7.2] - 2024-02-12
+
 ### Changed
 
 - Allow packages with `.` in their names. This is useful for packages
@@ -312,6 +314,7 @@ change, where applicable.
 
 <!-- next-url -->
 [Unreleased]: https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...HEAD
+[0.7.2]: https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2
 [0.7.2]: https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2
 [0.7.2]: https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2
 [0.7.2]: https://github.com/wasmerio/wasmer-pack/compare/v0.7.1...v0.7.2
