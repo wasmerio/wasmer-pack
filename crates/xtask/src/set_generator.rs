@@ -21,7 +21,7 @@ struct GetPackageVersionQuery;
 #[derive(Debug, clap::Parser)]
 pub struct SetGenerator {
     /// The GraphQL endpoint to send requests to.
-    #[clap(long, env, default_value = "https://registry.wapm.io/graphql")]
+    #[clap(long, env, default_value = "https://registry.wasmer.io/graphql")]
     registry: String,
     /// Look up the package and command, but don't send the final request to
     /// update the generator.
@@ -151,7 +151,7 @@ where
     let query =
         serde_json::to_string(&query).context("Unable to serialize the request body as JSON")?;
 
-    let request = ureq::post(registry).set("Content-Type", "application/json; charset=utf8");
+    let request = ureq::post(registry).set("Content-Type", "application/json");
 
     let response = update_request(request)
         .send_string(&query)

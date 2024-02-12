@@ -22,44 +22,43 @@ jobs:
         run: rustup target add wasm32-unknown-unknown wasm32-wasi
       - name: Setup Wasmer
         uses: wasmerio/setup-wasmer@v1
-      - name: Install cargo-wapm
+      - name: Install cargo-wasmer
         uses: actions-rs/cargo@v1
         with:
           command: install
-          args: cargo-wapm --verbose --debug --version '^0.3'
-
-      - name: Login to wapm.dev
+          args: cargo-wasmer --verbose --debug --version '^0.4' --locked
+      - name: Login to wasmer.wtf
         run: |
-          wapm config set registry.url https://registry.wapm.dev
-          wapm login ${{ secrets.WAPM_DEV_TOKEN }}
-      - name: Publish to wapm.dev
-        run: cargo wapm --package wasmer-pack-cli --package wasmer-pack-wasm
+          wasmer config set registry.url https://registry.wasmer.wtf
+          wasmer login ${{ secrets.WAPM_DEV_TOKEN }}
+      - name: Publish to wasmer.wtf
+        run: cargo wasmer --package wasmer-pack-cli --package wasmer-pack-wasm
         continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
-      - name: Update the bindings generator on wapm.dev
+      - name: Update the bindings generator on wasmer.wtf
         uses: actions-rs/cargo@v1
         with:
           command: xtask
           args: set-generator wasmer/wasmer-pack-cli
         env:
-          REGISTRY: https://registry.wapm.dev/graphql
+          REGISTRY: https://registry.wasmer.wtf/graphql
           TOKEN: ${{ secrets.WAPM_DEV_TOKEN }}
           VERSION: latest
         continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
 
-      - name: Login to wapm.io
+      - name: Login to wasmer.io
         run: |
-          wapm config set registry.url https://registry.wapm.io
-          wapm login ${{ secrets.WAPM_PROD_TOKEN }}
-      - name: Publish to wapm.io
-        run: cargo wapm --package wasmer-pack-cli --package wasmer-pack-wasm
+          wasmer config set registry.url https://registry.wasmer.io
+          wasmer login ${{ secrets.WAPM_PROD_TOKEN }}
+      - name: Publish to wasmer.io
+        run: cargo wasmer --package wasmer-pack-cli --package wasmer-pack-wasm
         continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
-      - name: Update the bindings generator on wapm.io
+      - name: Update the bindings generator on wasmer.io
         uses: actions-rs/cargo@v1
         with:
           command: xtask
           args: set-generator wasmer/wasmer-pack-cli
         env:
-          REGISTRY: https://registry.wapm.io/graphql
+          REGISTRY: https://registry.wasmer.io/graphql
           TOKEN: ${{ secrets.WAPM_PROD_TOKEN }}
           VERSION: latest
           COMMAND: wasmer-pack
