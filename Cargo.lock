@@ -1756,7 +1756,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
-name = "wasi-executable"
+name = "wasi_executable"
 version = "0.0.0"
 dependencies = [
  "anyhow",
