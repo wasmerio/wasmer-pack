@@ -1,0 +1,485 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js rust">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Hello, World! - Wasmer Pack User Guide</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="../index.html">Wasmer Pack</a></li><li class="chapter-item affix "><a href="../quickstart.html">Quickstart Guide</a></li><li class="chapter-item affix "><li class="part-title">Tutorial</li><li class="chapter-item expanded "><a href="../tutorial/01-hello-world.html" class="active">Hello, World!</a></li><li class="chapter-item "><a href="../tutorial/02-strings-and-lists.html">Strings and Lists</a></li><li class="chapter-item "><a href="../tutorial/03-records.html">Records</a></li><li class="chapter-item "><div>Variants</div></li><li class="chapter-item "><a href="../tutorial/05-resources.html">Exposing Resources</a></li><li class="chapter-item "><div>Importing Host Functions</div></li><li class="chapter-item "><div>Doing IO with WASI</div></li><li class="chapter-item "><div>Commands</div></li><li class="chapter-item "><div>Writing Guests in C</div></li><li class="chapter-item "><div>Tantivy</div></li><li class="chapter-item "><div>Integrating Tantivy with a React App</div></li><li class="chapter-item affix "><li class="part-title">Concepts</li><li class="chapter-item "><a href="../concepts/wai/index.html">WebAssembly Interfaces (WAI)</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../concepts/wai/types.html">Builtin Types</a></li><li class="chapter-item "><a href="../concepts/wai/functions.html">Functions</a></li><li class="chapter-item "><a href="../concepts/wai/records.html">Records</a></li><li class="chapter-item "><a href="../concepts/wai/variants.html">Enums, Flags, Variants, and Unions</a></li><li class="chapter-item "><a href="../concepts/wai/resources.html">Resources</a></li></ol></li><li class="chapter-item "><li class="part-title">How-To Guides</li><li class="chapter-item "><a href="../how-to/resources-vs-records.html">Choosing Between Resources and Records</a></li><li class="chapter-item affix "><li class="part-title">For Developers</li><li class="chapter-item "><a href="../contributing.html">Contributing Guide</a></li><li class="chapter-item "><a href="../architecture/index.html">Project Architecture</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../architecture/001-generated-package-naming.html">001 Generated Package Naming</a></li><li class="spacer"></li></ol></li><li class="chapter-item "><a href="../changelog.html">Changelog</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Wasmer Pack User Guide</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/wasmerio/wasmer-pack" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/wasmerio/wasmer-pack/edit/master/doc/./tutorial/01-hello-world.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="hello-world"><a class="header" href="#hello-world">Hello, World!</a></h1>
+<p>Like all good tutorials, let's start with WIT Pack's equivalent of
+<em>&quot;Hello, World!&quot;</em> - a library that adds two numbers together.</p>
+<p>By the end, you should know how to define a simple WIT interface and implement
+it in Rust. We will also publish the package to WAPM and use it from JavaScript.</p>
+<p>You can check WAPM for the package we'll be building - it's called
+<a href="https://wapm.dev/wasmer/tutorial-01"><code>wasmer/hello-world</code></a>.</p>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<p>You will need to install several CLI tools.</p>
+<ul>
+<li><a href="https://rustup.rs/">The Rust toolchain</a> so we can compile Rust code
+(<code>curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</code>)</li>
+<li>the <code>wasm32-unknown-unknown</code> target so Rust knows how to compile to
+WebAssembly (<code>rustup target add wasm32-unknown-unknown</code>)</li>
+<li><a href="https://docs.wasmer.io/ecosystem/wasmer/getting-started">The Wasmer runtime</a>
+so we can interact with WAPM (<code>curl https://get.wasmer.io -sSfL | sh</code>)</li>
+<li><a href="https://lib.rs/cargo-wapm">the <code>cargo wapm</code> sub-command</a> for publishing to WAPM
+(<code>cargo install cargo-wapm</code>)</li>
+</ul>
+<p>Once you've installed those tools, you'll want to create a new account on
+<a href="https://wapm.io/signup">wapm.io</a> so we have somewhere to publish our code to.</p>
+<p>Running the <code>wapm login</code> command will let you authenticate your computer with
+WAPM.</p>
+<h2 id="the-wit-file"><a class="header" href="#the-wit-file">The WIT File</a></h2>
+<p>We want to start off simple for now, so let's create a library that just adds
+two 32-bit integers.</p>
+<p>First, let's create a new Rust project and <code>cd</code> into it.</p>
+<pre><code class="language-console">$ cargo new --lib tutorial-01
+$ cd tutorial-01
+</code></pre>
+<p>(you can remove all the code in <code>src/lib.rs</code> - we don't need the example
+boilerplate)</p>
+<p>Now we can add a <code>hello-world.wai</code> file to the project. The syntax for a WIT
+file is quite similar to Rust.</p>
+<pre><code>// hello-world.wai
+
+/// Add two numbers
+add: func(a: u32, b: u32) -&gt; u32
+</code></pre>
+<p>This defines a function called <code>add</code> which takes two <code>u32</code> parameters (32-bit
+unsigned integers) called <code>a</code> and <code>b</code>, and returns a <code>u32</code>.</p>
+<p>You can see that normal comments start with a <code>//</code> and doc-comments use <code>///</code>.
+Here, we're using <code>// hello-world.wai</code> to indicate the text should be saved to
+<code>hello-world.wai</code>.</p>
+<p>One interesting constraint from the WIT format is that <em>all</em> names must be
+written in kebab-case. This lets <code>wai-bindgen</code> convert the name into the casing
+that is idiomatic for a particular language in a particular context.</p>
+<p>For example, if our WIT file defined a <code>hello-world</code> function, it would be
+accessible as <code>hello_world</code> in Python and Rust because they use snake_case for
+function names, whereas in JavaScript it would be <code>helloWorld</code>.</p>
+<h2 id="writing-some-rust"><a class="header" href="#writing-some-rust">Writing Some Rust</a></h2>
+<p>Now we've got a WIT file, let's create a WebAssembly library implementing the
+<code>hello-world.wai</code> interface.</p>
+<p>The <code>wai-bindgen</code> library uses some macros to generate some glue code for our
+WIT file, so add it as a dependency.</p>
+<pre><code class="language-console">$ cargo add wai-bindgen-rust
+</code></pre>
+<p>Towards the top of your <code>src/lib.rs</code>, we want to tell <code>wai-bindgen</code> that this
+crate <em>exports</em> our <code>hello-world.wai</code> file.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/lib.rs
+
+wai_bindgen_rust::export!(&quot;hello-world.wai&quot;);
+<span class="boring">}
+</span></code></pre></pre>
+<p>(note: <code>hello-world.wai</code> is relative to the crate's root - the folder
+containing your <code>Cargo.toml</code> file)</p>
+<p>Now let's run <code>cargo check</code> to see what compile errors it shows.</p>
+<pre><code class="language-console should_fail">$ cargo check
+error[E0412]: cannot find type `HelloWorld` in module `super`
+ --&gt; src/lib.rs:1:1
+  |
+1 | wai_bindgen_rust::export!(&quot;hello-world.wai&quot;);
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in `super`
+  |
+</code></pre>
+<p>This seems to fail because of <em>something</em> inside the
+<code>wai_bindgen_rust::export!()</code> macro, but we can't see what it is.</p>
+<p>The <a href="https://github.com/dtolnay/cargo-expand"><code>cargo expand</code></a> tool can be really useful in situations like
+these because it will expand all macros and print out the generated code.</p>
+<p>To use <code>cargo expand</code>, you'll need to make sure it's installed
+(<code>cargo install cargo-expand</code>) and that you have the nightly toolchain
+available (<code>rustup toolchain install nightly</code>).</p>
+<pre><code class="language-console should_fail">$ cargo expand
+mod hello_world {
+    #[export_name = &quot;add&quot;]
+    unsafe extern &quot;C&quot; fn __wai_bindgen_hello_world_add(arg0: i32, arg1: i32) -&gt; i32 {
+        let result = &lt;super::HelloWorld as HelloWorld&gt;::add(arg0 as u32, arg1 as u32);
+        wai_bindgen_rust::rt::as_i32(result)
+    }
+    pub trait HelloWorld {
+        /// Add two numbers
+        fn add(a: u32, b: u32) -&gt; u32;
+    }
+}
+</code></pre>
+<p>There's a lot going on in that code, and most of it isn't relevant to you, but
+there are a couple of things I'd like to point out:</p>
+<ol>
+<li>A <code>hello_world</code> module was generated (the name comes from
+<code>hello-world.wai</code>)</li>
+<li>A <code>HelloWorld</code> trait was defined with an <code>add()</code> method that matches <code>add()</code>
+from <code>hello-world.wai</code> (note: <code>HelloWorld</code> is <code>hello-world</code> in PascalCase)</li>
+<li>The <code>__wai_bindgen_hello_world_add()</code> shim expects a <code>HelloWorld</code> type to
+be defined in the parent module (that's the <code>super::</code> bit), and that
+<code>super::HelloWorld</code> type must implement the <code>HelloWorld</code> trait</li>
+</ol>
+<p>From assumption 3, we know that the generated code expects us to define a
+<code>HelloWorld</code> type. We've only got 1 line of code at the moment, so it shouldn't
+be surprising to see our code doesn't compile (yet).</p>
+<p>We can fix that by defining a <code>HelloWorld</code> type in <code>lib.rs</code>. Adding two numbers
+doesn't require any state, so we'll just use a unit struct.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct HelloWorld;
+<span class="boring">}
+</span></code></pre></pre>
+<p>Looking back at assumption 3, our code <em>still</em> shouldn't compile because we
+haven't implemented the <code>HelloWorld</code> trait for our <code>HelloWorld</code> struct yet.</p>
+<pre><code class="language-console">$ cargo check
+error[E0277]: the trait bound `HelloWorld: hello_world::HelloWorld` is not satisfied
+ --&gt; src/lib.rs:1:1
+  |
+1 | wai_bindgen_rust::export!(&quot;hello-world.wai&quot;);
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `hello_world::HelloWorld` is not implemented for `HelloWorld`
+</code></pre>
+<p>The fix is pretty trivial.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl hello_world::HelloWorld for HelloWorld {
+    fn add(a: u32, b: u32) -&gt; u32 { a + b }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>If the naming gets a bit confusing (that's a lot of variations on
+<code>hello-world</code>!) try to think back to that output from <code>cargo expand</code>. The key
+thing to remember is the <code>HelloWorld</code> type is defined at the root of our crate,
+but the <code>HelloWorld</code> trait is inside a <code>hello_world</code> module.</p>
+<p>Believe it or not, but we're done writing code for now. Your crate should now
+compile 🙂</p>
+<h2 id="compiling-to-webassembly"><a class="header" href="#compiling-to-webassembly">Compiling To WebAssembly</a></h2>
+<p>At the moment, running <code>cargo build</code> will just compile our crate to a Rust
+library that will work on your current machine (e.g. x86-64 Linux), so we'll
+need to <a href="https://rust-lang.github.io/rustup/cross-compilation.html"><em>cross-compile</em></a> our code to WebAssembly.</p>
+<p>Rust makes this cross-compilation process fairly painless.</p>
+<p>First, we need to install a version of the standard library that has already
+been compiled to WebAssembly.</p>
+<pre><code class="language-console ignore">$ rustup target add wasm32-unknown-unknown
+</code></pre>
+<p>We'll go into target triples a bit more when discussing WASI, but
+<code>wasm32-unknown-unknown</code> basically means we want generic 32-bit WebAssembly
+where the OS is unknown (i.e. we know nothing about the underlying OS, so we
+can't use it).</p>
+<p>Next, we need to tell <code>rustc</code> that we want it to generate a <code>*.wasm</code> file.</p>
+<p>By default, it will only generate a <code>rlib</code> (a &quot;Rust library&quot;), so we need to
+update <code>Cargo.toml</code> so our crate's <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-crate-type-field"><code>crate-type</code></a> includes a
+<code>cdylib</code> (a &quot;C-compatible dynamic library&quot;).</p>
+<pre><code class="language-toml"># Cargo.toml
+
+[lib]
+crate-type = [&quot;cdylib&quot;, &quot;rlib&quot;]
+</code></pre>
+<p>Now, we should be able to compile our crate for <code>wasm32-unknown-unknown</code> and
+see a <code>*.wasm</code> file.</p>
+<pre><code class="language-console">$ cargo build --target wasm32-unknown-unknown
+$ file target/wasm32-unknown-unknown/debug/*.wasm
+target/wasm32-unknown-unknown/debug/tutorial_01.wasm: WebAssembly (wasm) binary module version 0x1 (MVP)
+</code></pre>
+<p>The <code>wasmer</code> CLI also has an <code>inspect</code> command which can be useful for looking
+at our <code>*.wasm</code> file.</p>
+<pre><code class="language-console">$ wasmer inspect target/wasm32-unknown-unknown/debug/tutorial_01.wasm
+Exports:
+  Functions:
+    &quot;add&quot;: [I32, I32] -&gt; [I32]
+</code></pre>
+<p>You'll notice that, besides a bunch of other stuff, we're exporting an <code>add</code>
+function that takes two <code>i32</code>s and returns an <code>i32</code>.</p>
+<p>This matches the <code>__wai_bindgen_hello_world_add()</code> signature we saw earlier.</p>
+<h2 id="publishing-to-wapm"><a class="header" href="#publishing-to-wapm">Publishing to WAPM</a></h2>
+<p>Now we've got a WebAssembly binary that works, let's publish it to WAPM!</p>
+<p>The core component in a WAPM package is the <code>wapm.toml</code> file. This acts as a
+&quot;manifest&quot; which tells WAPM which modules are included in the package, and
+important metadata like the project name, version number, and repository URL.</p>
+<p>You can check out <a href="https://docs.wasmer.io/ecosystem/wapm/publishing-your-package">the docs</a> for a walkthrough of the full
+process for packaging an arbitrary WebAssembly module.</p>
+<p>However, while we <em>could</em> create this file ourselves, most of the information is
+already available as part of our project's <code>Cargo.toml</code> file. The
+<a href="https://lib.rs/cargo-wapm"><code>cargo wapm</code></a> sub-command lets us automate a lot of the fiddly
+tasks like compiling the project to <code>wasm32-unknown-unknown</code>, collecting
+metadata, copying binaries around, and so on.</p>
+<p>To enable <code>cargo wapm</code>, we need to add some metadata to our <code>Cargo.toml</code>.</p>
+<pre><code class="language-toml"># Cargo.toml
+
+[package]
+...
+description = &quot;Add two numbers&quot;
+
+[package.metadata.wapm]
+namespace = &quot;wasmer&quot;  # Replace this with your WAPM username
+abi = &quot;none&quot;
+bindings = { wai-bindgen = &quot;0.1.0&quot;, exports = &quot;hello-world.wai&quot; }
+</code></pre>
+<p>Something to note is that all packages on WAPM must have a <code>description</code> field.</p>
+<p>Other than that, we use the <a href="https://doc.rust-lang.org/cargo/reference/manifest.html#the-metadata-table"><code>[package.metadata]</code></a> section
+to tell <code>cargo wapm</code> a couple of things:</p>
+<ul>
+<li>which namespace we are publishing to (all WAPM packages are namespaced)</li>
+<li>The ABI being used (<code>none</code> corresponds to Rust's <code>wasm32-unknown-unknown</code>, and
+we'd write <code>wasi</code> if we were compiling to <code>wasm32-wasi</code>), and</li>
+<li>The location of our <code>hello-world.wai</code> exports, plus the version of
+<code>wai-bindgen</code> we used</li>
+</ul>
+<p>Now we've updated our <code>Cargo.toml</code>, let's do a dry-run to make sure the package
+builds.</p>
+<pre><code class="language-console">$ cargo wapm --dry-run
+Successfully published package `wasmer/hello-world@0.1.0`
+[INFO] Publish succeeded, but package was not published because it was run in dry-run mode
+</code></pre>
+<p>If we dig around the <code>target/wapm/</code> directory, we can see what <code>cargo wapm</code>
+generated for us.</p>
+<pre><code class="language-console">$ tree target/wapm/tutorial-01
+target/wapm/tutorial-01
+├── tutorial_01.wasm
+├── hello-world.wai
+└── wapm.toml
+
+0 directories, 3 files
+
+$ cat target/wapm/tutorial-01/wapm.toml
+[package]
+name = &quot;wasmer/tutorial-01&quot;
+version = &quot;0.1.0&quot;
+description = &quot;Add two numbers&quot;
+repository = &quot;https://github.com/wasmerio/wasmer-pack-tutorial&quot;
+
+[[module]]
+name = &quot;tutorial-01&quot;
+source = &quot;tutorial_01.wasm&quot;
+abi = &quot;none&quot;
+
+[module.bindings]
+wai-exports = &quot;hello-world.wai&quot;
+wai-bindgen = &quot;0.1.0&quot;
+</code></pre>
+<p>This all looks correct, so let's actually publish the package!</p>
+<pre><code class="language-console">$ cargo wapm
+</code></pre>
+<p>If you open up WAPM in your browser, you should see a new package has been
+published. It'll look something like <a href="https://wapm.dev/wasmer/tutorial-01"><code>wasmer/tutorial-01</code></a>.</p>
+<h2 id="using-the-package-from-python"><a class="header" href="#using-the-package-from-python">Using the Package from Python</a></h2>
+<p>Let's create a Python project that uses the bindings to double-check that <code>1+1</code>
+does indeed equal <code>2</code>.</p>
+<p>First, create a new <a href="https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment">virtual environment</a> and activate it.</p>
+<pre><code class="language-console">$ python -m venv env
+$ source env/bin/activate
+</code></pre>
+<p>Now we can ask the <code>wapm</code> CLI to <code>pip install</code> our <code>tutorial-01</code> package's
+Python bindings.</p>
+<pre><code class="language-console">$ wapm install --pip wasmer/tutorial-01
+...
+Successfully installed tutorial-01-0.1.0 wasmer-1.1.0 wasmer-compiler-cranelift-1.1.0
+</code></pre>
+<p>Whenever a package is published to WAPM with the <code>bindings</code> field set, WIT Pack
+will automatically generate bindings for various languages in the background.
+All the <code>wapm</code> CLI is doing here is asking the WAPM backend for these bindings -
+<a href="https://registry.wapm.dev/graphql?query=%7B%0A%20%20getPackageVersion(name%3A%20%22wasmer%2Ftutorial-01%22)%20%7B%0A%20%20%20%20version%0A%20%20%20%20bindings%20%7B%0A%20%20%20%20%20%20language%0A%20%20%20%20%20%20url%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A">you can run the query yourself</a> if you want.</p>
+<p>The <code>tutorial_01</code> package exposes a <code>bindings</code> variable which we can use to
+create new instances of our WebAssembly module. As you would expect, the object
+we get back has our <code>add()</code> method.</p>
+<pre><code class="language-py"># main.py
+
+from tutorial_01 import bindings
+
+instance = bindings.hello_world()
+print(&quot;1 + 1 =&quot;, instance.add(1, 1))
+</code></pre>
+<p>Let's run our script.</p>
+<pre><code class="language-console">$ python ./main.py
+1 + 1 = 2
+</code></pre>
+<h2 id="conclusions"><a class="header" href="#conclusions">Conclusions</a></h2>
+<p>Hopefully you've got a better idea for how to create a WebAssembly library and
+use it from different languages, now.</p>
+<p>To recap, the process for publishing a library to WAPM is:</p>
+<ol>
+<li>Define a <code>*.wai</code> file with your interface</li>
+<li>Create a new Rust crate and add <code>wai-bindgen</code> as a dependency</li>
+<li>Implement the trait defined by <code>wai_bindgen_rust::export!(&quot;hello-world.wai&quot;)</code></li>
+<li>Add <code>[package.metadata.wapm]</code> table to your <code>Cargo.toml</code></li>
+<li>Publish to WAPM</li>
+</ol>
+<p>We took a bit longer than normal to get here, but that's mainly because there
+were plenty of detours to explain the &quot;magic&quot; that tools like <code>wai-bingen</code> and
+<code>cargo wapm</code> are doing for us.  This explanation gives you a better intuition
+for how the tools work, but we'll probably skip over them in the future.</p>
+<p>Some exercises for the reader:</p>
+<ul>
+<li>If your editor has some form of intellisense or code completion, hover over
+things like <code>bindings.hello_world</code> and <code>instance.add</code> to see their signatures</li>
+<li>Add an <code>add_floats</code> function to <code>hello-world.wai</code> which will add 32-bit
+floating point numbers (<code>f32</code>)</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../quickstart.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../tutorial/02-strings-and-lists.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../quickstart.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../tutorial/02-strings-and-lists.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

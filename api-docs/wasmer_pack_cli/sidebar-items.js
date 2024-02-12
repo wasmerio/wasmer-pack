@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Format","Language"],"struct":["Codegen","Show"],"type":["Error"]};

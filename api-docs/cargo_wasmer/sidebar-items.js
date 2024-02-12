@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"externcrate":["clap_cargo"],"mod":["metadata"],"struct":["Pack","Publish"]};

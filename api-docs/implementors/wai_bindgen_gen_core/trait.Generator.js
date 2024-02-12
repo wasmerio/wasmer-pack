@@ -1,0 +1,5 @@
+(function() {var implementors = {
+"wai_bindgen_gen_js":[["impl <a class=\"trait\" href=\"wai_bindgen_gen_core/trait.Generator.html\" title=\"trait wai_bindgen_gen_core::Generator\">Generator</a> for <a class=\"struct\" href=\"wai_bindgen_gen_js/struct.Js.html\" title=\"struct wai_bindgen_gen_js::Js\">Js</a>"]],
+"wai_bindgen_gen_rust_wasm":[["impl Generator for <a class=\"struct\" href=\"wai_bindgen_gen_rust_wasm/struct.RustWasm.html\" title=\"struct wai_bindgen_gen_rust_wasm::RustWasm\">RustWasm</a>"]],
+"wai_bindgen_gen_wasmer_py":[["impl <a class=\"trait\" href=\"wai_bindgen_gen_core/trait.Generator.html\" title=\"trait wai_bindgen_gen_core::Generator\">Generator</a> for <a class=\"struct\" href=\"wai_bindgen_gen_wasmer_py/struct.WasmerPy.html\" title=\"struct wai_bindgen_gen_wasmer_py::WasmerPy\">WasmerPy</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

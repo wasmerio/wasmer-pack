@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Error","ErrorKind","RedirectAuthHeaders"],"fn":["agent","builder","delete","get","head","patch","post","put","request","request_url"],"struct":["Agent","AgentBuilder","Header","MiddlewareNext","Proxy","Request","RequestUrl","Response","Transport"],"trait":["Middleware","OrAnyStatus","ReadWrite","Resolver","TlsConnector"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Language"],"fn":["autodiscover","compile_rust_to_wapm_package","generate_bindings"]};

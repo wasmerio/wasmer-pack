@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["coalesce_errors","infer_command","query_package_info","send_query","set_bindings_generator","translate_graphql_error"],"mod":["change_generator","get_package_version_query"],"struct":["ChangeGenerator","GetPackageVersionQuery","PackageInfo","SetGenerator"]};

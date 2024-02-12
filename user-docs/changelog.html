@@ -1,0 +1,476 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js rust">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Changelog - Wasmer Pack User Guide</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="index.html">Wasmer Pack</a></li><li class="chapter-item affix "><a href="quickstart.html">Quickstart Guide</a></li><li class="chapter-item affix "><li class="part-title">Tutorial</li><li class="chapter-item "><a href="tutorial/01-hello-world.html">Hello, World!</a></li><li class="chapter-item "><a href="tutorial/02-strings-and-lists.html">Strings and Lists</a></li><li class="chapter-item "><a href="tutorial/03-records.html">Records</a></li><li class="chapter-item "><div>Variants</div></li><li class="chapter-item "><a href="tutorial/05-resources.html">Exposing Resources</a></li><li class="chapter-item "><div>Importing Host Functions</div></li><li class="chapter-item "><div>Doing IO with WASI</div></li><li class="chapter-item "><div>Commands</div></li><li class="chapter-item "><div>Writing Guests in C</div></li><li class="chapter-item "><div>Tantivy</div></li><li class="chapter-item "><div>Integrating Tantivy with a React App</div></li><li class="chapter-item affix "><li class="part-title">Concepts</li><li class="chapter-item "><a href="concepts/wai/index.html">WebAssembly Interfaces (WAI)</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="concepts/wai/types.html">Builtin Types</a></li><li class="chapter-item "><a href="concepts/wai/functions.html">Functions</a></li><li class="chapter-item "><a href="concepts/wai/records.html">Records</a></li><li class="chapter-item "><a href="concepts/wai/variants.html">Enums, Flags, Variants, and Unions</a></li><li class="chapter-item "><a href="concepts/wai/resources.html">Resources</a></li></ol></li><li class="chapter-item "><li class="part-title">How-To Guides</li><li class="chapter-item "><a href="how-to/resources-vs-records.html">Choosing Between Resources and Records</a></li><li class="chapter-item affix "><li class="part-title">For Developers</li><li class="chapter-item "><a href="contributing.html">Contributing Guide</a></li><li class="chapter-item "><a href="architecture/index.html">Project Architecture</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="architecture/001-generated-package-naming.html">001 Generated Package Naming</a></li><li class="spacer"></li></ol></li><li class="chapter-item "><a href="changelog.html" class="active">Changelog</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Wasmer Pack User Guide</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/wasmerio/wasmer-pack" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/wasmerio/wasmer-pack/edit/master/doc/./changelog.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="change-log"><a class="header" href="#change-log">Change Log</a></h1>
+<p>All notable changes to this project will be documented in this file.</p>
+<p>The format is based on <a href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>,
+and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
+<p>Changelog entries will contain a link to the pull request implementing that
+change, where applicable.</p>
+<blockquote>
+<p><strong>Note:</strong> The project was renamed from <code>wit-pack</code> to <code>wasmer-pack</code> in version
+0.5.0. Changelog entries from 0.4.2 and earlier use the old name.</p>
+</blockquote>
+<!-- next-header -->
+<h2 id="unreleased---releasedate"><a class="header" href="#unreleased---releasedate"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...HEAD">Unreleased</a> - ReleaseDate</a></h2>
+<h2 id="072---2024-02-12"><a class="header" href="#072---2024-02-12"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h2 id="072---2024-02-12-1"><a class="header" href="#072---2024-02-12-1"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h2 id="072---2024-02-12-2"><a class="header" href="#072---2024-02-12-2"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h2 id="072---2024-02-12-3"><a class="header" href="#072---2024-02-12-3"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h2 id="072---2024-02-12-4"><a class="header" href="#072---2024-02-12-4"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h2 id="072---2024-02-12-5"><a class="header" href="#072---2024-02-12-5"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h2 id="072---2024-02-12-6"><a class="header" href="#072---2024-02-12-6"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h3 id="changed"><a class="header" href="#changed">Changed</a></h3>
+<ul>
+<li>Allow packages with <code>.</code> in their names. This is useful for packages
+<code>my-website.com</code>. Internally, the <code>.</code> is converted into a <code>-</code> to
+make it a valid binding name.</li>
+</ul>
+<h3 id="added"><a class="header" href="#added">Added</a></h3>
+<ul>
+<li>Added ability to pass in a user-specified name for the generated
+bindings. This can be done by passing in the <code>--name</code> flag in the
+CLI or by passing the <code>name</code> option when calling the <code>generate_*</code>
+functions.</li>
+</ul>
+<h3 id="fixed"><a class="header" href="#fixed">Fixed</a></h3>
+<ul>
+<li>
+<p>Fixed the <code>python-wasi</code> test in <code>wasmer-pack</code> crate to use poetry
+instead of pipenv. This is because poetry is used everywhere else,
+except in this one place.</p>
+</li>
+<li>
+<p>Fixed flaky integration tests by specifying a valid webc file for
+wasmer-pack in both <code>test_wasmer_pack.py</code> (pytest) and
+<code>index.test.ts</code> (jest)</p>
+</li>
+<li>
+<p>Pass in <code>BindingsOptions</code> by reference so it's easier to implement builder
+pattern later on.</p>
+</li>
+</ul>
+<h2 id="071---2023-06-12"><a class="header" href="#071---2023-06-12"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.0...v0.7.1">0.7.1</a> - 2023-06-12</a></h2>
+<h3 id="added-1"><a class="header" href="#added-1">Added</a></h3>
+<ul>
+<li>Upgraded the <code>webc</code> crate to <code>5.0.4</code> so we now have support for <code>*.webc</code> files
+in both the v1 and v2 formats
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/131">#131</a>)</li>
+</ul>
+<h3 id="changed-1"><a class="header" href="#changed-1">Changed</a></h3>
+<ul>
+<li>Raised the MSRV from <code>1.64.0</code> to <code>1.67.0</code> to match <code>wapm-targz-to-pirita</code>
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/131">#131</a>)</li>
+</ul>
+<h3 id="fixed-1"><a class="header" href="#fixed-1">Fixed</a></h3>
+<ul>
+<li>Fixed the &quot;Releases&quot; job in CI so <code>wasmer/wasmer-pack-cli</code> would be published
+and not just <code>wasmer/wasmer-pack</code>
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/124">#124</a>)</li>
+</ul>
+<h2 id="070---2023-02-10"><a class="header" href="#070---2023-02-10"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.6.0...v0.7.0">0.7.0</a> - 2023-02-10</a></h2>
+<h3 id="-breaking-changes-"><a class="header" href="#-breaking-changes-">💥 Breaking Changes 💥</a></h3>
+<ul>
+<li>Restructured the <code>wasmer/wasmer-pack</code> WAPM package's API
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/118">#118</a>)
+<ul>
+<li>The <code>Package</code> type has been changed from a <code>record</code> to a <code>resource</code> with
+methods</li>
+<li>There are now convenience functions for loading a <code>Package</code> from known
+binary formats (e.g. WEBC)</li>
+</ul>
+</li>
+</ul>
+<h3 id="added-2"><a class="header" href="#added-2">Added</a></h3>
+<ul>
+<li>Moved the logic for loading a <code>wasmer_pack::Package</code> from a WEBC binary out
+of <code>wasmer-pack-cli</code> into the main <code>wasmer-pack</code> crate
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/118">#118</a>)</li>
+</ul>
+<h3 id="fixed-2"><a class="header" href="#fixed-2">Fixed</a></h3>
+<ul>
+<li>Replaced the naive ABI detection routine with something that properly checks
+which namespaces are imported by a module
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/118">#118</a>)</li>
+</ul>
+<h3 id="removed"><a class="header" href="#removed">Removed</a></h3>
+<ul>
+<li>Removed the <code>TestEnvironment</code> construct from <code>wasmer-pack-testing</code> in favour
+of the <code>autodiscover()</code> tests
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/121">#121</a>)</li>
+</ul>
+<h2 id="060---2022-12-28"><a class="header" href="#060---2022-12-28"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.5.3...v0.6.0">0.6.0</a> - 2022-12-28</a></h2>
+<h3 id="added-3"><a class="header" href="#added-3">Added</a></h3>
+<ul>
+<li>Generated JavaScript packages can now import host functions
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/109">#109</a>)</li>
+<li>Introduce the <code>wasmer-pack-testing</code> crate for testing generated bindings
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/112">#112</a>)</li>
+<li>Generated Python packages can now import host functions
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/113">#113</a>)</li>
+</ul>
+<h3 id="changed-2"><a class="header" href="#changed-2">Changed</a></h3>
+<ul>
+<li>Renamed <code>wasmer-pack</code>'s sub-commands to be called <code>javascript</code> and <code>python</code>,
+with <code>js</code> and <code>py</code> as aliases (i.e. running <code>wasmer-pack js</code> is equivalent to
+<code>wasmer-pack javascript</code>)
+<a href="https://github.com/wasmerio/wasmer-pack/pull/111">#111</a></li>
+</ul>
+<h2 id="053---2022-12-02"><a class="header" href="#053---2022-12-02"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.5.2...v0.5.3">0.5.3</a> - 2022-12-02</a></h2>
+<h3 id="fixed-3"><a class="header" href="#fixed-3">Fixed</a></h3>
+<ul>
+<li>The <code>wasmer-pack</code> CLI wasn't extracting the <code>*.wai</code> export files correctly
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/105">#105</a>)</li>
+</ul>
+<h2 id="052---2022-11-24"><a class="header" href="#052---2022-11-24"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.5.1...v0.5.2">0.5.2</a> - 2022-11-24</a></h2>
+<h3 id="added-4"><a class="header" href="#added-4">Added</a></h3>
+<ul>
+<li>Users can now also generate bindings from a directory containing a
+<code>wapm.toml</code> file or a <code>*.tar.gz</code> downloaded from WAPM
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/80">#80</a>)</li>
+<li>Added a tutorial on using records
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/83">#83</a>)</li>
+</ul>
+<h2 id="051---2022-11-18"><a class="header" href="#051---2022-11-18"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.5.0...v0.5.1">0.5.1</a> - 2022-11-18</a></h2>
+<h3 id="fixed-4"><a class="header" href="#fixed-4">Fixed</a></h3>
+<ul>
+<li>Running <code>wasmer run --mapdir .:. wasmer/wasmer-pack-cli ...</code> would fail
+because the <code>[fs]</code> table was being used incorrectly in <code>wapm.toml</code>
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/91">#91</a>)</li>
+<li>Added a workaround for dealing with <code>*.webc</code> files that were generated by a
+<a href="https://github.com/wasmerio/pirita/issues/30">buggy</a> version of
+<code>wapm2pirita</code> (<a href="https://github.com/wasmerio/wasmer-pack/pull/92">#92</a>)</li>
+</ul>
+<h3 id="changed-3"><a class="header" href="#changed-3">Changed</a></h3>
+<ul>
+<li>The <code>wasmer-pack</code> tool now generates CommonJS packages instead of ES Modules
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/89">#89</a>)</li>
+</ul>
+<h2 id="050---2022-11-08"><a class="header" href="#050---2022-11-08"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.4.2...v0.5.0">0.5.0</a> - 2022-11-08</a></h2>
+<h3 id="changed-4"><a class="header" href="#changed-4">Changed</a></h3>
+<ul>
+<li>Switched from Wasmer's fork of <code>wit-bindgen</code> on GitHub to the <code>wai-bindgen</code>
+crate on crates.io
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/71">#71</a>)</li>
+</ul>
+<h3 id="fixed-5"><a class="header" href="#fixed-5">Fixed</a></h3>
+<ul>
+<li>Update <code>PackageName</code> validation to accept the <code>_</code> namespace and global
+packages (<a href="https://github.com/wasmerio/wasmer-pack/pull/74">#74</a>)</li>
+<li>Package bindings will no longer have naming conflicts when importing a binding
+type with the same name as one of types we generate
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/75">#75</a>)</li>
+</ul>
+<h3 id="-breaking-changes--1"><a class="header" href="#-breaking-changes--1">💥 Breaking Changes 💥</a></h3>
+<ul>
+<li>The project has been renamed from <code>wit-pack</code> to <code>wasmer-pack</code></li>
+</ul>
+<h2 id="042---2022-10-30"><a class="header" href="#042---2022-10-30"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.4.1...v0.4.2">0.4.2</a> - 2022-10-30</a></h2>
+<h3 id="fixed-6"><a class="header" href="#fixed-6">Fixed</a></h3>
+<ul>
+<li>Put all generated JavaScript inside a <code>package/</code> folder to match the logic
+used by <code>npm pack</code> when consuming tarballs
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/66">#66</a>)</li>
+<li>Update <code>MANIFEST.in</code> to include <code>py.typed</code> in the package, meaning MyPy can
+now typecheck the generated bindings
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/66">#66</a>)</li>
+<li>Don't assume atoms will have the same name as their commands
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/64">#64</a>)</li>
+<li>Some JavaScript bindings wouldn't run because the bindings always import
+<code>@wasmer/wasi</code>, while the dependency was only added when one or more
+libraries/commands was compiled to WASI
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/58">#58</a>)</li>
+</ul>
+<h2 id="041---2022-10-24"><a class="header" href="#041---2022-10-24"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.4.0...v0.4.1">0.4.1</a> - 2022-10-24</a></h2>
+<h3 id="added-5"><a class="header" href="#added-5">Added</a></h3>
+<ul>
+<li>User-facing documentation and a tutorial series are now available under the
+<code>doc/</code> folder (<a href="https://github.com/wasmerio/wasmer_pack/pull/47">#47</a>)</li>
+<li>Mention the <code>wit-pack</code> version in each generated package
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/54">#54</a>)</li>
+</ul>
+<h3 id="fixed-7"><a class="header" href="#fixed-7">Fixed</a></h3>
+<ul>
+<li>Fixed a bug where <code>*.wasm</code> files weren't being installed with the Python
+bindings from WAPM (<a href="https://github.com/wasmerio/wasmer_pack/pull/52">#52</a>)</li>
+</ul>
+<h2 id="040---2022-10-12"><a class="header" href="#040---2022-10-12"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.3.0...v0.4.0">0.4.0</a> - 2022-10-12</a></h2>
+<h3 id="added-6"><a class="header" href="#added-6">Added</a></h3>
+<ul>
+<li>To facilitate caching or different means of distribution, users are now able
+to provide their own pre-compiled WebAssembly module when initialising
+libraries or running commands (<a href="https://github.com/wasmerio/wasmer_pack/pull/45">#45</a>)</li>
+</ul>
+<h3 id="changed-5"><a class="header" href="#changed-5">Changed</a></h3>
+<ul>
+<li>Removed the <code>LoadArgs</code> type from the Python bindings in favour of named
+arguments (<a href="https://github.com/wasmerio/wasmer_pack/pull/45">#45</a>)</li>
+<li>Raised the MSRV from <code>1.59.0</code> to <code>1.61.0</code> to
+<a href="https://github.com/mitsuhiko/minijinja/blob/c5a09ebd/CHANGELOG.md#0210">match <code>minijinja</code></a></li>
+<li>Removed the top-level class from the generated bindings, so now you just need
+to do something like <code>from wit_pack import bindings, commands</code> to use the
+package's libraries or commands (<a href="https://github.com/wasmerio/wasmer_pack/pull/40">#40</a>)</li>
+</ul>
+<h3 id="fixed-8"><a class="header" href="#fixed-8">Fixed</a></h3>
+<ul>
+<li>Make the current directory available to the CLI when run by wasmer
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/37">#37</a>)</li>
+</ul>
+<h2 id="030---2022-09-27"><a class="header" href="#030---2022-09-27"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.2.3...v0.3.0">0.3.0</a> - 2022-09-27</a></h2>
+<h3 id="added-7"><a class="header" href="#added-7">Added</a></h3>
+<ul>
+<li>Set up CI to automatically deploy to wapm.dev whenever GitHub receives a
+tagged commit (<a href="https://github.com/wasmerio/wasmer_pack/pull/24">#24</a>)</li>
+<li>Fleshed out the repo's documentation (<a href="https://github.com/wasmerio/wasmer_pack/pull/25">#25</a>)
+<ul>
+<li>Populated the <code>CHANGELOG.md</code></li>
+<li>Wrote up <code>CONTRIBUTING.md</code></li>
+<li>Rewrote the <code>README.md</code> walkthrough</li>
+</ul>
+</li>
+<li>Added a <em>&quot;Time Reporter&quot;</em> task to CI so we can keep an eye on CI times (<a href="https://github.com/wasmerio/wasmer_pack/pull/25">#25</a>)</li>
+<li>Generate wrappers for calling WASI executables from JavaScript
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/26">#26</a>)</li>
+<li>Generate wrappers for calling WASI executables from Python
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/27">#27</a>)</li>
+<li>Detect all available WASI executables in a Pirita file
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/28">#28</a>)</li>
+<li>Add a top-level facade to the generated Python bindings so libraries and
+commands can be accessed through one common object
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/30">#30</a>)</li>
+<li>Add a top-level facade to the generated JavaScript bindings so libraries and
+commands can be accessed through one common object
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/34">#34</a>)</li>
+<li>Added a <code>wit-pack show</code> sub-command to show which libraries and commands would
+be generated from a Pirita file
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/35">#35</a>)</li>
+</ul>
+<h2 id="fixed-9"><a class="header" href="#fixed-9">Fixed</a></h2>
+<ul>
+<li>Inspect each atom's kind when discovering the commands in a Pirita file instead
+of blindly assuming everything is a command
+(<a href="https://github.com/wasmerio/wasmer_pack/issues/32">#32</a>)</li>
+</ul>
+<h2 id="023---2022-09-15"><a class="header" href="#023---2022-09-15"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.2.2...v0.2.3">0.2.3</a> - 2022-09-15</a></h2>
+<h3 id="fixed-10"><a class="header" href="#fixed-10">Fixed</a></h3>
+<ul>
+<li>When run as a WASI program, the <code>wit-pack</code> CLI would unconditionally fail
+to load inputs because <code>mmap</code> isn't available (<a href="https://github.com/wasmerio/wasmer_pack/pull/24">#24</a>)</li>
+</ul>
+<h2 id="022---2022-09-15"><a class="header" href="#022---2022-09-15"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.2.1...v0.2.2">0.2.2</a> - 2022-09-15</a></h2>
+<p>(no user-facing changes)</p>
+<h2 id="021---2022-09-15"><a class="header" href="#021---2022-09-15"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.2.0...v0.2.1">0.2.1</a> - 2022-09-15</a></h2>
+<p>(no user-facing changes)</p>
+<h2 id="020---2022-09-15"><a class="header" href="#020---2022-09-15"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.1.5...v0.2.0">0.2.0</a> - 2022-09-15</a></h2>
+<h3 id="added-8"><a class="header" href="#added-8">Added</a></h3>
+<ul>
+<li>The <code>wit-pack</code> crate now allows packages to contain multiple WebAssembly
+modules (<a href="https://github.com/wasmerio/wasmer_pack/pull/22">#22</a>)</li>
+</ul>
+<h3 id="-breaking-changes--2"><a class="header" href="#-breaking-changes--2">💥 Breaking Changes 💥</a></h3>
+<ul>
+<li>
+<p>The <code>wit-pack</code> CLI now takes a Pirita file as its only input
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/20">#20</a>)</p>
+<ul>
+<li>
+<p>This means the commandline interface has changed</p>
+<pre><code class="language-console"># Instead of this
+$ wit-pack js --exports exports.wit --name hello_world --version 0.1.1 --module wit.wasm -o=wit-js --abi=none
+
+# you should now do this
+$ wit-pack js -o=wit-js ./hello-world.webc
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="015---2022-09-12"><a class="header" href="#015---2022-09-12"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.1.4...v0.1.5">0.1.5</a> - 2022-09-12</a></h2>
+<h3 id="added-9"><a class="header" href="#added-9">Added</a></h3>
+<ul>
+<li>Introduced support for WASI libraries (<a href="https://github.com/wasmerio/wasmer_pack/pull/12">#12</a>)</li>
+</ul>
+<h3 id="changed-6"><a class="header" href="#changed-6">Changed</a></h3>
+<ul>
+<li>The <code>crates/wit-pack-cli</code> and <code>crates/wit-pack-wasm</code> crates are now published
+to WAPM under the <code>wasmer</code> namespace instead of <code>Michael-F-Bryan</code></li>
+</ul>
+<h2 id="014---2022-08-25"><a class="header" href="#014---2022-08-25"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.1.3...v0.1.4">0.1.4</a> - 2022-08-25</a></h2>
+<p>(no user-facing changes)</p>
+<h2 id="013---2022-08-25"><a class="header" href="#013---2022-08-25"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.1.2...v0.1.3">0.1.3</a> - 2022-08-25</a></h2>
+<p>(no user-facing changes)</p>
+<h2 id="012---2022-08-24"><a class="header" href="#012---2022-08-24"><a href="https://github.com/wasmerio/wasmer-pack/compare/6f1e4ca6f...v0.1.2">0.1.2</a> - 2022-08-24</a></h2>
+<!-- next-url -->
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="architecture/001-generated-package-naming.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="architecture/001-generated-package-naming.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

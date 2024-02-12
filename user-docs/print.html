@@ -1,0 +1,2099 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js rust">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Wasmer Pack User Guide</title>
+        <meta name="robots" content="noindex" />
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item affix "><a href="index.html">Wasmer Pack</a></li><li class="chapter-item affix "><a href="quickstart.html">Quickstart Guide</a></li><li class="chapter-item affix "><li class="part-title">Tutorial</li><li class="chapter-item "><a href="tutorial/01-hello-world.html">Hello, World!</a></li><li class="chapter-item "><a href="tutorial/02-strings-and-lists.html">Strings and Lists</a></li><li class="chapter-item "><a href="tutorial/03-records.html">Records</a></li><li class="chapter-item "><div>Variants</div></li><li class="chapter-item "><a href="tutorial/05-resources.html">Exposing Resources</a></li><li class="chapter-item "><div>Importing Host Functions</div></li><li class="chapter-item "><div>Doing IO with WASI</div></li><li class="chapter-item "><div>Commands</div></li><li class="chapter-item "><div>Writing Guests in C</div></li><li class="chapter-item "><div>Tantivy</div></li><li class="chapter-item "><div>Integrating Tantivy with a React App</div></li><li class="chapter-item affix "><li class="part-title">Concepts</li><li class="chapter-item "><a href="concepts/wai/index.html">WebAssembly Interfaces (WAI)</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="concepts/wai/types.html">Builtin Types</a></li><li class="chapter-item "><a href="concepts/wai/functions.html">Functions</a></li><li class="chapter-item "><a href="concepts/wai/records.html">Records</a></li><li class="chapter-item "><a href="concepts/wai/variants.html">Enums, Flags, Variants, and Unions</a></li><li class="chapter-item "><a href="concepts/wai/resources.html">Resources</a></li></ol></li><li class="chapter-item "><li class="part-title">How-To Guides</li><li class="chapter-item "><a href="how-to/resources-vs-records.html">Choosing Between Resources and Records</a></li><li class="chapter-item affix "><li class="part-title">For Developers</li><li class="chapter-item "><a href="contributing.html">Contributing Guide</a></li><li class="chapter-item "><a href="architecture/index.html">Project Architecture</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="architecture/001-generated-package-naming.html">001 Generated Package Naming</a></li><li class="spacer"></li></ol></li><li class="chapter-item "><a href="changelog.html">Changelog</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Wasmer Pack User Guide</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/wasmerio/wasmer-pack" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="wasmer-pack"><a class="header" href="#wasmer-pack">Wasmer Pack</a></h1>
+<p>The Wasmer Pack project is a code generator that takes in a WebAssembly library
+and the <a href="./concepts/wai/">WAI</a> files defining its interface, and generates packages for
+using it natively in your favourite programming language.</p>
+<p>Useful links:</p>
+<ul>
+<li><a href="https://github.com/wasmerio/wasmer-pack">The Wasmer Pack repository on GitHub</a></li>
+<li><a href="https://wasmerio.github.io/wasmer-pack/user-docs">This user guide</a></li>
+<li><a href="https://wapm.io/">The WebAssembly Package Manager</a></li>
+<li><a href="https://github.com/wasmerio/wai/blob/main/WAI.md">The <code>*.wai</code> format</a></li>
+</ul>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<p>The WAPM backend automatically runs Wasmer Pack over any packages that are
+published to the registry, so most users won't need to interact with it
+directly.</p>
+<p>That said, the <code>wasmer-pack</code> CLI is available on crates.io for those wanting to
+run it locally (e.g. during testing).</p>
+<pre><code class="language-console">$ cargo install wasmer-pack-cli
+</code></pre>
+<p>The same CLI is <a href="https://wapm.io/wasmer/wasmer-pack-cli">published to WAPM</a> as a WASI executable, meaning
+you can use <code>wasmer run</code> to automatically fetch and run the latest version.</p>
+<pre><code class="language-console">$ wasmer run wasmer/wasmer-pack-cli --dir=. -- --help
+wasmer-pack-cli 0.5.2
+
+USAGE:
+    wasmer-pack.wasm &lt;SUBCOMMAND&gt;
+
+OPTIONS:
+    -h, --help       Print help information
+    -V, --version    Print version information
+
+SUBCOMMANDS:
+    help      Print this message or the help of the given subcommand(s)
+    js        Generate bindings for use with NodeJS
+    python    Generate Python bindings
+    show      Show metadata for the bindings that would be generated from a Pirita file
+</code></pre>
+<blockquote>
+<p><strong>NOTE:</strong> the <code>--dir=.</code> flag is important! This tells the <code>wasmer</code> CLI to let
+<code>wasmer/wasmer-pack-cli</code> access the current directory.</p>
+<p>WebAssembly is sandboxed by default, so all file system access must be
+explicitly provided.</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="wasmer-pack-quickstart-guide"><a class="header" href="#wasmer-pack-quickstart-guide">Wasmer Pack Quickstart Guide</a></h1>
+<p>This guide walks you through creating, publishing, and using a simple library
+with Wasmer Pack, WAI, and WAPM.</p>
+<h2 id="creating-the-library"><a class="header" href="#creating-the-library">Creating the Library</a></h2>
+<p>Create a new Rust project and add the wai-bindgen-rust crate as a dependency:</p>
+<pre><code class="language-console">$ cargo new --lib quickstart
+$ cd quickstart
+$ cargo add wai-bindgen-rust
+</code></pre>
+<p>Create a WAI file to define the calculator interface:</p>
+<pre><code class="language-wai">// calculator.wai
+
+/// Add two numbers.
+add: func(a: float32, b: float32) -&gt; float32
+</code></pre>
+<p>Implement the interface in Rust:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/lib.rs
+
+wai_bindgen_rust::export!(&quot;calculator.wai&quot;);
+struct Calculator;
+
+impl crate::calculator::Calculator for Calculator {
+    fn add(a: f32, b: f32) -&gt; f32 { a + b }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<h2 id="publishing-the-library"><a class="header" href="#publishing-the-library">Publishing the Library</a></h2>
+<p>Install wapm using <a href="https://docs.wasmer.io/ecosystem/wapm/getting-started">the Wasmer installer</a>:</p>
+<pre><code class="language-console">$ curl https://get.wasmer.io -sSfL | sh
+</code></pre>
+<p>Next, install the <a href="https://github.com/wasmerio/cargo-wapm"><code>cargo wapm</code></a> helper:</p>
+<pre><code class="language-console">$ cargo install cargo-wapm
+</code></pre>
+<p>Log in to your <a href="https://wapm.io/signup">WAPM account</a>:</p>
+<pre><code class="language-console">$ wapm login
+</code></pre>
+<p>Update <code>Cargo.toml</code> to configure the package for WAPM publication:</p>
+<pre><code class="language-toml"># Cargo.toml
+
+[package.metadata.wapm]
+namespace = &quot;&lt;YOUR_USERNAME&gt;&quot;
+abi = &quot;none&quot;
+bindings = { wai-version = &quot;0.2.0&quot;, exports = &quot;calculator.wai&quot; }
+
+[lib]
+crate-type = [&quot;cdylib&quot;, &quot;rlib&quot;]
+</code></pre>
+<p>Publish the package:</p>
+<pre><code class="language-console">$ cargo wapm
+</code></pre>
+<h2 id="using-the-library"><a class="header" href="#using-the-library">Using the Library</a></h2>
+<h3 id="javascript"><a class="header" href="#javascript">JavaScript</a></h3>
+<p>Create a new JavaScript project and add the calculator package:</p>
+<pre><code class="language-console">$ yarn init --yes
+$ wasmer add --yarn wai/tutorial-01
+</code></pre>
+<p>Import and use the package in your JavaScript code:</p>
+<pre><code class="language-js">// index.js
+
+import { bindings } from &quot;wai/tutorial-01&quot;;
+
+async function main() {
+    const calculator = await bindings.calculator();
+    console.log(&quot;2 + 2 =&quot;, calculator.add(2, 2));
+}
+
+main();
+</code></pre>
+<h3 id="python"><a class="header" href="#python">Python</a></h3>
+<p>Add the calculator package to your Python project:</p>
+<pre><code class="language-console">$ wasmer add --pip wai/tutorial-01
+</code></pre>
+<p>Import and use the package in your Python code:</p>
+<pre><code class="language-py"># main.py
+
+from tutorial_01 import bindings
+
+calculator = bindings.calculator()
+print(&quot;2+2 = &quot;, calculator.add(2.0, 2.0))
+</code></pre>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>Congratulations, you have successfully completed the Wasmer Pack Quickstart
+Guide! In this tutorial, you learned how to:</p>
+<ul>
+<li>Create a simple calculator library using Rust and WAI.</li>
+<li>Implement the interface using Rust and wai-bindgen-rust.</li>
+<li>Publish the library to WAPM.</li>
+<li>Use the library in JavaScript and Python projects.</li>
+</ul>
+<p>Now that you have a basic understanding of how to create, publish, and use a
+Wasmer Pack library, you can explore more advanced topics and features.</p>
+<p>Here are some suggestions for further exploration:</p>
+<ul>
+<li>Learn about more advanced WAI features, such as error handling and custom
+types.</li>
+<li>Discover how to optimize your WebAssembly modules for performance and size.</li>
+<li>Explore <a href="https://wapm.io/">the Wasmer ecosystem</a> and learn about other Wasmer tools and
+libraries.</li>
+<li>Create and publish more complex libraries, experimenting with different use
+cases and applications.</li>
+</ul>
+<p>For more tutorials, guides, and resources, visit <a href="https://wasmerio.github.io/wasmer-pack/user-docs">the Wasmer Pack
+documentation</a> and the <a href="https://github.com/wasmerio/wasmer-pack">Wasmer Pack GitHub repository</a>. You can also
+join <a href="https://slack.wasmer.io/">the Wasmer community</a> to ask questions, share your projects, and
+connect with other developers.</p>
+<p>Good luck with your future projects, and happy coding!</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="hello-world"><a class="header" href="#hello-world">Hello, World!</a></h1>
+<p>Like all good tutorials, let's start with WIT Pack's equivalent of
+<em>&quot;Hello, World!&quot;</em> - a library that adds two numbers together.</p>
+<p>By the end, you should know how to define a simple WIT interface and implement
+it in Rust. We will also publish the package to WAPM and use it from JavaScript.</p>
+<p>You can check WAPM for the package we'll be building - it's called
+<a href="https://wapm.dev/wasmer/tutorial-01"><code>wasmer/hello-world</code></a>.</p>
+<h2 id="installation-1"><a class="header" href="#installation-1">Installation</a></h2>
+<p>You will need to install several CLI tools.</p>
+<ul>
+<li><a href="https://rustup.rs/">The Rust toolchain</a> so we can compile Rust code
+(<code>curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</code>)</li>
+<li>the <code>wasm32-unknown-unknown</code> target so Rust knows how to compile to
+WebAssembly (<code>rustup target add wasm32-unknown-unknown</code>)</li>
+<li><a href="https://docs.wasmer.io/ecosystem/wasmer/getting-started">The Wasmer runtime</a>
+so we can interact with WAPM (<code>curl https://get.wasmer.io -sSfL | sh</code>)</li>
+<li><a href="https://lib.rs/cargo-wapm">the <code>cargo wapm</code> sub-command</a> for publishing to WAPM
+(<code>cargo install cargo-wapm</code>)</li>
+</ul>
+<p>Once you've installed those tools, you'll want to create a new account on
+<a href="https://wapm.io/signup">wapm.io</a> so we have somewhere to publish our code to.</p>
+<p>Running the <code>wapm login</code> command will let you authenticate your computer with
+WAPM.</p>
+<h2 id="the-wit-file"><a class="header" href="#the-wit-file">The WIT File</a></h2>
+<p>We want to start off simple for now, so let's create a library that just adds
+two 32-bit integers.</p>
+<p>First, let's create a new Rust project and <code>cd</code> into it.</p>
+<pre><code class="language-console">$ cargo new --lib tutorial-01
+$ cd tutorial-01
+</code></pre>
+<p>(you can remove all the code in <code>src/lib.rs</code> - we don't need the example
+boilerplate)</p>
+<p>Now we can add a <code>hello-world.wai</code> file to the project. The syntax for a WIT
+file is quite similar to Rust.</p>
+<pre><code>// hello-world.wai
+
+/// Add two numbers
+add: func(a: u32, b: u32) -&gt; u32
+</code></pre>
+<p>This defines a function called <code>add</code> which takes two <code>u32</code> parameters (32-bit
+unsigned integers) called <code>a</code> and <code>b</code>, and returns a <code>u32</code>.</p>
+<p>You can see that normal comments start with a <code>//</code> and doc-comments use <code>///</code>.
+Here, we're using <code>// hello-world.wai</code> to indicate the text should be saved to
+<code>hello-world.wai</code>.</p>
+<p>One interesting constraint from the WIT format is that <em>all</em> names must be
+written in kebab-case. This lets <code>wai-bindgen</code> convert the name into the casing
+that is idiomatic for a particular language in a particular context.</p>
+<p>For example, if our WIT file defined a <code>hello-world</code> function, it would be
+accessible as <code>hello_world</code> in Python and Rust because they use snake_case for
+function names, whereas in JavaScript it would be <code>helloWorld</code>.</p>
+<h2 id="writing-some-rust"><a class="header" href="#writing-some-rust">Writing Some Rust</a></h2>
+<p>Now we've got a WIT file, let's create a WebAssembly library implementing the
+<code>hello-world.wai</code> interface.</p>
+<p>The <code>wai-bindgen</code> library uses some macros to generate some glue code for our
+WIT file, so add it as a dependency.</p>
+<pre><code class="language-console">$ cargo add wai-bindgen-rust
+</code></pre>
+<p>Towards the top of your <code>src/lib.rs</code>, we want to tell <code>wai-bindgen</code> that this
+crate <em>exports</em> our <code>hello-world.wai</code> file.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/lib.rs
+
+wai_bindgen_rust::export!(&quot;hello-world.wai&quot;);
+<span class="boring">}
+</span></code></pre></pre>
+<p>(note: <code>hello-world.wai</code> is relative to the crate's root - the folder
+containing your <code>Cargo.toml</code> file)</p>
+<p>Now let's run <code>cargo check</code> to see what compile errors it shows.</p>
+<pre><code class="language-console should_fail">$ cargo check
+error[E0412]: cannot find type `HelloWorld` in module `super`
+ --&gt; src/lib.rs:1:1
+  |
+1 | wai_bindgen_rust::export!(&quot;hello-world.wai&quot;);
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in `super`
+  |
+</code></pre>
+<p>This seems to fail because of <em>something</em> inside the
+<code>wai_bindgen_rust::export!()</code> macro, but we can't see what it is.</p>
+<p>The <a href="https://github.com/dtolnay/cargo-expand"><code>cargo expand</code></a> tool can be really useful in situations like
+these because it will expand all macros and print out the generated code.</p>
+<p>To use <code>cargo expand</code>, you'll need to make sure it's installed
+(<code>cargo install cargo-expand</code>) and that you have the nightly toolchain
+available (<code>rustup toolchain install nightly</code>).</p>
+<pre><code class="language-console should_fail">$ cargo expand
+mod hello_world {
+    #[export_name = &quot;add&quot;]
+    unsafe extern &quot;C&quot; fn __wai_bindgen_hello_world_add(arg0: i32, arg1: i32) -&gt; i32 {
+        let result = &lt;super::HelloWorld as HelloWorld&gt;::add(arg0 as u32, arg1 as u32);
+        wai_bindgen_rust::rt::as_i32(result)
+    }
+    pub trait HelloWorld {
+        /// Add two numbers
+        fn add(a: u32, b: u32) -&gt; u32;
+    }
+}
+</code></pre>
+<p>There's a lot going on in that code, and most of it isn't relevant to you, but
+there are a couple of things I'd like to point out:</p>
+<ol>
+<li>A <code>hello_world</code> module was generated (the name comes from
+<code>hello-world.wai</code>)</li>
+<li>A <code>HelloWorld</code> trait was defined with an <code>add()</code> method that matches <code>add()</code>
+from <code>hello-world.wai</code> (note: <code>HelloWorld</code> is <code>hello-world</code> in PascalCase)</li>
+<li>The <code>__wai_bindgen_hello_world_add()</code> shim expects a <code>HelloWorld</code> type to
+be defined in the parent module (that's the <code>super::</code> bit), and that
+<code>super::HelloWorld</code> type must implement the <code>HelloWorld</code> trait</li>
+</ol>
+<p>From assumption 3, we know that the generated code expects us to define a
+<code>HelloWorld</code> type. We've only got 1 line of code at the moment, so it shouldn't
+be surprising to see our code doesn't compile (yet).</p>
+<p>We can fix that by defining a <code>HelloWorld</code> type in <code>lib.rs</code>. Adding two numbers
+doesn't require any state, so we'll just use a unit struct.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct HelloWorld;
+<span class="boring">}
+</span></code></pre></pre>
+<p>Looking back at assumption 3, our code <em>still</em> shouldn't compile because we
+haven't implemented the <code>HelloWorld</code> trait for our <code>HelloWorld</code> struct yet.</p>
+<pre><code class="language-console">$ cargo check
+error[E0277]: the trait bound `HelloWorld: hello_world::HelloWorld` is not satisfied
+ --&gt; src/lib.rs:1:1
+  |
+1 | wai_bindgen_rust::export!(&quot;hello-world.wai&quot;);
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `hello_world::HelloWorld` is not implemented for `HelloWorld`
+</code></pre>
+<p>The fix is pretty trivial.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl hello_world::HelloWorld for HelloWorld {
+    fn add(a: u32, b: u32) -&gt; u32 { a + b }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>If the naming gets a bit confusing (that's a lot of variations on
+<code>hello-world</code>!) try to think back to that output from <code>cargo expand</code>. The key
+thing to remember is the <code>HelloWorld</code> type is defined at the root of our crate,
+but the <code>HelloWorld</code> trait is inside a <code>hello_world</code> module.</p>
+<p>Believe it or not, but we're done writing code for now. Your crate should now
+compile 🙂</p>
+<h2 id="compiling-to-webassembly"><a class="header" href="#compiling-to-webassembly">Compiling To WebAssembly</a></h2>
+<p>At the moment, running <code>cargo build</code> will just compile our crate to a Rust
+library that will work on your current machine (e.g. x86-64 Linux), so we'll
+need to <a href="https://rust-lang.github.io/rustup/cross-compilation.html"><em>cross-compile</em></a> our code to WebAssembly.</p>
+<p>Rust makes this cross-compilation process fairly painless.</p>
+<p>First, we need to install a version of the standard library that has already
+been compiled to WebAssembly.</p>
+<pre><code class="language-console ignore">$ rustup target add wasm32-unknown-unknown
+</code></pre>
+<p>We'll go into target triples a bit more when discussing WASI, but
+<code>wasm32-unknown-unknown</code> basically means we want generic 32-bit WebAssembly
+where the OS is unknown (i.e. we know nothing about the underlying OS, so we
+can't use it).</p>
+<p>Next, we need to tell <code>rustc</code> that we want it to generate a <code>*.wasm</code> file.</p>
+<p>By default, it will only generate a <code>rlib</code> (a &quot;Rust library&quot;), so we need to
+update <code>Cargo.toml</code> so our crate's <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-crate-type-field"><code>crate-type</code></a> includes a
+<code>cdylib</code> (a &quot;C-compatible dynamic library&quot;).</p>
+<pre><code class="language-toml"># Cargo.toml
+
+[lib]
+crate-type = [&quot;cdylib&quot;, &quot;rlib&quot;]
+</code></pre>
+<p>Now, we should be able to compile our crate for <code>wasm32-unknown-unknown</code> and
+see a <code>*.wasm</code> file.</p>
+<pre><code class="language-console">$ cargo build --target wasm32-unknown-unknown
+$ file target/wasm32-unknown-unknown/debug/*.wasm
+target/wasm32-unknown-unknown/debug/tutorial_01.wasm: WebAssembly (wasm) binary module version 0x1 (MVP)
+</code></pre>
+<p>The <code>wasmer</code> CLI also has an <code>inspect</code> command which can be useful for looking
+at our <code>*.wasm</code> file.</p>
+<pre><code class="language-console">$ wasmer inspect target/wasm32-unknown-unknown/debug/tutorial_01.wasm
+Exports:
+  Functions:
+    &quot;add&quot;: [I32, I32] -&gt; [I32]
+</code></pre>
+<p>You'll notice that, besides a bunch of other stuff, we're exporting an <code>add</code>
+function that takes two <code>i32</code>s and returns an <code>i32</code>.</p>
+<p>This matches the <code>__wai_bindgen_hello_world_add()</code> signature we saw earlier.</p>
+<h2 id="publishing-to-wapm"><a class="header" href="#publishing-to-wapm">Publishing to WAPM</a></h2>
+<p>Now we've got a WebAssembly binary that works, let's publish it to WAPM!</p>
+<p>The core component in a WAPM package is the <code>wapm.toml</code> file. This acts as a
+&quot;manifest&quot; which tells WAPM which modules are included in the package, and
+important metadata like the project name, version number, and repository URL.</p>
+<p>You can check out <a href="https://docs.wasmer.io/ecosystem/wapm/publishing-your-package">the docs</a> for a walkthrough of the full
+process for packaging an arbitrary WebAssembly module.</p>
+<p>However, while we <em>could</em> create this file ourselves, most of the information is
+already available as part of our project's <code>Cargo.toml</code> file. The
+<a href="https://lib.rs/cargo-wapm"><code>cargo wapm</code></a> sub-command lets us automate a lot of the fiddly
+tasks like compiling the project to <code>wasm32-unknown-unknown</code>, collecting
+metadata, copying binaries around, and so on.</p>
+<p>To enable <code>cargo wapm</code>, we need to add some metadata to our <code>Cargo.toml</code>.</p>
+<pre><code class="language-toml"># Cargo.toml
+
+[package]
+...
+description = &quot;Add two numbers&quot;
+
+[package.metadata.wapm]
+namespace = &quot;wasmer&quot;  # Replace this with your WAPM username
+abi = &quot;none&quot;
+bindings = { wai-bindgen = &quot;0.1.0&quot;, exports = &quot;hello-world.wai&quot; }
+</code></pre>
+<p>Something to note is that all packages on WAPM must have a <code>description</code> field.</p>
+<p>Other than that, we use the <a href="https://doc.rust-lang.org/cargo/reference/manifest.html#the-metadata-table"><code>[package.metadata]</code></a> section
+to tell <code>cargo wapm</code> a couple of things:</p>
+<ul>
+<li>which namespace we are publishing to (all WAPM packages are namespaced)</li>
+<li>The ABI being used (<code>none</code> corresponds to Rust's <code>wasm32-unknown-unknown</code>, and
+we'd write <code>wasi</code> if we were compiling to <code>wasm32-wasi</code>), and</li>
+<li>The location of our <code>hello-world.wai</code> exports, plus the version of
+<code>wai-bindgen</code> we used</li>
+</ul>
+<p>Now we've updated our <code>Cargo.toml</code>, let's do a dry-run to make sure the package
+builds.</p>
+<pre><code class="language-console">$ cargo wapm --dry-run
+Successfully published package `wasmer/hello-world@0.1.0`
+[INFO] Publish succeeded, but package was not published because it was run in dry-run mode
+</code></pre>
+<p>If we dig around the <code>target/wapm/</code> directory, we can see what <code>cargo wapm</code>
+generated for us.</p>
+<pre><code class="language-console">$ tree target/wapm/tutorial-01
+target/wapm/tutorial-01
+├── tutorial_01.wasm
+├── hello-world.wai
+└── wapm.toml
+
+0 directories, 3 files
+
+$ cat target/wapm/tutorial-01/wapm.toml
+[package]
+name = &quot;wasmer/tutorial-01&quot;
+version = &quot;0.1.0&quot;
+description = &quot;Add two numbers&quot;
+repository = &quot;https://github.com/wasmerio/wasmer-pack-tutorial&quot;
+
+[[module]]
+name = &quot;tutorial-01&quot;
+source = &quot;tutorial_01.wasm&quot;
+abi = &quot;none&quot;
+
+[module.bindings]
+wai-exports = &quot;hello-world.wai&quot;
+wai-bindgen = &quot;0.1.0&quot;
+</code></pre>
+<p>This all looks correct, so let's actually publish the package!</p>
+<pre><code class="language-console">$ cargo wapm
+</code></pre>
+<p>If you open up WAPM in your browser, you should see a new package has been
+published. It'll look something like <a href="https://wapm.dev/wasmer/tutorial-01"><code>wasmer/tutorial-01</code></a>.</p>
+<h2 id="using-the-package-from-python"><a class="header" href="#using-the-package-from-python">Using the Package from Python</a></h2>
+<p>Let's create a Python project that uses the bindings to double-check that <code>1+1</code>
+does indeed equal <code>2</code>.</p>
+<p>First, create a new <a href="https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment">virtual environment</a> and activate it.</p>
+<pre><code class="language-console">$ python -m venv env
+$ source env/bin/activate
+</code></pre>
+<p>Now we can ask the <code>wapm</code> CLI to <code>pip install</code> our <code>tutorial-01</code> package's
+Python bindings.</p>
+<pre><code class="language-console">$ wapm install --pip wasmer/tutorial-01
+...
+Successfully installed tutorial-01-0.1.0 wasmer-1.1.0 wasmer-compiler-cranelift-1.1.0
+</code></pre>
+<p>Whenever a package is published to WAPM with the <code>bindings</code> field set, WIT Pack
+will automatically generate bindings for various languages in the background.
+All the <code>wapm</code> CLI is doing here is asking the WAPM backend for these bindings -
+<a href="https://registry.wapm.dev/graphql?query=%7B%0A%20%20getPackageVersion(name%3A%20%22wasmer%2Ftutorial-01%22)%20%7B%0A%20%20%20%20version%0A%20%20%20%20bindings%20%7B%0A%20%20%20%20%20%20language%0A%20%20%20%20%20%20url%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A">you can run the query yourself</a> if you want.</p>
+<p>The <code>tutorial_01</code> package exposes a <code>bindings</code> variable which we can use to
+create new instances of our WebAssembly module. As you would expect, the object
+we get back has our <code>add()</code> method.</p>
+<pre><code class="language-py"># main.py
+
+from tutorial_01 import bindings
+
+instance = bindings.hello_world()
+print(&quot;1 + 1 =&quot;, instance.add(1, 1))
+</code></pre>
+<p>Let's run our script.</p>
+<pre><code class="language-console">$ python ./main.py
+1 + 1 = 2
+</code></pre>
+<h2 id="conclusions"><a class="header" href="#conclusions">Conclusions</a></h2>
+<p>Hopefully you've got a better idea for how to create a WebAssembly library and
+use it from different languages, now.</p>
+<p>To recap, the process for publishing a library to WAPM is:</p>
+<ol>
+<li>Define a <code>*.wai</code> file with your interface</li>
+<li>Create a new Rust crate and add <code>wai-bindgen</code> as a dependency</li>
+<li>Implement the trait defined by <code>wai_bindgen_rust::export!(&quot;hello-world.wai&quot;)</code></li>
+<li>Add <code>[package.metadata.wapm]</code> table to your <code>Cargo.toml</code></li>
+<li>Publish to WAPM</li>
+</ol>
+<p>We took a bit longer than normal to get here, but that's mainly because there
+were plenty of detours to explain the &quot;magic&quot; that tools like <code>wai-bingen</code> and
+<code>cargo wapm</code> are doing for us.  This explanation gives you a better intuition
+for how the tools work, but we'll probably skip over them in the future.</p>
+<p>Some exercises for the reader:</p>
+<ul>
+<li>If your editor has some form of intellisense or code completion, hover over
+things like <code>bindings.hello_world</code> and <code>instance.add</code> to see their signatures</li>
+<li>Add an <code>add_floats</code> function to <code>hello-world.wai</code> which will add 32-bit
+floating point numbers (<code>f32</code>)</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="strings-and-lists"><a class="header" href="#strings-and-lists">Strings and Lists</a></h1>
+<p>Now we know how to write a WebAssembly library and add two numbers, let's work
+with something slightly more interesting - strings and lists!</p>
+<p>First, we need to create a new project to hold our code. We'll also remove the
+existing code, so we start from blank slate.</p>
+<pre><code class="language-console">$ cargo new --lib tutorial-02
+$ cd tutorial-02 &amp;&amp; rm src/lib.rs
+</code></pre>
+<h2 id="the-wit-file-1"><a class="header" href="#the-wit-file-1">The WIT File</a></h2>
+<p>Just like last time, our first step is to define a WIT file for our interface.</p>
+<p>This file has two functions, the first function will create a string that greets
+a person by name (i.e. <em>&quot;Hello, Michael!&quot;</em>)...</p>
+<pre><code class="language-wai">// strings-and-lists.wai
+
+/// Greet a person by name.
+greet: func(name: string) -&gt; string
+</code></pre>
+<p>... and the other function will take a list of people's names, greeting them
+all at the same time.</p>
+<pre><code class="language-wai">/// Say hello to multiple people.
+greet-many: func(people: list&lt;string&gt;) -&gt; string
+</code></pre>
+<h2 id="writing-some-rust-1"><a class="header" href="#writing-some-rust-1">Writing Some Rust</a></h2>
+<p>Now we've defined our <code>strings-and-lists.wai</code> file, let's implement the crate.</p>
+<p>The first thing we need to do is add <code>wai-bindgen</code> as a dependency.</p>
+<pre><code class="language-console">$ cargo add wai-bindgen-rust
+</code></pre>
+<p>We also need to tell <code>wai-bindgen</code> that we're implementing
+<code>strings-and-lists.wai</code>.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/lib.rs
+
+wai_bindgen_rust::export!(&quot;strings-and-lists.wai&quot;);
+<span class="boring">}
+</span></code></pre></pre>
+<p>Next, we need to define a <code>StringsAndLists</code> type and implement the
+<code>strings_and_lists::StringsAndLists</code> on it.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct StringsAndLists;
+
+impl strings_and_lists::StringsAndLists for StringsAndLists {
+    fn greet(name: String) -&gt; String {
+        format!(&quot;Hello, {name}!&quot;)
+    }
+
+    fn greet_many(people: Vec&lt;String&gt;) -&gt; String {
+        match people.as_slice() {
+            [] =&gt; &quot;Oh, nobody's there...&quot;.to_string(),
+            [person] =&gt; format!(&quot;Hello, {person}!&quot;),
+            [people @ .., last] =&gt; {
+                let people = people.join(&quot;, &quot;);
+                format!(&quot;Hello, {people}, and {last}!&quot;)
+            }
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The implementation of these functions is fairly straightforward, so we don't
+need to go into too much detain about it other than pointing out
+<code>greet_many()</code>'s use of <a href="https://adventures.michaelfbryan.com/posts/daily/slice-patterns/"><em>Slice Patterns</em></a>.</p>
+<h3 id="a-note-on-ownership"><a class="header" href="#a-note-on-ownership">A Note on Ownership</a></h3>
+<p>While our code wasn't overly complex, there is something that needs to be
+pointed out,</p>
+<blockquote>
+<p>Both functions use owned values for their arguments and results</p>
+</blockquote>
+<p>This may seem odd, because it's idiomatic in normal Rust to pass strings and
+lists around by reference (i.e. <code>&amp;str</code> and <code>&amp;[String]</code>) so the caller can
+maintain ownership of the original value and doesn't need to make unnecessary
+copies.</p>
+<p>This comes back to one of the design decisions for WebAssembly, namely that a
+guest (our <code>tutorial-02</code> crate) is completely sandboxed and unable to access
+memory on the host.</p>
+<p>That means when the host calls our WebAssembly function, arguments will be
+passed in by</p>
+<ol>
+<li>Allocate some memory <strong>inside</strong> the guest's linear memory</li>
+<li>Copy the value into this newly allocated buffer</li>
+<li>Hand ownership of the buffer to the guest function (i.e. our <code>greet()</code>
+method)</li>
+</ol>
+<p>Luckily <code>wai-bindgen</code> will generate all the code we need for this, but it's
+something to be aware of.</p>
+<p>Another thing to keep in mind is that all return values must be owned, too.</p>
+<p>WebAssembly doesn't have any concept of ownership and borrowing, so it'd be easy
+for the host to run into use-after-free issues and dangling pointers if we were
+allowed to return non-<code>'static</code> values.</p>
+<h2 id="publishing"><a class="header" href="#publishing">Publishing</a></h2>
+<p>Similar to last time, if we want to publish our package to WAPM, we'll need to
+update our <code>Cargo.toml</code> file.</p>
+<pre><code class="language-toml"># Cargo.toml
+[package]
+...
+description = &quot;Greet one or more people&quot;
+
+[lib]
+crate-type = [&quot;cdylib&quot;, &quot;rlib&quot;]
+
+[package.metadata.wapm]
+namespace = &quot;wasmer&quot;
+abi = &quot;none&quot;
+bindings = { wai-bindgen = &quot;0.1.0&quot;, exports = &quot;strings-and-lists.wai&quot; }
+</code></pre>
+<p>Now, we can publish it to WAPM.</p>
+<pre><code class="language-console">$ cargo wapm
+Successfully published package `wasmer/tutorial-02@0.1.0`
+</code></pre>
+<h2 id="using-the-bindings-from-typescript"><a class="header" href="#using-the-bindings-from-typescript">Using The Bindings From TypeScript</a></h2>
+<p>For a change, let's use our bindings from TypeScript. First, we need to create
+a basic <code>package.json</code> file.</p>
+<pre><code class="language-console">$ yarn init --yes
+success Saved package.json
+</code></pre>
+<p>We'll need to install TypeScript and <code>ts-node</code>.</p>
+<pre><code class="language-console">$ yarn add --dev ts-node typescript @types/node
+</code></pre>
+<p>The TypeScript compiler will need a basic <code>tsconfig.json</code> file.</p>
+<pre><code class="language-json">// tsconfig.json
+{
+  &quot;compilerOptions&quot;: {
+    &quot;target&quot;: &quot;es2016&quot;,
+    &quot;module&quot;: &quot;ESNext&quot;,
+    &quot;moduleResolution&quot;: &quot;node&quot;,
+    &quot;strict&quot;: true,
+    &quot;skipLibCheck&quot;: true
+  }
+}
+</code></pre>
+<p>Now, we can use <code>wapm install</code> to add our <code>tutorial-02</code> package as a dependency.</p>
+<pre><code class="language-console">$ wapm install --yarn wasmer/tutorial-02
+</code></pre>
+<p>Finally, we're able to start writing some code.</p>
+<pre><code class="language-ts">// index.ts
+
+import { bindings } from &quot;@wasmer/tutorial-02&quot;;
+
+async function main() {
+  const strings = await bindings.strings_and_lists();
+  console.log(strings.greet(&quot;World&quot;));
+  console.log(strings.greetMany([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]));
+}
+
+main();
+</code></pre>
+<p>If we run it using the <code>ts-node</code> loader, we'll see exactly the output we expect.</p>
+<pre><code class="language-console">$ node --loader ts-node/esm index.ts
+Hello, World!
+Hello, a, b, and c!
+</code></pre>
+<h2 id="conclusion-1"><a class="header" href="#conclusion-1">Conclusion</a></h2>
+<p>Strings and lists are the building blocks of all meaningful applications, so
+it's important to know how to use them.</p>
+<p>Our first foray into non-primitive types has also introduced us to the
+repercussions of running your code inside a fully sandboxed virtual machine -
+any data received from the outside world must be copied into linear memory.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="records"><a class="header" href="#records">Records</a></h1>
+<p>You're just doing great! Now, let us introduce record types, often called &quot;structs&quot; in other languages.</p>
+<h2 id="project-setup"><a class="header" href="#project-setup">Project Setup</a></h2>
+<p>Let's clear our <code>./src/lib.rs</code> and start from scratch</p>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>Record is a combination of data that structurally belongs together such as:</p>
+<h3 id="syntax-for-a-record"><a class="header" href="#syntax-for-a-record">Syntax for a record</a></h3>
+<blockquote>
+<p>record-item ::= 'record' id '{' record-fields '}'</p>
+<p>record-fields ::= record-field
+| record-field ',' record-fields?</p>
+<p>record-field ::= id ':' ty</p>
+</blockquote>
+<p>A <em>Record</em> lets you pass data between the <strong>guests</strong> and the <strong>hosts</strong></p>
+<h2 id="the-wit-file-2"><a class="header" href="#the-wit-file-2">The WIT File</a></h2>
+<p>Now let us define our WIT file for our interface.</p>
+<pre><code class="language-wai">//geometry.wai
+
+/// A point coordinate structure with { x, y }
+record point {
+    x: float32,
+    y: float32
+}
+</code></pre>
+<blockquote>
+<p>Note: As you use <code>cargo expand</code>, the generated file won't contain the <code>Point</code> Geometry 🙁</p>
+</blockquote>
+<pre><code class="language-Rust">#![feature(prelude_import)]
+#[prelude_import]
+use std::prelude::rust_2021::*;
+#[macro_use]
+extern crate std;
+#[allow(clippy::all)]
+mod geometry {}
+</code></pre>
+<blockquote>
+<p>This happens because we didn't use our <code>Point</code> geometry in any function/interface so it is not compiled to an underlying struct for <code>Rust</code>.</p>
+</blockquote>
+<p>So now let's use our <code>Point</code> geometry in a function.</p>
+<pre><code class="language-wai">// geometry.wai
+
+/// A point coordinate structure with { x, y }
+record point {
+    x: float32,
+    y: float32
+}
+
+/// Calculate distance between two points
+distance-between: func(p1: point, p2: point) -&gt; float32
+</code></pre>
+<blockquote>
+<p><code>cargo expand</code></p>
+</blockquote>
+<pre><code class="language-Rust">#![feature(prelude_import)]
+#[prelude_import]
+use std::prelude::rust_2021::*;
+#[macro_use]
+extern crate std;
+use crate::geometry::{Circle, MultiLine, Point};
+#[allow(clippy::all)]
+mod geometry {
+    /// A point coordinate structure with { x, y }
+    #[repr(C)]
+    pub struct Point {
+        pub x: f32,
+        pub y: f32,
+    }
+    #[automatically_derived]
+    impl ::core::marker::Copy for Point {}
+    #[automatically_derived]
+    impl ::core::clone::Clone for Point {
+        #[inline]
+        fn clone(&amp;self) -&gt; Point {
+            let _: ::core::clone::AssertParamIsClone&lt;f32&gt;;
+            *self
+        }
+    }
+    impl core::fmt::Debug for Point {
+        fn fmt(&amp;self, f: &amp;mut core::fmt::Formatter&lt;'_&gt;) -&gt; core::fmt::Result {
+            f.debug_struct(&quot;Point&quot;).field(&quot;x&quot;, &amp;self.x).field(&quot;y&quot;, &amp;self.y).finish()
+        }
+    }
+    #[export_name = &quot;distance-between&quot;]
+    unsafe extern &quot;C&quot; fn __wai_bindgen_geometry_distance_between(
+        arg0: f32,
+        arg1: f32,
+        arg2: f32,
+        arg3: f32,
+    ) -&gt; f32 {
+        let result = &lt;super::Geometry as Geometry&gt;::distance_between(
+            Point { x: arg0, y: arg1 },
+            Point { x: arg2, y: arg3 },
+        );
+        wai_bindgen_rust::rt::as_f32(result)
+    }
+    pub trait Geometry {
+        /// Calculate distance between two points
+        fn distance_between(p1: Point, p2: Point) -&gt; f32;
+    }
+}
+</code></pre>
+<blockquote>
+<p>Here, we see that our <code>Point</code> struct can be seen <code>distance_between</code> function is present and is exported as an external variable for use in our Rust file.
+We also see the Debug trait being implemented for the Point record.</p>
+</blockquote>
+<p>This file has a record and a function. The record is a structure for a point in a coordinate system <em>(x,y)</em>. The function performs the distance calculation between two points as arguements.</p>
+<h2 id="writing-some-rust-2"><a class="header" href="#writing-some-rust-2">Writing Some Rust</a></h2>
+<p>Now we've defined our <code>geometry.wai</code> file, let's implement the crate.</p>
+<p>The first thing we need to do is add <code>wai-bindgen</code> as a dependency</p>
+<pre><code class="language-console">$ cargo add wai-bindgen-rust
+</code></pre>
+<p>We also need to tell <code>wai-bindgen</code> that we're implementing
+<code>geometry.wai</code>.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/lib.rs
+
+wai_bindgen_rust::export!(&quot;geometry.wai&quot;);
+<span class="boring">}
+</span></code></pre></pre>
+<p>Next, we need to define a <code>geometry</code> struct and implement the
+<code>geometry::Geometry</code> Trait on it.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Geometry;
+
+impl geometry::Geometry for Geometry {
+    fn distance_between(p1: Point, p2: Point) -&gt; f32 {
+        let Point { x: x1, y: y1 } = p1;
+        let Point { x: x2, y: y2 } = p2;
+
+        ((x2 - x1).powi(2) + (y2 - y1).powi(2)).sqrt()
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<blockquote>
+<p>Note: This may seem comfusing so I've boiled it down:</p>
+<ul>
+<li><code>geometry</code> is the crate</li>
+<li><code>Geometry</code> is the struct</li>
+<li><code>geometry::Geometry</code> is the Trait that implements the function <code>distance_between</code> on <code>Geometry</code></li>
+</ul>
+</blockquote>
+<h3 id="explaination"><a class="header" href="#explaination">Explaination</a></h3>
+<p>Here, the function <code>distance_between</code> takes two arguement of the <em>Point</em> type. For simplicity we <a href="https://doc.rust-lang.org/rust-by-example/flow_control/match/destructuring/destructure_structures.html">destructure</a> it for a clear distinction between the x1, x2 and y1,y2 as opposed to writing <code>p1.x</code> or <code>p1.y</code> everytime.</p>
+<p>We then find the distance between the two points using the <a href="https://en.wikipedia.org/wiki/Euclidean_distance">distance formula</a>.</p>
+<h5 id="note"><a class="header" href="#note">Note📝</a></h5>
+<blockquote>
+<p>As <code>.wai</code> files only accept kebab-casing. The function <code>distance_between</code> in the <code>geometry.wai</code> will convert to the default casings for the respected language.</p>
+<p>//change here after formatting!!
+i.e: <em>snake_case</em> for rust, <em>CamelCase</em> for Javascript,</p>
+</blockquote>
+<h3 id="nested-records"><a class="header" href="#nested-records">Nested Records</a></h3>
+<p>As we saw, the use of simpler identifiers to create a <code>Point</code> record. we can further extend this functionality using records or other valid <code>WAI types</code> to specify the record arguments to create more complex and <em>nested records</em>.</p>
+<blockquote>
+<p>⚠️ Recursive types are explicitly forbidden in WAI.</p>
+</blockquote>
+<pre><code class="language-wai">record tree-node {
+    children: list&lt;tree-node&gt;
+}
+</code></pre>
+<blockquote>
+<p>👆🏼, is not allowed.</p>
+</blockquote>
+<p>Let's futher explain <code>Nested Records</code> this with an example:</p>
+<blockquote>
+<p>WAI file with nested records :</p>
+</blockquote>
+<pre><code class="language-wai">/// A line geometry to represent a line segment with starting and ending point
+record line-segment {
+    start: point,
+    end: point
+}
+
+/// A structure to represent a circle with center point and a radius
+record circle {
+    center: point,
+    radius: float32
+}
+
+/// Arbitary shape - represent a shape with n number of points using a list of points
+record multi-line{
+    points: list&lt;point&gt;,
+}
+
+/// Calculate the perimeter of a Circle using 2*π*r.
+perimeter-of-circle: func(c: circle) -&gt; float32
+
+/// Calculate the area of a Circle using π*r*r.
+area-of-circle: func(c: circle) -&gt; float32
+
+/// Calculate the length of the multi-line by iterating over all the points and adding the result
+multi-line-length: func(l: multi-line) -&gt; float32
+</code></pre>
+<p>Here we used the <code>point</code> struct that we created earlier to futher define records (i.e. <code>line-segment</code>, <code>circle</code> and <code>shape</code>).</p>
+<ul>
+<li>line segment uses points to define starting and ending of the line</li>
+<li>Circle uses the point record for defining a center</li>
+<li>An Arbitrary shape can also be represented as a list of points</li>
+</ul>
+<p>If we had x,y for representing points in each of these geometries it would have no structure and code readability. Thus, we define nested records using a previously existing record.</p>
+<h5 id="note-1"><a class="header" href="#note-1">Note📝</a></h5>
+<blockquote>
+<p>Records can further have <em>type identifiers</em> such as u8, u16, float32, enum, tuple, etc.</p>
+</blockquote>
+<h2 id="writing-some-rust-again"><a class="header" href="#writing-some-rust-again">Writing Some Rust Again</a></h2>
+<pre><code class="language-Rust">use crate::geometry::{Circle, MultiLine, Point};
+
+wai_bindgen_rust::export!(&quot;geometry.wai&quot;);
+
+struct Geometry;
+
+impl geometry::Geometry for Geometry {
+    fn distance_between(p1: Point, p2: Point) -&gt; f32 {
+        let Point { x: x1, y: y1 } = p1;
+        let Point { x: x2, y: y2 } = p2;
+
+        ((x2 - x1).powi(2) + (y2 - y1).powi(2)).sqrt()
+    }
+    fn perimeter_of_circle(c: Circle) -&gt; f32 {
+        let Circle { center: _, radius } = c;
+        (2.0 * 22.0 * radius as f32) / 7.0
+    }
+    fn area_of_circle(c: Circle) -&gt; f32 {
+        let Circle { center: _, radius } = c;
+        (22.0 * (radius * radius) as f32) / 7.0
+    }
+    fn multi_line_length(l: MultiLine) -&gt; f32 {
+        if l.points.len() == 0 {
+            return 0.0;
+        }
+        let mut result = 0.0;
+        for i in 1..l.points.len() {
+            let p1 = l.points[i - 1];
+            let p2 = l.points[i];
+            result += Geometry::distance_between(p1, p2);
+        }
+        result
+    }
+}
+</code></pre>
+<p>Here, we defined multiple functions such as:</p>
+<ul>
+<li><code>perimeter_of_circle</code></li>
+<li><code>area_of_circle</code></li>
+<li><code>multi_line_length</code></li>
+</ul>
+<blockquote>
+<p>All of these functions show how the nested records can be used to perform operations.</p>
+</blockquote>
+<h2 id="publishing-1"><a class="header" href="#publishing-1">Publishing</a></h2>
+<p>Similar to last time, if we want to publish our package to WAPM, we'll need to
+update our <code>Cargo.toml</code> file.</p>
+<pre><code class="language-toml"># Cargo.toml
+[package]
+...
+description = &quot;Geometrical representations using points&quot;
+
+[lib]
+crate-type = [&quot;cdylib&quot;, &quot;rlib&quot;]
+
+[package.metadata.wapm]
+namespace = &quot;wasmer&quot;
+abi = &quot;none&quot;
+bindings = { wai-bindgen = &quot;0.1.0&quot;, exports = &quot;geometry.wai&quot; }
+</code></pre>
+<p>Now, we can publish it to WAPM.</p>
+<pre><code class="language-console">$ cargo wapm
+Successfully published package `wasmer/tutorial-03@0.1.0`
+</code></pre>
+<!--
+TODO(@dynamite-bud):
+- write the installation for typescript/python and conclusion
+- write about the importance of nested records and ask Michael about records with resources in them
+- Justify how the records are converted to the host e.g: data class in python and typed object in typescript. Show code snippets
+-->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="exposing-resources"><a class="header" href="#exposing-resources">Exposing Resources</a></h1>
+<p>So far we've covered basic functions, numbers, strings, lists, records, and
+variants, but there's one key aspect in programming we haven't touched on yet -
+objects with behaviour and internal state!</p>
+<p>In WIT, we use a <code>resource</code> to give the host access to an &quot;object&quot; that has
+behaviour without exposing how that object is implemented (or even which
+language it is implemented in).</p>
+<p>To explore this concept, we'll create a basic <code>Calculator</code> resource which lets
+the caller do various operations like addition and multiplication.</p>
+<p>Like always, let's start off with a new Rust project.</p>
+<pre><code class="language-console">$ cargo new --lib tutorial-05
+</code></pre>
+<h2 id="the-wit-file-3"><a class="header" href="#the-wit-file-3">The WIT File</a></h2>
+<p>The key thing to understand about a <code>resource</code> is that it only defines methods.</p>
+<pre><code class="language-wai">// resources.wai
+
+resource calculator {
+    static new: func(initial-value: float32) -&gt; calculator
+    current-value: func() -&gt; float32
+    add: func(value: float32)
+    multiply: func(value: float32)
+}
+</code></pre>
+<p>Prefixing a function with the <code>static</code> keyword will turn it into a
+<a href="https://docs.python.org/3/library/functions.html#staticmethod"><code>static</code> method</a>. This is useful for defining constructors or
+factory functions.</p>
+<p>Resource methods also allow the <code>async</code> modifier (i.e.
+<code>add: async func(value: float32)</code>), however that will require your runtime to
+support <code>async</code> functions.</p>
+<h2 id="writing-some-rust-3"><a class="header" href="#writing-some-rust-3">Writing Some Rust</a></h2>
+<p>As always, we need to add <code>wai-bindgen</code> as a dependency.</p>
+<pre><code class="language-console">$ cargo add wai-bindgen-rust
+</code></pre>
+<p>We also need to ask <code>wai-bindgen</code> to generate exports for our <code>resources.wai</code>
+interface.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/lib.rs
+
+wai_bindgen_rust::export!(&quot;resources.wai&quot;);
+<span class="boring">}
+</span></code></pre></pre>
+<p>If we run <code>cargo check</code>, we'll see that - besides the missing <code>Resources</code> type
+we expected - it complains about not being able to find <code>Calculator</code>.</p>
+<pre><code class="language-console">$ cargo check
+error[E0412]: cannot find type `Calculator` in module `super`
+...
+error[E0412]: cannot find type `Resources` in module `super`
+</code></pre>
+<p>We can create the <code>Resources</code> struct and implement the <code>resources::Resources</code>
+trait for it. This module won't have any top-level functions, so the trait
+implementation can stay empty.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Resources;
+
+impl resources::Resources for Resources {}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The way the <code>resources::Calculator</code> trait was designed adds certain constraints
+to our <code>Calculator</code> struct, though.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Calculator(Mutex&lt;f32&gt;);
+
+impl resources::Calculator for Calculator {
+    fn new(initial_value: f32) -&gt; Handle&lt;Calculator&gt; {
+        Handle::new(Calculator(Mutex::new(initial_value)))
+    }
+
+    fn current_value(&amp;self) -&gt; f32 {
+        *self.0.lock().unwrap()
+    }
+
+    fn add(&amp;self, value: f32) {
+        *self.0.lock().unwrap() += value;
+    }
+
+    fn multiply(&amp;self, value: f32) {
+        *self.0.lock().unwrap() *= value;
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<h3 id="a-note-on-mutability"><a class="header" href="#a-note-on-mutability">A Note On Mutability</a></h3>
+<p>You'll notice that all methods in the <code>resources::Calculator</code> trait take an
+immutable <code>&amp;self</code>. This means we'll need to use <a href="https://doc.rust-lang.org/book/ch15-05-interior-mutability.html">interior mutability</a>
+if we want to update internal state.</p>
+<p>While this might feel a bit awkward, there is a very good reason for requiring
+all state in a resource to synchronise its mutations - WebAssembly makes no
+guarantees that the caller will respect the borrow checker.</p>
+<h2 id="publishing-2"><a class="header" href="#publishing-2">Publishing</a></h2>
+<p>We need to publish this package to WAPM, so let's update <code>Cargo.toml</code> with the
+relevant metadata.</p>
+<pre><code class="language-toml"># Cargo.toml
+[package]
+...
+description = &quot;A basic calculator&quot;
+
+[lib]
+crate-type = [&quot;cdylib&quot;, &quot;rlib&quot;]
+
+[package.metadata.wapm]
+namespace = &quot;wasmer&quot;
+abi = &quot;none&quot;
+bindings = { wai-bindgen = &quot;0.1.0&quot;, exports = &quot;resources.wai&quot; }
+</code></pre>
+<p>Now, we can publish it to WAPM.</p>
+<pre><code class="language-console">$ cargo wapm
+Successfully published package `wasmer/tutorial-05@0.1.0`
+</code></pre>
+<h2 id="using-the-bindings-from-python"><a class="header" href="#using-the-bindings-from-python">Using The Bindings From Python</a></h2>
+<p>Once the package has been published, create a new Python virtual environment
+and import the package into Python.</p>
+<pre><code class="language-console">$ python -m venv env
+$ source env/bin/activate
+$ wapm install --pip wasmer/tutorial-05
+</code></pre>
+<p>Next, let's create our test script.</p>
+<pre><code class="language-python"># main.py
+
+from tutorial_05 import bindings
+from tutorial_05.bindings.resources import Calculator
+
+resources = bindings.resources()
+calculator = Calculator.new(resources, 3)
+
+calculator.add(5)
+calculator.multiply(2)
+print(&quot;(3 + 5)*2 =&quot;, calculator.current_value())
+</code></pre>
+<p>Running it from the command-line should show us that <code>(3+5)*2 = 16</code>.</p>
+<pre><code class="language-console">$ python main.py
+(3+5)*2 = 16
+</code></pre>
+<h2 id="conclusion-2"><a class="header" href="#conclusion-2">Conclusion</a></h2>
+<p>The resource is a useful tool for exposing stateful objects that have behaviour,
+and should be familiar to</p>
+<p>With the addition of resources, we've introduced most of the fundamental
+constructs in WIT.</p>
+<p>Exercises for the reader:</p>
+<ul>
+<li>Expand the <code>calculator</code> resource to be a fully fledged calculator</li>
+<li>Try to create your own Regex package using the <code>regex</code> crate</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="webassembly-interfaces-wai"><a class="header" href="#webassembly-interfaces-wai">WebAssembly Interfaces (WAI)</a></h1>
+<p>The WebAssembly spec that was first released in 2017 was only a minimum viable
+product and deliberately left several features incomplete to be iterated on by
+the ecosystem.</p>
+<p>Arguably the most important functionality gap is the fact that only WebAssembly
+primitives can be passed between the host and guest. That means imports and
+exports can only use the following data types,</p>
+<ul>
+<li><code>i32</code> - signed 32-bit integers</li>
+<li><code>i64</code> - signed 64-bit integers</li>
+<li><code>f32</code> - a 32-bit float</li>
+<li><code>f64</code> - a 64-bit float (often called a <code>double</code>)</li>
+<li><code>funcref</code> - a reference to a WebAssembly function</li>
+<li><code>externref</code> - a reference to some opaque object owned by the WebAssembly
+virtual machine</li>
+</ul>
+<p>You'll notice this list doesn't even include strings or boolean values!</p>
+<p>The WebAssembly Interfaces project (WAI for short) provides a polyfill for
+passing around higher-level objects. It lets developers define their imports and
+exports in a <code>*.wai</code> file, then uses <code>wai-bindgen</code> to generate glue which
+automagically passes things around within the constraints of WebAssembly.</p>
+<p>There are four main parts to WAI:</p>
+<ul>
+<li>The <code>*.wai</code> file</li>
+<li>The WAI Bindgen code generator</li>
+<li>The guest</li>
+<li>The host</li>
+</ul>
+<p>The <a href="concepts/wai/../../">Wasmer Pack</a> project provides a convenient way to consume
+WebAssembly packages which implement a WAI interface.</p>
+<p>Some useful links:</p>
+<ul>
+<li><a href="https://github.com/wasmerio/wai">The <code>wasmerio/wai</code> repository</a></li>
+<li><a href="https://github.com/wasmerio/wai/blob/main/WAI.md">The <code>*.wai</code> format</a></li>
+<li><a href="https://crates.io/crates/wai-bindgen-cli">The <code>wai-bindgen</code> CLI on crates.io</a></li>
+</ul>
+<h2 id="the-wai-file"><a class="header" href="#the-wai-file">The <code>*.wai</code> File</a></h2>
+<p>WAI uses a file (or files) with the <code>*.wai</code> extension to define the host-guest
+interface for an application that uses WebAssembly.</p>
+<p>The items in a <code>*.wai</code> file map closely to concepts shared by most programming
+languages. It has <a href="concepts/wai/./types.html">types</a>, interfaces
+(<a href="concepts/wai/./resources.html">&quot;Resources&quot;</a>), structs (<a href="concepts/wai/./records.html">&quot;Records&quot;</a>),
+<a href="concepts/wai/./functions.html">functions</a>, <a href="concepts/wai/./variants.html">enums</a>, and so on.</p>
+<p>The precise syntax <a href="https://github.com/wasmerio/wai/blob/main/WAI.md">is defined in the WAI repository</a> and a parser,
+<a href="https://docs.rs/wai-parser"><code>wai-parser</code></a>, is available as a Rust crate.</p>
+<h2 id="the-guest"><a class="header" href="#the-guest">The Guest</a></h2>
+<p>In an application using WebAssembly, the &quot;guest&quot; is the code that has been
+compiled to WebAssembly and is being loaded into a WebAssembly virtual machine.</p>
+<h2 id="the-host"><a class="header" href="#the-host">The Host</a></h2>
+<p>In an application using WebAssembly, the &quot;host&quot; is the code that uses a
+WebAssembly virtual machine (like <a href="https://docs.rs/wasmer"><code>wasmer</code></a>) to load a guest and use
+functionality it provides.</p>
+<p>The WebAssembly spec refers to the host in some places as
+<a href="https://webassembly.github.io/spec/core/intro/overview.html#embedder"><em>the embedder</em></a>.</p>
+<h2 id="wai-bindgen"><a class="header" href="#wai-bindgen">WAI Bindgen</a></h2>
+<p>The WAI Bindgen code generator consumes <code>*.wai</code> files and generates glue code
+that <a href="concepts/wai/index.html#the-host">the host</a> can use for using functionality from a WebAssembly
+module or <a href="concepts/wai/index.html#the-guest">the guest</a> can use for implementing that functionality.</p>
+<p>There are two primary ways users will interact with WAI Bindgen, the
+<code>wai-bindgen</code> CLI, and the <code>wai-bindgen-*</code> family of crates.</p>
+<p>The <code>wai-bindgen</code> CLI provides a command-line interface to the <code>wai-bindgen-*</code>
+crates, and is often used for once-off investigation or integration with a
+non-Rust build system.</p>
+<p>On the other hand, the <code>wai-bindgen-*</code> crates allow users to generate bindings
+programmatically and give them much more control over the generation process.</p>
+<div class="table-wrapper"><table><thead><tr><th>Language</th><th>Direction</th><th>Code Generator</th><th>Procedural Macro</th></tr></thead><tbody>
+<tr><td>Rust</td><td>Guest</td><td><a href="https://docs.rs/wai-bindgen-gen-rust-wasm/"><code>wai-bindgen-gen-rust-wasm</code></a></td><td><a href="https://docs.rs/wai-bindgen-rust/"><code>wai-bindgen-rust</code></a></td></tr>
+<tr><td>Rust</td><td>Host (Wasmer)</td><td><a href="https://docs.rs/wai-bindgen-gen-wasmer/"><code>wai-bindgen-gen-wasmer</code></a></td><td><a href="https://docs.rs/wai-bindgen-wasmer/"><code>wai-bindgen-wasmer</code></a></td></tr>
+<tr><td>Rust</td><td>Host (Wasmtime)</td><td><a href="https://docs.rs/wai-bindgen-gen-wasmtime/"><code>wai-bindgen-gen-wasmtime</code></a></td><td><a href="https://docs.rs/wai-bindgen-wasmtime/"><code>wai-bindgen-wasmtime</code></a></td></tr>
+<tr><td>C</td><td>Guest</td><td><a href="https://docs.rs/wai-bindgen-gen-c/"><code>wai-bindgen-gen-c</code></a></td><td></td></tr>
+<tr><td>JavaScript</td><td>Host</td><td><a href="https://docs.rs/wai-bindgen-gen-js/"><code>wai-bindgen-gen-js</code></a></td><td></td></tr>
+<tr><td>Python</td><td>Host (Wasmer)</td><td><a href="https://docs.rs/wai-bindgen-gen-wasmer-py/"><code>wai-bindgen-gen-wasmer-py</code></a></td><td></td></tr>
+<tr><td>Python</td><td>Host (Wasmtime)</td><td><a href="https://docs.rs/wai-bindgen-gen-wasmtime-py/"><code>wai-bindgen-gen-wasmtime-py</code></a></td><td></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="builtin-types"><a class="header" href="#builtin-types">Builtin Types</a></h1>
+<p>All types that can be used in a <code>*.wai</code> file are intended to mappable to native
+types in a general purpose programming language.</p>
+<p>The core basic types are</p>
+<ul>
+<li>Unsigned integers (<code>u8</code>, <code>u16</code>, <code>u32</code>, <code>u64</code>)</li>
+<li>Signed integers (<code>s8</code>, <code>s16</code>, <code>s32</code>, <code>s64</code>)</li>
+<li>Floating point numbers (<code>float32</code>, <code>float64</code>)</li>
+<li>UTF-8 Strings (<code>string</code>)</li>
+<li>UTF-8 code points (<code>char</code>)</li>
+<li><a href="https://en.wikipedia.org/wiki/Void_type">Void</a> or nothing (<code>unit</code>)</li>
+</ul>
+<p>For a more precise definition, consult <a href="https://github.com/wasmerio/wai/blob/main/WAI.md#types">the <em>Types</em> section</a> in the
+<code>*.wai</code> format.</p>
+<h2 id="other-builtin-types"><a class="header" href="#other-builtin-types">Other Builtin Types</a></h2>
+<p>Besides the basic builtin types, there are several &quot;generic&quot; types built into
+WAI which let users express common concepts.</p>
+<h3 id="tuples"><a class="header" href="#tuples">Tuples</a></h3>
+<p>The tuple is equivalent to a <a href="concepts/wai/./records.html">record</a> that has numeric fields.</p>
+<p>Code generators may be able to express tuples as a first-class concept. For
+example, <code>tuple&lt;string, float32, float32&gt;</code> would be expressed as
+<code>(String, f32, f32)</code> in Rust.</p>
+<h3 id="lists"><a class="header" href="#lists">Lists</a></h3>
+<p>Lists are dynamically-sized sequences of the same element type. Often called
+a &quot;list&quot;, &quot;vector&quot;, or &quot;array&quot;, a <code>list&lt;string&gt;</code> would be expressed as
+<code>Vec&lt;String&gt;</code> in Rust.</p>
+<h3 id="option"><a class="header" href="#option">Option</a></h3>
+<p>The option type is used to express a value that may or may not be present.</p>
+<p>In Rust, an <code>option&lt;T&gt;</code> is expressed as <a href="https://doc.rust-lang.org/std/option/enum.Option.html"><code>std::option::Option&lt;T&gt;</code></a>,
+while other languages may choose to use <code>null</code> to represent the missing value.</p>
+<p>It is semantically equivalent to the following variant:</p>
+<pre><code>variant option {
+    none,
+    some(T),
+}
+</code></pre>
+<h3 id="expected"><a class="header" href="#expected">Expected</a></h3>
+<p>The expected type is used to express the result of a fallible operation.</p>
+<p>In Rust, an <code>expected&lt;T, E&gt;</code> is expressed as
+<a href="https://doc.rust-lang.org/std/result/enum.Result.html"><code>std::result::Result&lt;T, E&gt;</code></a>, although other languages may choose
+to convert errors into exceptions.</p>
+<p>It is semantically equivalent to the following variant:</p>
+<pre><code>variant expected {
+    ok(T),
+    err(E),
+}
+</code></pre>
+<h3 id="futures--streams"><a class="header" href="#futures--streams">Futures &amp; Streams</a></h3>
+<p>The <code>future&lt;T&gt;</code> and <code>stream&lt;T, E&gt;</code> types are used to represent the result of
+asynchronous operations.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="functions"><a class="header" href="#functions">Functions</a></h1>
+<p>Functions are one of the most important concepts in WAI. They are what guests
+and hosts use to expose functionality to each other, and have a name,
+parameters, and results.</p>
+<p>Here are some examples:</p>
+<pre><code>thunk: func()
+fibonacci: func(n: u32) -&gt; u32
+sleep: async func(ms: u64)
+</code></pre>
+<p>Most guests will map functions to top-level functions, while most hosts will
+expose functions as some sort of callable object which eventually calls into
+the relevant part of the WebAssembly virtual machine.</p>
+<p>For a more details, consult <a href="https://github.com/wasmerio/wai/blob/main/WAI.md#item-func">the <em>Item: <code>func</code></em> section</a> in the <code>*.wai</code>
+format.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="records-1"><a class="header" href="#records-1">Records</a></h1>
+<p>A record is an abstract data type containing a series of named fields. It has no
+associated behaviour and acts as a way to group data together. In C++, this
+would be referred to as a <a href="https://en.wikipedia.org/wiki/Passive_data_structure">plain old data</a> type.</p>
+<p>Depending on the language, records may be expressed in in different ways.</p>
+<div class="table-wrapper"><table><thead><tr><th>Language</th><th>Equivalent Construct</th></tr></thead><tbody>
+<tr><td>Rust</td><td>Struct</td></tr>
+<tr><td>C</td><td>Struct</td></tr>
+<tr><td>Python</td><td><a href="https://peps.python.org/pep-0557/">Data Class</a></td></tr>
+<tr><td>TypeScript</td><td><a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-aliases">Type alias</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="syntax"><a class="header" href="#syntax">Syntax</a></h2>
+<p>A record contains a list of fields, where each field must be given a type.</p>
+<pre><code>record person {
+    name: string,
+    age: u32,
+    has-lego-action-figure: bool,
+}
+</code></pre>
+<p>For a more details, consult <a href="https://github.com/wasmerio/wai/blob/main/WAI.md#item-record-bag-of-named-fields">the <em>Item: <code>record</code></em> section</a> in the
+<code>*.wai</code> format.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="enums-flags-variants-and-unions"><a class="header" href="#enums-flags-variants-and-unions">Enums, Flags, Variants, and Unions</a></h1>
+<p>the concept of &quot;this value can be X or Y or Z&quot; can be expressed in several ways
+depending on the context.</p>
+<h2 id="enum"><a class="header" href="#enum">Enum</a></h2>
+<p>The <code>enum</code> keyword can be used to introduce a C-style enum. This is a type of
+named constant where each constant has its own value.</p>
+<pre><code class="language-wai">enum ordering {
+    less-than,
+    equal-to,
+    greater-than,
+}
+</code></pre>
+<p>For a more details, consult <a href="https://github.com/wasmerio/wai/blob/main/WAI.md#item-union-variant-but-with-no-case-names">the <em>Item: <code>enum</code></em> section</a> in the <code>*.wai</code>
+format.</p>
+<h2 id="flags"><a class="header" href="#flags">Flags</a></h2>
+<p>The <code>flags</code> keyword can be used to introduce a bitflags variable. The easiest
+way to think of this is as a &quot;bag of bools&quot; where each variant can be set
+independently.</p>
+<pre><code class="language-wai">flags text-style {
+    bold,
+    italics,
+    underline,
+    strikethrough,
+}
+</code></pre>
+<p>The <code>flags</code> type is a separate concept from <code>enum</code> because multiple flag
+variants can be set at a time, whereas an <code>enum</code> can be only one thing at a
+time. Different languages are often able to express this in a very efficient
+form, typically an integer where each bit represents a different flag.</p>
+<p>For a more details, consult <a href="https://github.com/wasmerio/wai/blob/main/WAI.md#item-flags-bag-of-bools">the <em>Item: <code>flags</code></em> section</a> in the <code>*.wai</code>
+format.</p>
+<h2 id="variant"><a class="header" href="#variant">Variant</a></h2>
+<p>A <code>variant</code> lets you express something that is one of a set of types. This is
+similar to an <code>enum</code>, except each variant may have some associated data.</p>
+<pre><code class="language-wai">variant error {
+    file-not-found(string),
+    parse(parse-failed),
+    other,
+}
+
+record parse-failed {
+    message: string,
+    line-number: u32,
+}
+</code></pre>
+<p>Variants are implemented very differently based on what is idiomatic for a
+particular language.</p>
+<p>In Rust, a <code>variant</code> is just a normal <code>enum</code>.</p>
+<p>In TypeScript, the variant is implemented as a tagged union.</p>
+<pre><code class="language-ts">type error = { type: &quot;file-not-found&quot;, value: string }
+    | { type: &quot;parse&quot;, value: ParseFailed }
+    | { type: &quot;other&quot; };
+</code></pre>
+<p>For a more details, consult <a href="https://github.com/wasmerio/wai/blob/main/WAI.md#item-variant-one-of-a-set-of-types">the <em>Item: <code>variant</code></em> section</a> in the
+<code>*.wai</code> format.</p>
+<h2 id="union"><a class="header" href="#union">Union</a></h2>
+<p>A <code>union</code> is very similar to a variant, except it drops the type tag.</p>
+<pre><code class="language-wai">union configuration {
+    string,
+    list&lt;string&gt;,
+}
+</code></pre>
+<p>This is distinct from a <code>variant</code> because some languages may be able to
+represent an <code>union</code> in a way that is more efficient or idiomatic.</p>
+<p>For a more details, consult <a href="https://github.com/wasmerio/wai/blob/main/WAI.md#item-union-variant-but-with-no-case-names">the <em>Item: <code>union</code></em> section</a> in the
+<code>*.wai</code> format.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="resources"><a class="header" href="#resources">Resources</a></h1>
+<p>A resource represents an opaque object where the representation and underlying
+implementation is completely hidden from the outside world. Resources may have
+associated methods, static methods, or no methods at all.</p>
+<p>Depending on the language, records may be expressed in in different ways.</p>
+<div class="table-wrapper"><table><thead><tr><th>Language</th><th>Equivalent Construct</th></tr></thead><tbody>
+<tr><td>Rust</td><td><a href="https://doc.rust-lang.org/reference/types/trait-object.html">Trait object</a></td></tr>
+<tr><td>Python</td><td>class</td></tr>
+<tr><td>JavaScript</td><td>class</td></tr>
+</tbody></table>
+</div>
+<p>Resources can only be used through a &quot;handle&quot; and can be owned by either the
+host or the guest. Resource lifetimes are managed manually, although most
+languages provide some sort of reference counting or garbage collection
+mechanism.</p>
+<h2 id="syntax-1"><a class="header" href="#syntax-1">Syntax</a></h2>
+<p>The simplest resource is an opaque &quot;token&quot;. Users can pass this value around,
+but have no other way to interact with it.</p>
+<pre><code>resource file-descriptor
+</code></pre>
+<p>Resources can also have methods. These are functions which are associated with
+the resource and are implicitly given a reference to the resource when they
+are invoked.</p>
+<pre><code>resource writer {
+  write: func(data: list&lt;u8&gt;) -&gt; expected&lt;unit, error&gt;
+  flush: func() -&gt; expected&lt;unit, error&gt;
+}
+</code></pre>
+<p>Additionally, resources can have <code>static</code> methods. These are often used to
+implement constructors.</p>
+<pre><code>resource request {
+    static new: func() -&gt; request
+
+    body: async func() -&gt; list&lt;u8&gt;
+    headers: func() -&gt; list&lt;string&gt;
+}
+</code></pre>
+<p>For a more details, consult <a href="https://github.com/wasmerio/wai/blob/main/WAI.md#item-resource">the <em>Item: <code>resource</code></em> section</a> in the
+<code>*.wai</code> format.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="choosing-between-resources-and-records"><a class="header" href="#choosing-between-resources-and-records">Choosing Between Resources and Records</a></h1>
+<p>The difference between a <a href="how-to/../concepts/wai/resources.html">resource</a> and a
+<a href="how-to/../concepts/wai/records.html">record</a> can be subtle when first starting out,
+but there is a simple rule of thumb that will work 90% of the time:</p>
+<blockquote>
+<p>Records contain data, resources encapsulate behaviour.</p>
+</blockquote>
+<h2 id="typical-examples"><a class="header" href="#typical-examples">Typical Examples</a></h2>
+<p>A person is a good example of a record.</p>
+<pre><code>record person {
+    name: string,
+    age: u8,
+    address: option&lt;address&gt;,
+}
+
+record address {
+    number: u32,
+    street: string,
+    state: string,
+    country: string,
+    postcode: u32,
+}
+</code></pre>
+<p>On the other hand, a database connection would be best represented using a
+resource.</p>
+<pre><code class="language-wai">resource database {
+    static connect: func(connection_string: string) -&gt; expected&lt;database, error&gt;
+    query: func(sql: string) -&gt; expected&lt;list&lt;record&gt;, error&gt;
+    close: func() -&gt; expected&lt;unit, error&gt;
+}
+</code></pre>
+<h2 id="key-considerations"><a class="header" href="#key-considerations">Key Considerations</a></h2>
+<p>When deciding between using a resource or a record, consider the following:</p>
+<ul>
+<li>Performance: Records require deep copying when passed between guest and host,
+which can be expensive for large or complex records. Consider using resources
+for objects with significant amounts of data or complex structures to mitigate
+performance issues.</li>
+<li>Immutability: Records provide a level of immutability due to their
+pass-by-value nature. If immutability is a priority, records can be a suitable
+choice. However, if you need to frequently modify an object's state, a resource
+might be more appropriate.</li>
+<li>Encapsulation: For objects with both data and behavior, consider whether
+separating the data and behavior into different objects—a record for data and a
+resource for behavior—adds value or complexity to your code.</li>
+<li>Data Sharing: If data sharing or synchronization across components or
+instances is important, resources are a better choice since they use references,
+while records are not ideal for sharing data.</li>
+</ul>
+<h2 id="edge-cases"><a class="header" href="#edge-cases">Edge Cases</a></h2>
+<p>While the <em>&quot;Records contain data, resources encapsulate behaviour&quot;</em> rule works
+for most cases, you will almost certainly run into situations where something
+has both data and behaviour.</p>
+<p>This happens a lot when wrapping a &quot;normal&quot; library with a WAI interface so it
+can be used from WebAssembly. The distinction between &quot;object&quot; and &quot;data&quot; is
+more fluid in most general purpose programming languages, so it can be common to
+encounter something that doesn't neatly fall into the &quot;record&quot; or &quot;resource&quot;
+categories.</p>
+<h3 id="workaround-1-getters--setters"><a class="header" href="#workaround-1-getters--setters">Workaround 1: Getters &amp; Setters</a></h3>
+<p>If something would normally have publicly accessible fields <strong>and</strong> methods
+which might modify those fields, the best solution is to make that thing a
+resource with getters and setters.</p>
+<p>For example, a virtual machine might normally expose its instruction pointer
+and any global variables that are defined, while also having an <code>eval()</code> method
+for evaluating code snippets.</p>
+<pre><code>resource virtual-machine {
+    instruction-pointer: func() -&gt; u32
+    set-instruction-pointer: func(ip: u32)
+    global-variables: func() -&gt; list&lt;tuple&lt;string, value&gt;&gt;
+    set-global-variable: func(name: string, value: value)
+    eval: func(code: string) -&gt; expected&lt;unit, error&gt;
+}
+</code></pre>
+<p>This approach works particularly well when the methods will update state because
+all resources are reference types, meaning any modifications made to a resource
+through one handle (e.g. via a method) will be seen by all other handles to the
+same resource.</p>
+<p>One downside of this approach is that each getter or setter is implemented using
+a method. When you have a large number of fields to expose, these extra methods
+can become hard to maintain or make it easy to lose interesting functionality
+within a wall of boilerplate.</p>
+<h3 id="workaround-2-move-methods-to-top-level-functions"><a class="header" href="#workaround-2-move-methods-to-top-level-functions">Workaround 2: Move Methods to Top-Level Functions</a></h3>
+<p>Going in the other direction, sometimes it might be better to turn methods into
+top-level functions and use a record.</p>
+<p>One example of this could be the satellite object used in a library that
+predicts the motion of a satellite.</p>
+<pre><code class="language-wai">/// An element
+record satellite {
+    object-name: optional&lt;string&gt;,
+    norad-id: u64,
+    inclination: float64,
+    right-ascension: float64,
+    ..
+}
+
+/// Parse a satellite from its JSON representation.
+satellite-from-json: func(json: string) -&gt; expected&lt;satellite, error&gt;
+
+/// Predict where a satellite will be at a particular time.
+predicted-location: func(s: satellite, ts: timestamp) -&gt; position
+</code></pre>
+<p>This works well when the thing being expressed is mostly data, with only a
+couple of pieces of associated behaviour.</p>
+<p>Records are passed around by value, meaning any operations that would normally
+modify a field will need to return a new value with the updated field, instead.
+This can be quite expensive when the record is large, because passing a record
+from guest to host (or host to guest) will often mean the entire object is
+serialized recursively and copied across the host-guest boundary. Consider the
+trade-offs between performance and immutability when deciding whether to use
+records or resources in these edge cases.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="contributing"><a class="header" href="#contributing">Contributing</a></h1>
+<h2 id="design-goals"><a class="header" href="#design-goals">Design Goals</a></h2>
+<p>This project is developed under several assumptions,</p>
+<ul>
+<li>Most of the time spent using <code>wasmer-pack</code> will actually go into the IO before
+and after using it rather than <em>running</em> the code generator (i.e. because you
+have to download large inputs from a server), so <strong>performance is a non-goal</strong>
+for this project</li>
+<li>The core library should be usable by itself, but everything else can be
+tailored to Wasmer's use cases</li>
+</ul>
+<p>As such, we prefer developer experience over flexibility and raw performance.</p>
+<h3 id="goal-1-fast-compile-times"><a class="header" href="#goal-1-fast-compile-times">Goal 1: Fast Compile Times</a></h3>
+<p>A clean build of the entire workspace shouldn't take any longer than 30 seconds
+and all CI jobs should finish within 5 minutes.</p>
+<p>This isn't actually too difficult to achieve as long as you follow some
+guidelines:</p>
+<ul>
+<li>Don't add dependencies unless you absolutely need to</li>
+<li>Trim out unnecessary features</li>
+<li>Periodically use <code>cargo clean &amp;&amp; cargo build --timings</code> to see where compile
+time is spent</li>
+<li>Don't import crates that pull in half of crates.io</li>
+</ul>
+<p>The rationale behind this is simple - <a href="https://matklad.github.io/2021/09/04/fast-rust-builds.html"><strong>a short edit-compile-test cycle is a
+force multiplier</strong></a>. If you have fast compile times then
+developers can recompile and re-run the test suite after every change.</p>
+<p>On the other hand, if CI takes 30 minutes to complete, developers will avoid
+your project like the plague because getting even the most trivial changes
+merged becomes a multi-hour chore.</p>
+<p>To help this, we have <a href="https://github.com/Michael-F-Bryan/workflow-timer">a GitHub Action</a> which will post comments
+on each PR to let you know how much your changes have affected CI times.</p>
+<h3 id="goal-2-it-just-works"><a class="header" href="#goal-2-it-just-works">Goal 2: It Just Works</a></h3>
+<p>Users of <code>wasmer-pack</code> should be able to compile the project from scratch and
+use the generated bindings without needing to mess around with dependencies or
+configuration.</p>
+<p>To achieve this,</p>
+<ul>
+<li>Avoid dependencies that link to native libraries because they need a working C
+toolchain and often require installing system libraries</li>
+<li>Avoid conditional compilation (including feature flags) because they tend to
+introduce edge cases that are hard to test and debug</li>
+<li>Be opinionated - don't give the end user unnecessary flags or options unless
+it's part of the core functionality</li>
+</ul>
+<h2 id="release-process"><a class="header" href="#release-process">Release Process</a></h2>
+<p>This is the process if you ever need to cut a release:</p>
+<ul>
+<li><input disabled="" type="checkbox"/>
+Make a PR which mentions the new version in its title (e.g.
+<em>&quot;Release v1.2.3&quot;</em> on a <code>releases</code> branch)</li>
+<li><input disabled="" type="checkbox"/>
+Update <a href="https://github.com/wasmerio/wasmer-pack/blob/master/CHANGELOG.md"><code>CHANGELOG.md</code></a> to include any user-facing changes
+since the last release (the <code>[Unreleased]</code> link at the bottom is
+particularly helpful here)</li>
+<li><input disabled="" type="checkbox"/>
+Run <a href="https://github.com/crate-ci/cargo-release"><code>cargo release</code></a>. This will...
+<ul>
+<li>Promote the change log's <code>[Unreleased]</code> items to a named version</li>
+<li>Bump version numbers in all <code>Cargo.toml</code> files</li>
+<li>Tag the commit (e.g. <code>v1.2.3</code>)</li>
+<li>Publish to crates.io, and</li>
+<li>Push all commits and tags to GitHub</li>
+</ul>
+</li>
+<li><input disabled="" type="checkbox"/>
+Wait for the <a href="https://github.com/wasmerio/wasmer-pack/actions/workflows/releases.yml"><em>&quot;Releases&quot;</em></a> job to pass. This will...
+<ul>
+<li>Publish WebAssembly binaries to WAPM</li>
+<li>Use <code>cargo xtask set-generator</code> to make the WAPM backend generate
+bindings with the new version of <code>wasmer-pack-cli</code></li>
+</ul>
+</li>
+<li><input disabled="" type="checkbox"/>
+Merge the <em>&quot;Release v1.2.3&quot;</em> PR into the <code>master</code> branch!</li>
+</ul>
+<h2 id="cargo-xtask"><a class="header" href="#cargo-xtask">Cargo xtask</a></h2>
+<p>We use <a href="https://github.com/matklad/cargo-xtask">the <code>cargo xtask</code> pattern</a> for any project automation more
+complex than 1 or 2 lines of shell. This means we get access to any library
+on crates.io, and having everything in pure Rust means you don't need to
+manually install anything or worry about OS-specific weirdness.</p>
+<p>Currently, there are only a couple major tasks,</p>
+<ul>
+<li><code>cargo xtask set-generator</code> calls the mutation for setting a bindings
+generator</li>
+<li><code>cargo xtask sync-schema</code> will make sure the <code>schema.graphql</code> file is in sync
+with the WAPM backend, automatically updating the file if necessary</li>
+</ul>
+<p>You can run <code>cargo xtask --help</code> to find out more details.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="project-architecture"><a class="header" href="#project-architecture">Project Architecture</a></h1>
+<p>The <code>wasmer-pack</code> project is split across several crates depending on the various
+ways it might be used.</p>
+<p>The main crates are:</p>
+<ul>
+<li><a href="https://github.com/wasmerio/wasmer-pack/tree/master/crates/wasmer-pack"><code>crates/wasmer-pack</code></a> - this is the meat and potatoes of <code>wasmer-pack</code>.
+It contains all the code for generating bindings to WebAssembly modules, plus
+templates for any glue code that will be needed along the way</li>
+<li><a href="https://github.com/wasmerio/wasmer-pack/tree/master/crates/cli"><code>crates/cli</code></a> - this is a CLI tool that lets <code>wasmer-pack</code> generate
+bindings using the commands and libraries inside a <a href="https://github.com/wasmerio/pirita">Pirita</a> file</li>
+<li><a href="https://github.com/wasmerio/wasmer-pack/tree/master/crates/wasm"><code>crates/wasm</code></a> - this is a wrapper that makes <code>wasmer-pack</code> available as a
+WebAssembly module. The functions and data types that are exposed are defined
+in <a href="https://github.com/wasmerio/wasmer-pack/tree/master/crates/wasm/wasmer-pack.exports.wai"><code>crates/wasm/wasmer-pack.exports.wai</code></a> (see <a href="https://github.com/wasmerio/wai/blob/c04723063c7a5a7389660ca97f85ffd9bc9ef0b8/WIT.md"><code>WIT.md</code></a> for the
+syntax)</li>
+</ul>
+<h2 id="architecture-decision-records"><a class="header" href="#architecture-decision-records">Architecture Decision Records</a></h2>
+<p>An <a href="https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions">architectural decision record</a> (ADR) is a document that describes a choice the
+team makes about a significant aspect of the software architecture they’re
+planning to build. Each ADR describes the architectural decision, its context,
+and its consequences.</p>
+<p>The goal is to get knowledge about a decision out of a developer's head so it
+doesn't get lost to time.</p>
+<p>ADRs aren't big documents - if you are writing more than a couple paragraphs,
+you are probably doing it wrong!</p>
+<details>
+<summary>(click to see the template)</summary>
+<pre><code class="language-md"># (short title of solved problem and solution)
+
+| Metadata | Value                                                                               |
+| -------- | ----------------------------------------------------------------------------------- |
+| Status   | *proposed, rejected, accepted, deprecated, superseded by [ADR-123](123-example.md)* |
+
+## Context and Problem Statement
+
+*(Describe the context and problem statement, e.g., in free form using two to three sentences. You may want to articulate the problem in form of a question.)*
+
+## Decision Drivers &lt;!-- optional --&gt;
+
+1. *(driver 1, e.g., a force, facing concern, …)*
+2. … &lt;!-- numbers of drivers can vary --&gt;
+
+## Considered Options
+
+1. option 1
+2. option 2
+4. … &lt;!-- numbers of options can vary --&gt;
+
+## Decision Outcome
+
+Chosen option: &quot;option 1&quot;, because (justification. e.g., only option, which meets k.o. criterion decision driver | which resolves force force | … | comes out best).
+
+### Positive Consequences &lt;!-- optional --&gt;
+
+- (e.g., improvement of quality attribute satisfaction, follow-up decisions required, …)
+- …
+
+### Negative Consequences &lt;!-- optional --&gt;
+
+- (e.g., compromising quality attribute, follow-up decisions required, …)
+- …
+
+## Pros and Cons of the Options &lt;!-- optional --&gt;
+
+### option 1
+
+*(example | description | pointer to more information | …)* &lt;!-- optional --&gt;
+
+- Good, because X
+- Good, because Y
+- Bad, because Z
+- … &lt;!-- numbers of pros and cons can vary --&gt;
+
+## Links &lt;!-- optional --&gt;
+
+- []()
+</code></pre>
+</details>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="generated-package-naming"><a class="header" href="#generated-package-naming">Generated Package Naming</a></h1>
+<div class="table-wrapper"><table><thead><tr><th>Metadata</th><th>Value</th></tr></thead><tbody>
+<tr><td>Status</td><td>proposed</td></tr>
+</tbody></table>
+</div>
+<h2 id="context-and-problem-statement"><a class="header" href="#context-and-problem-statement">Context and Problem Statement</a></h2>
+<p>Currently, generated packages will derive their name from the WAPM package name,
+so <code>wasmer/wasmer-pack-cli</code> gets turned into <code>wasmer_pack_cli</code> for Python and
+<code>@wasmer/wasmer-pack-cli</code> for JavaScript.</p>
+<p>Eventually, we'd like WAPM to automatically publish these packages to PyPI or
+NPM, so we need to come up with names that are unique.</p>
+<h2 id="decision-drivers"><a class="header" href="#decision-drivers">Decision Drivers</a></h2>
+<ol>
+<li>Negligible chance of collisions</li>
+<li>Generated package names are similar to the package on WAPM</li>
+</ol>
+<h2 id="considered-options"><a class="header" href="#considered-options">Considered Options</a></h2>
+<ol>
+<li>Put all packages under a <code>@wasmer-package</code> organisation and use <code>__</code> for
+delimiters</li>
+<li>Host our own private registries</li>
+</ol>
+<h2 id="decision-outcome"><a class="header" href="#decision-outcome">Decision Outcome</a></h2>
+<p>TODO: make a decision</p>
+<h2 id="pros-and-cons-of-the-options"><a class="header" href="#pros-and-cons-of-the-options">Pros and Cons of the Options</a></h2>
+<h3 id="option-1"><a class="header" href="#option-1">Option 1</a></h3>
+<ul>
+<li>Good, because it's practically guaranteed to not have collisions</li>
+<li>Good, because we can publish to PyPI/NPM and be used by other packages</li>
+<li>Good because there is an obvious way to transform a package name back and forth</li>
+<li>Bad, because the names become very verbose and unwieldy
+<ul>
+<li><code>wasmer/wasmer-pack</code> becomes <code>wasmer_package__wasmer__wasmer_pack</code> on Python
+and <code>@wasmer-package/wasmer__wasmer-pack</code> on JavaScript</li>
+</ul>
+</li>
+</ul>
+<h3 id="option-2"><a class="header" href="#option-2">Option 2</a></h3>
+<ul>
+<li>Good, because we don't have to worry about colliding with existing packages</li>
+<li>Good, because we get complete control over the registry</li>
+<li>Bad, because it's more infrastructure to manage (operations costs, expertise,
+,
+etc.)</li>
+<li>Bad, because most package managers don't let you publish packages that depend
+on something from another registry</li>
+</ul>
+<h2 id="links"><a class="header" href="#links">Links</a></h2>
+<ul>
+<li>Original ticket - <a href="https://github.com/wasmerio/wasmer-pack/issues/100">wasmerio/wasmer-pack#100</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="change-log"><a class="header" href="#change-log">Change Log</a></h1>
+<p>All notable changes to this project will be documented in this file.</p>
+<p>The format is based on <a href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>,
+and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
+<p>Changelog entries will contain a link to the pull request implementing that
+change, where applicable.</p>
+<blockquote>
+<p><strong>Note:</strong> The project was renamed from <code>wit-pack</code> to <code>wasmer-pack</code> in version
+0.5.0. Changelog entries from 0.4.2 and earlier use the old name.</p>
+</blockquote>
+<!-- next-header -->
+<h2 id="unreleased---releasedate"><a class="header" href="#unreleased---releasedate"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...HEAD">Unreleased</a> - ReleaseDate</a></h2>
+<h2 id="072---2024-02-12"><a class="header" href="#072---2024-02-12"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h2 id="072---2024-02-12-1"><a class="header" href="#072---2024-02-12-1"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h2 id="072---2024-02-12-2"><a class="header" href="#072---2024-02-12-2"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h2 id="072---2024-02-12-3"><a class="header" href="#072---2024-02-12-3"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h2 id="072---2024-02-12-4"><a class="header" href="#072---2024-02-12-4"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h2 id="072---2024-02-12-5"><a class="header" href="#072---2024-02-12-5"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h2 id="072---2024-02-12-6"><a class="header" href="#072---2024-02-12-6"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.2...v0.7.2">0.7.2</a> - 2024-02-12</a></h2>
+<h3 id="changed"><a class="header" href="#changed">Changed</a></h3>
+<ul>
+<li>Allow packages with <code>.</code> in their names. This is useful for packages
+<code>my-website.com</code>. Internally, the <code>.</code> is converted into a <code>-</code> to
+make it a valid binding name.</li>
+</ul>
+<h3 id="added"><a class="header" href="#added">Added</a></h3>
+<ul>
+<li>Added ability to pass in a user-specified name for the generated
+bindings. This can be done by passing in the <code>--name</code> flag in the
+CLI or by passing the <code>name</code> option when calling the <code>generate_*</code>
+functions.</li>
+</ul>
+<h3 id="fixed"><a class="header" href="#fixed">Fixed</a></h3>
+<ul>
+<li>
+<p>Fixed the <code>python-wasi</code> test in <code>wasmer-pack</code> crate to use poetry
+instead of pipenv. This is because poetry is used everywhere else,
+except in this one place.</p>
+</li>
+<li>
+<p>Fixed flaky integration tests by specifying a valid webc file for
+wasmer-pack in both <code>test_wasmer_pack.py</code> (pytest) and
+<code>index.test.ts</code> (jest)</p>
+</li>
+<li>
+<p>Pass in <code>BindingsOptions</code> by reference so it's easier to implement builder
+pattern later on.</p>
+</li>
+</ul>
+<h2 id="071---2023-06-12"><a class="header" href="#071---2023-06-12"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.7.0...v0.7.1">0.7.1</a> - 2023-06-12</a></h2>
+<h3 id="added-1"><a class="header" href="#added-1">Added</a></h3>
+<ul>
+<li>Upgraded the <code>webc</code> crate to <code>5.0.4</code> so we now have support for <code>*.webc</code> files
+in both the v1 and v2 formats
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/131">#131</a>)</li>
+</ul>
+<h3 id="changed-1"><a class="header" href="#changed-1">Changed</a></h3>
+<ul>
+<li>Raised the MSRV from <code>1.64.0</code> to <code>1.67.0</code> to match <code>wapm-targz-to-pirita</code>
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/131">#131</a>)</li>
+</ul>
+<h3 id="fixed-1"><a class="header" href="#fixed-1">Fixed</a></h3>
+<ul>
+<li>Fixed the &quot;Releases&quot; job in CI so <code>wasmer/wasmer-pack-cli</code> would be published
+and not just <code>wasmer/wasmer-pack</code>
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/124">#124</a>)</li>
+</ul>
+<h2 id="070---2023-02-10"><a class="header" href="#070---2023-02-10"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.6.0...v0.7.0">0.7.0</a> - 2023-02-10</a></h2>
+<h3 id="-breaking-changes-"><a class="header" href="#-breaking-changes-">💥 Breaking Changes 💥</a></h3>
+<ul>
+<li>Restructured the <code>wasmer/wasmer-pack</code> WAPM package's API
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/118">#118</a>)
+<ul>
+<li>The <code>Package</code> type has been changed from a <code>record</code> to a <code>resource</code> with
+methods</li>
+<li>There are now convenience functions for loading a <code>Package</code> from known
+binary formats (e.g. WEBC)</li>
+</ul>
+</li>
+</ul>
+<h3 id="added-2"><a class="header" href="#added-2">Added</a></h3>
+<ul>
+<li>Moved the logic for loading a <code>wasmer_pack::Package</code> from a WEBC binary out
+of <code>wasmer-pack-cli</code> into the main <code>wasmer-pack</code> crate
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/118">#118</a>)</li>
+</ul>
+<h3 id="fixed-2"><a class="header" href="#fixed-2">Fixed</a></h3>
+<ul>
+<li>Replaced the naive ABI detection routine with something that properly checks
+which namespaces are imported by a module
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/118">#118</a>)</li>
+</ul>
+<h3 id="removed"><a class="header" href="#removed">Removed</a></h3>
+<ul>
+<li>Removed the <code>TestEnvironment</code> construct from <code>wasmer-pack-testing</code> in favour
+of the <code>autodiscover()</code> tests
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/121">#121</a>)</li>
+</ul>
+<h2 id="060---2022-12-28"><a class="header" href="#060---2022-12-28"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.5.3...v0.6.0">0.6.0</a> - 2022-12-28</a></h2>
+<h3 id="added-3"><a class="header" href="#added-3">Added</a></h3>
+<ul>
+<li>Generated JavaScript packages can now import host functions
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/109">#109</a>)</li>
+<li>Introduce the <code>wasmer-pack-testing</code> crate for testing generated bindings
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/112">#112</a>)</li>
+<li>Generated Python packages can now import host functions
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/113">#113</a>)</li>
+</ul>
+<h3 id="changed-2"><a class="header" href="#changed-2">Changed</a></h3>
+<ul>
+<li>Renamed <code>wasmer-pack</code>'s sub-commands to be called <code>javascript</code> and <code>python</code>,
+with <code>js</code> and <code>py</code> as aliases (i.e. running <code>wasmer-pack js</code> is equivalent to
+<code>wasmer-pack javascript</code>)
+<a href="https://github.com/wasmerio/wasmer-pack/pull/111">#111</a></li>
+</ul>
+<h2 id="053---2022-12-02"><a class="header" href="#053---2022-12-02"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.5.2...v0.5.3">0.5.3</a> - 2022-12-02</a></h2>
+<h3 id="fixed-3"><a class="header" href="#fixed-3">Fixed</a></h3>
+<ul>
+<li>The <code>wasmer-pack</code> CLI wasn't extracting the <code>*.wai</code> export files correctly
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/105">#105</a>)</li>
+</ul>
+<h2 id="052---2022-11-24"><a class="header" href="#052---2022-11-24"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.5.1...v0.5.2">0.5.2</a> - 2022-11-24</a></h2>
+<h3 id="added-4"><a class="header" href="#added-4">Added</a></h3>
+<ul>
+<li>Users can now also generate bindings from a directory containing a
+<code>wapm.toml</code> file or a <code>*.tar.gz</code> downloaded from WAPM
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/80">#80</a>)</li>
+<li>Added a tutorial on using records
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/83">#83</a>)</li>
+</ul>
+<h2 id="051---2022-11-18"><a class="header" href="#051---2022-11-18"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.5.0...v0.5.1">0.5.1</a> - 2022-11-18</a></h2>
+<h3 id="fixed-4"><a class="header" href="#fixed-4">Fixed</a></h3>
+<ul>
+<li>Running <code>wasmer run --mapdir .:. wasmer/wasmer-pack-cli ...</code> would fail
+because the <code>[fs]</code> table was being used incorrectly in <code>wapm.toml</code>
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/91">#91</a>)</li>
+<li>Added a workaround for dealing with <code>*.webc</code> files that were generated by a
+<a href="https://github.com/wasmerio/pirita/issues/30">buggy</a> version of
+<code>wapm2pirita</code> (<a href="https://github.com/wasmerio/wasmer-pack/pull/92">#92</a>)</li>
+</ul>
+<h3 id="changed-3"><a class="header" href="#changed-3">Changed</a></h3>
+<ul>
+<li>The <code>wasmer-pack</code> tool now generates CommonJS packages instead of ES Modules
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/89">#89</a>)</li>
+</ul>
+<h2 id="050---2022-11-08"><a class="header" href="#050---2022-11-08"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.4.2...v0.5.0">0.5.0</a> - 2022-11-08</a></h2>
+<h3 id="changed-4"><a class="header" href="#changed-4">Changed</a></h3>
+<ul>
+<li>Switched from Wasmer's fork of <code>wit-bindgen</code> on GitHub to the <code>wai-bindgen</code>
+crate on crates.io
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/71">#71</a>)</li>
+</ul>
+<h3 id="fixed-5"><a class="header" href="#fixed-5">Fixed</a></h3>
+<ul>
+<li>Update <code>PackageName</code> validation to accept the <code>_</code> namespace and global
+packages (<a href="https://github.com/wasmerio/wasmer-pack/pull/74">#74</a>)</li>
+<li>Package bindings will no longer have naming conflicts when importing a binding
+type with the same name as one of types we generate
+(<a href="https://github.com/wasmerio/wasmer-pack/pull/75">#75</a>)</li>
+</ul>
+<h3 id="-breaking-changes--1"><a class="header" href="#-breaking-changes--1">💥 Breaking Changes 💥</a></h3>
+<ul>
+<li>The project has been renamed from <code>wit-pack</code> to <code>wasmer-pack</code></li>
+</ul>
+<h2 id="042---2022-10-30"><a class="header" href="#042---2022-10-30"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.4.1...v0.4.2">0.4.2</a> - 2022-10-30</a></h2>
+<h3 id="fixed-6"><a class="header" href="#fixed-6">Fixed</a></h3>
+<ul>
+<li>Put all generated JavaScript inside a <code>package/</code> folder to match the logic
+used by <code>npm pack</code> when consuming tarballs
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/66">#66</a>)</li>
+<li>Update <code>MANIFEST.in</code> to include <code>py.typed</code> in the package, meaning MyPy can
+now typecheck the generated bindings
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/66">#66</a>)</li>
+<li>Don't assume atoms will have the same name as their commands
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/64">#64</a>)</li>
+<li>Some JavaScript bindings wouldn't run because the bindings always import
+<code>@wasmer/wasi</code>, while the dependency was only added when one or more
+libraries/commands was compiled to WASI
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/58">#58</a>)</li>
+</ul>
+<h2 id="041---2022-10-24"><a class="header" href="#041---2022-10-24"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.4.0...v0.4.1">0.4.1</a> - 2022-10-24</a></h2>
+<h3 id="added-5"><a class="header" href="#added-5">Added</a></h3>
+<ul>
+<li>User-facing documentation and a tutorial series are now available under the
+<code>doc/</code> folder (<a href="https://github.com/wasmerio/wasmer_pack/pull/47">#47</a>)</li>
+<li>Mention the <code>wit-pack</code> version in each generated package
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/54">#54</a>)</li>
+</ul>
+<h3 id="fixed-7"><a class="header" href="#fixed-7">Fixed</a></h3>
+<ul>
+<li>Fixed a bug where <code>*.wasm</code> files weren't being installed with the Python
+bindings from WAPM (<a href="https://github.com/wasmerio/wasmer_pack/pull/52">#52</a>)</li>
+</ul>
+<h2 id="040---2022-10-12"><a class="header" href="#040---2022-10-12"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.3.0...v0.4.0">0.4.0</a> - 2022-10-12</a></h2>
+<h3 id="added-6"><a class="header" href="#added-6">Added</a></h3>
+<ul>
+<li>To facilitate caching or different means of distribution, users are now able
+to provide their own pre-compiled WebAssembly module when initialising
+libraries or running commands (<a href="https://github.com/wasmerio/wasmer_pack/pull/45">#45</a>)</li>
+</ul>
+<h3 id="changed-5"><a class="header" href="#changed-5">Changed</a></h3>
+<ul>
+<li>Removed the <code>LoadArgs</code> type from the Python bindings in favour of named
+arguments (<a href="https://github.com/wasmerio/wasmer_pack/pull/45">#45</a>)</li>
+<li>Raised the MSRV from <code>1.59.0</code> to <code>1.61.0</code> to
+<a href="https://github.com/mitsuhiko/minijinja/blob/c5a09ebd/CHANGELOG.md#0210">match <code>minijinja</code></a></li>
+<li>Removed the top-level class from the generated bindings, so now you just need
+to do something like <code>from wit_pack import bindings, commands</code> to use the
+package's libraries or commands (<a href="https://github.com/wasmerio/wasmer_pack/pull/40">#40</a>)</li>
+</ul>
+<h3 id="fixed-8"><a class="header" href="#fixed-8">Fixed</a></h3>
+<ul>
+<li>Make the current directory available to the CLI when run by wasmer
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/37">#37</a>)</li>
+</ul>
+<h2 id="030---2022-09-27"><a class="header" href="#030---2022-09-27"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.2.3...v0.3.0">0.3.0</a> - 2022-09-27</a></h2>
+<h3 id="added-7"><a class="header" href="#added-7">Added</a></h3>
+<ul>
+<li>Set up CI to automatically deploy to wapm.dev whenever GitHub receives a
+tagged commit (<a href="https://github.com/wasmerio/wasmer_pack/pull/24">#24</a>)</li>
+<li>Fleshed out the repo's documentation (<a href="https://github.com/wasmerio/wasmer_pack/pull/25">#25</a>)
+<ul>
+<li>Populated the <code>CHANGELOG.md</code></li>
+<li>Wrote up <code>CONTRIBUTING.md</code></li>
+<li>Rewrote the <code>README.md</code> walkthrough</li>
+</ul>
+</li>
+<li>Added a <em>&quot;Time Reporter&quot;</em> task to CI so we can keep an eye on CI times (<a href="https://github.com/wasmerio/wasmer_pack/pull/25">#25</a>)</li>
+<li>Generate wrappers for calling WASI executables from JavaScript
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/26">#26</a>)</li>
+<li>Generate wrappers for calling WASI executables from Python
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/27">#27</a>)</li>
+<li>Detect all available WASI executables in a Pirita file
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/28">#28</a>)</li>
+<li>Add a top-level facade to the generated Python bindings so libraries and
+commands can be accessed through one common object
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/30">#30</a>)</li>
+<li>Add a top-level facade to the generated JavaScript bindings so libraries and
+commands can be accessed through one common object
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/34">#34</a>)</li>
+<li>Added a <code>wit-pack show</code> sub-command to show which libraries and commands would
+be generated from a Pirita file
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/35">#35</a>)</li>
+</ul>
+<h2 id="fixed-9"><a class="header" href="#fixed-9">Fixed</a></h2>
+<ul>
+<li>Inspect each atom's kind when discovering the commands in a Pirita file instead
+of blindly assuming everything is a command
+(<a href="https://github.com/wasmerio/wasmer_pack/issues/32">#32</a>)</li>
+</ul>
+<h2 id="023---2022-09-15"><a class="header" href="#023---2022-09-15"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.2.2...v0.2.3">0.2.3</a> - 2022-09-15</a></h2>
+<h3 id="fixed-10"><a class="header" href="#fixed-10">Fixed</a></h3>
+<ul>
+<li>When run as a WASI program, the <code>wit-pack</code> CLI would unconditionally fail
+to load inputs because <code>mmap</code> isn't available (<a href="https://github.com/wasmerio/wasmer_pack/pull/24">#24</a>)</li>
+</ul>
+<h2 id="022---2022-09-15"><a class="header" href="#022---2022-09-15"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.2.1...v0.2.2">0.2.2</a> - 2022-09-15</a></h2>
+<p>(no user-facing changes)</p>
+<h2 id="021---2022-09-15"><a class="header" href="#021---2022-09-15"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.2.0...v0.2.1">0.2.1</a> - 2022-09-15</a></h2>
+<p>(no user-facing changes)</p>
+<h2 id="020---2022-09-15"><a class="header" href="#020---2022-09-15"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.1.5...v0.2.0">0.2.0</a> - 2022-09-15</a></h2>
+<h3 id="added-8"><a class="header" href="#added-8">Added</a></h3>
+<ul>
+<li>The <code>wit-pack</code> crate now allows packages to contain multiple WebAssembly
+modules (<a href="https://github.com/wasmerio/wasmer_pack/pull/22">#22</a>)</li>
+</ul>
+<h3 id="-breaking-changes--2"><a class="header" href="#-breaking-changes--2">💥 Breaking Changes 💥</a></h3>
+<ul>
+<li>
+<p>The <code>wit-pack</code> CLI now takes a Pirita file as its only input
+(<a href="https://github.com/wasmerio/wasmer_pack/pull/20">#20</a>)</p>
+<ul>
+<li>
+<p>This means the commandline interface has changed</p>
+<pre><code class="language-console"># Instead of this
+$ wit-pack js --exports exports.wit --name hello_world --version 0.1.1 --module wit.wasm -o=wit-js --abi=none
+
+# you should now do this
+$ wit-pack js -o=wit-js ./hello-world.webc
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="015---2022-09-12"><a class="header" href="#015---2022-09-12"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.1.4...v0.1.5">0.1.5</a> - 2022-09-12</a></h2>
+<h3 id="added-9"><a class="header" href="#added-9">Added</a></h3>
+<ul>
+<li>Introduced support for WASI libraries (<a href="https://github.com/wasmerio/wasmer_pack/pull/12">#12</a>)</li>
+</ul>
+<h3 id="changed-6"><a class="header" href="#changed-6">Changed</a></h3>
+<ul>
+<li>The <code>crates/wit-pack-cli</code> and <code>crates/wit-pack-wasm</code> crates are now published
+to WAPM under the <code>wasmer</code> namespace instead of <code>Michael-F-Bryan</code></li>
+</ul>
+<h2 id="014---2022-08-25"><a class="header" href="#014---2022-08-25"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.1.3...v0.1.4">0.1.4</a> - 2022-08-25</a></h2>
+<p>(no user-facing changes)</p>
+<h2 id="013---2022-08-25"><a class="header" href="#013---2022-08-25"><a href="https://github.com/wasmerio/wasmer-pack/compare/v0.1.2...v0.1.3">0.1.3</a> - 2022-08-25</a></h2>
+<p>(no user-facing changes)</p>
+<h2 id="012---2022-08-24"><a class="header" href="#012---2022-08-24"><a href="https://github.com/wasmerio/wasmer-pack/compare/6f1e4ca6f...v0.1.2">0.1.2</a> - 2022-08-24</a></h2>
+<!-- next-url -->
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+    </body>
+</html>

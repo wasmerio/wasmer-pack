@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["iterate_lexical","iterate_lexical_char","iterate_lexical_char_only_alnum","iterate_lexical_only_alnum"],"struct":["LexicalChar"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["getrandom","getrandom_uninit"],"macro":["register_custom_getrandom"],"struct":["Error"]};
