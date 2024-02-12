@@ -15,6 +15,8 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
 - Allow packages with `.` in their names. This is useful for packages
   `my-website.com`. Internally, the `.` is converted into a `-` to
   make it a valid binding name.
