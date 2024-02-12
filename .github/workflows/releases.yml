@@ -34,7 +34,7 @@ jobs:
       - name: Publish to wasmer.wtf
         run: cargo wasmer --package wasmer-pack-cli --package wasmer-pack-wasm
         continue-on-error: ${{ github.event_name == 'workflow_dispatch' }}
-      - name: Update the bindings generator on wapm.dev
+      - name: Update the bindings generator on wasmer.wtf
         uses: actions-rs/cargo@v1
         with:
           command: xtask
