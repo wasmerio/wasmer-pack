@@ -52,7 +52,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: install
-          args: cargo-wasmer --verbose --debug --version '^0.4'
+          args: cargo-wasmer --verbose --debug --version '^0.4' --locked
       - name: Type Checking
         uses: actions-rs/cargo@v1
         with:

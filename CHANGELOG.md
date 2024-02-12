@@ -15,6 +15,10 @@ change, where applicable.
 
 ## [Unreleased] - ReleaseDate
 
+- Allow packages with `.` in their names. This is useful for packages
+  `my-website.com`. Internally, the `.` is converted into a `-` to
+  make it a valid binding name.
+
 ### Added
 - Added ability to pass in a user-specified name for the generated
   bindings. This can be done by passing in the `--name` flag in the

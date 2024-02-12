@@ -219,11 +219,10 @@ fn parse_identifier(s: &str) -> Result<String, Error> {
     );
     anyhow::ensure!(
         s.chars()
-            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_')),
-        "Identifiers can only contain '-', '_', ascii numbers, and letters"
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.')),
+        "Identifiers can only contain '-', '_', '.', ascii numbers, and letters"
     );
-
-    Ok(s.to_string())
+    Ok(s.replace('.', "-"))
 }
 
 /// Information about the [`Package`] being generated.
